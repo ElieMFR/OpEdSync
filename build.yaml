@@ -1,18 +1,18 @@
 ---
-name: "AnimeThemes"
-guid: "086022b5-29fb-4f89-a298-3d595492a5ed"
-version: 7
+name: "OpEdSync"
+guid: "c99b0ba5-9cbf-4ee0-b45f-40873c6b5b0b"
+version: 1
 targetAbi: "12.0.0.0"
 framework: "net10.0"
 overview: "Plugin for Jellyfin that fetches anime themes (OPs and EDs) from animethemes.moe"
 description: >
   Plugin for Jellyfin that fetches anime themes (OPs and EDs) from animethemes.moe.
 
-  **Since the AniDB ID is used to find the matching themes, you'll need to install the AniDB plugin.**
+  **Items are matched through their AniDB, MyAnimeList or AniList ID, so install at least one of those metadata plugins.**
 
 category: "Metadata"
-owner: "EusthEnoptEron"
+owner: "ElieM"
 artifacts:
-  - "Jellyfin.Plugin.AnimeThemes.dll"
+  - "Jellyfin.Plugin.OpEdSync.dll"
 changelog: |-
-  - fix: actually fill chunks (#43) @EusthEnoptEron
+  - Jellyfin 12 support, MyAnimeList/AniList lookups, safer downloads

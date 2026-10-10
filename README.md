@@ -2,9 +2,7 @@
 
 Plugin [Jellyfin](https://jellyfin.org/) qui télécharge automatiquement les génériques d'animes (openings et endings) depuis [animethemes.moe](https://animethemes.moe). Les fichiers audio et vidéo sont pris en charge.
 
-Compatible **Jellyfin 12.x**. Basé sur [jellyfin-plugin-animethemes](https://github.com/EusthEnoptEron/jellyfin-plugin-animethemes) d'EusthEnoptEron.
-
-> Dans Jellyfin, le plugin s'affiche sous le nom **AnimeThemes**.
+Compatible **Jellyfin 12.x**. Développé par ElieM, basé sur [jellyfin-plugin-animethemes](https://github.com/EusthEnoptEron/jellyfin-plugin-animethemes) d'EusthEnoptEron.
 
 ## Fonctionnement
 
@@ -14,15 +12,25 @@ Il te faut donc au moins un plugin de métadonnées qui fournit l'un de ces iden
 
 ## Installation
 
-1. Télécharge `animethemes_7.0.0.0.zip` depuis les releases.
+### Depuis le catalogue Jellyfin
+
+Ajoute ce dépôt de plugins (Tableau de bord → Plugins → Dépôts) puis installe **OpEdSync** :
+
+```
+https://gitlab.bmeouchi.fr/Elie/OpEdSync/raw/branch/main/manifest.json
+```
+
+### À la main
+
+1. Télécharge `dist/opedsync_1.0.0.0.zip` depuis le dépôt.
 2. Arrête Jellyfin.
-3. Crée un dossier `AnimeThemes_7.0.0.0` dans le dossier `plugins` du serveur :
+3. Crée un dossier `OpEdSync_1.0.0.0` dans le dossier `plugins` du serveur :
    - Windows : `C:\ProgramData\Jellyfin\Server\plugins\`
    - Docker : `/config/plugins/`
    - Linux : `/var/lib/jellyfin/plugins/`
-4. Place-y `Jellyfin.Plugin.AnimeThemes.dll`, puis relance Jellyfin.
+4. Place-y `Jellyfin.Plugin.OpEdSync.dll`, puis relance Jellyfin.
 
-Si l'ancienne version (6.x) est installée, supprime son dossier avant.
+OpEdSync est un plugin à part entière : il s'installe à côté de l'ancien plugin AnimeThemes, mais les deux téléchargeraient les mêmes fichiers. Désactive ou désinstalle l'ancien.
 
 ## Utilisation
 
@@ -56,10 +64,10 @@ body:not(.hide-scroll) > .videoPlayerContainer > video {
 Nécessite le SDK .NET 10.
 
 ```bash
-dotnet build Jellyfin.Plugin.AnimeThemes -c Release
+dotnet build Jellyfin.Plugin.OpEdSync -c Release
 ```
 
-Le fichier `Jellyfin.Plugin.AnimeThemes.dll` se trouve ensuite dans `bin/Release/net10.0/`.
+Le fichier `Jellyfin.Plugin.OpEdSync.dll` se trouve ensuite dans `bin/Release/net10.0/`.
 
 ## Licence
 
