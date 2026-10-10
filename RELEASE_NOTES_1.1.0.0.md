@@ -1,8 +1,0 @@
-## 1.1.0.0 — Thème de la dernière saison
-
-### Nouveautés
-- Nouveau réglage **« Thème utilisé pour les séries »** : par défaut, le plugin utilise l'identifiant de la **dernière saison** connue d'AnimeThemes (puis celui de la série en secours), au lieu de la saison 1.
-- Pour remplacer les thèmes déjà téléchargés, active aussi **« Imposer la conformité »** une fois.
-
-### Corrections
-- « Imposer la conformité » est maintenant réellement appliqué à chaque exécution : auparavant, une série qui avait déjà un thème n'était plus jamais revérifiée.

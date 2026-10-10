@@ -120,7 +120,10 @@ public class AnimeThemesDownloader : IDisposable
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    if (entry.Value.Length == 0)
+                    // A season can be listed before any video is uploaded; treat it as not found so the
+                    // previous season (or the series) is tried instead.
+                    var animeWithVideos = entry.Value.Where(HasVideos).ToArray();
+                    if (animeWithVideos.Length == 0)
                     {
                         continue;
                     }
@@ -129,7 +132,7 @@ public class AnimeThemesDownloader : IDisposable
                     foreach (var item in itemsById[entry.Key])
                     {
                         pending.Remove(item);
-                        yield return new ItemWithAnime(item, new ReadOnlyCollection<Anime>(entry.Value));
+                        yield return new ItemWithAnime(item, new ReadOnlyCollection<Anime>(animeWithVideos));
                     }
                 }
             }
@@ -180,23 +183,35 @@ public class AnimeThemesDownloader : IDisposable
         // Turn them into downloadable links
         var links = ExtractLinks(type, requiredThemes, settings).ToArray();
 
-        // Before we start the download, make sure the folders are in a clean state.
-        if (forceSync)
-        {
-            if (type == MediaType.Audio)
-            {
-                // We don't need this file because we're using the directory variant.
-                RemoveFile(item, ThemeMusicFileName);
-            }
-
-            CleanDirectory(item, type, links.Select(it => Path.GetFileName(it.Filepath)));
-        }
-
         bool changesMade = false;
         foreach (var (url, relativePath) in links)
         {
             // Download if needed
             changesMade |= await Download(type, url, item, relativePath, settings.Volume, cancellationToken).ConfigureAwait(false);
+        }
+
+        if (forceSync)
+        {
+            // Only clean up once the replacements are on disk, so a failed download or a show without
+            // matching themes never loses the theme it already had. "None" is an explicit request to clear them.
+            bool replacementsReady = settings.FetchType == FetchType.None
+                ? links.Length == 0
+                : links.Length > 0 && links.All(it => File.Exists(Path.Combine(item.ContainingFolderPath, it.Filepath)));
+
+            if (replacementsReady)
+            {
+                if (type == MediaType.Audio)
+                {
+                    // We don't need this file because we're using the directory variant.
+                    changesMade |= RemoveFile(item, ThemeMusicFileName);
+                }
+
+                changesMade |= CleanDirectory(item, type, links.Select(it => Path.GetFileName(it.Filepath)));
+            }
+            else
+            {
+                _logger.LogInformation("[{Id}] Keeping existing {Type} themes: no complete replacement available", item.Id, type);
+            }
         }
 
         return changesMade;
@@ -232,16 +247,19 @@ public class AnimeThemesDownloader : IDisposable
         }
     }
 
-    private void RemoveFile(BaseItem series, string filename)
+    private static bool RemoveFile(BaseItem series, string filename)
     {
         var path = Path.Combine(series.ContainingFolderPath, filename);
-        if (File.Exists(path))
+        if (!File.Exists(path))
         {
-            File.Delete(path);
+            return false;
         }
+
+        File.Delete(path);
+        return true;
     }
 
-    private void CleanDirectory(BaseItem series, MediaType mediaType, IEnumerable<string> allowedNames)
+    private bool CleanDirectory(BaseItem series, MediaType mediaType, IEnumerable<string> allowedNames)
     {
         var directory = mediaType == MediaType.Audio ? ThemeMusicDirectory : ThemeVideoDirectory;
         var searchPattern = mediaType == MediaType.Audio ? "*.mp3" : "*.webm";
@@ -249,10 +267,11 @@ public class AnimeThemesDownloader : IDisposable
         var path = Path.Combine(series.ContainingFolderPath, directory);
         if (!Directory.Exists(path))
         {
-            return;
+            return false;
         }
 
         var allowedNamesSet = allowedNames.ToHashSet();
+        bool removed = false;
 
         foreach (var filepath in Directory.GetFiles(path, searchPattern))
         {
@@ -261,8 +280,11 @@ public class AnimeThemesDownloader : IDisposable
             {
                 _logger.LogInformation("[{Id}] Removing obsolete theme: {Theme}", series.Id, filepath);
                 File.Delete(filepath);
+                removed = true;
             }
         }
+
+        return removed;
     }
 
     private async ValueTask<bool> Download(MediaType type, string url, BaseItem item, string relativePath, double volume = 1.0, CancellationToken cancellationToken = default)
@@ -396,6 +418,11 @@ public class AnimeThemesDownloader : IDisposable
         var videoSatisfied = item.GetThemeVideos().Any() || settings.VideoSettings.FetchType == FetchType.None;
 
         return audioSatisfied && videoSatisfied;
+    }
+
+    private static bool HasVideos(Anime anime)
+    {
+        return anime.Themes.Any(theme => theme.Entries.Any(entry => entry.Videos.Count > 0));
     }
 
     private static bool IsSupportedKind(BaseItem item)
