@@ -2,7 +2,7 @@
 # Le jeton est demandé au lancement (jamais écrit sur le disque).
 $ErrorActionPreference = 'Stop'
 $base = 'https://gitlab.bmeouchi.fr'
-$user = 'elie'
+$user = 'Elie'
 $repo = 'OpEdSync'
 $tag  = '7.0.0.0'
 $zip  = Join-Path $PSScriptRoot 'animethemes_7.0.0.0.zip'

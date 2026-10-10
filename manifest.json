@@ -11,7 +11,7 @@
                 "checksum": "0bae6305ae75341f1cfab1db0ca001c7",
                 "changelog": "Jellyfin 12.x support; falls back to MyAnimeList/AniList IDs; safer downloads.",
                 "targetAbi": "12.0.0.0",
-                "sourceUrl": "https://gitlab.bmeouchi.fr/elie/OpEdSync/releases/download/7.0.0.0/animethemes_7.0.0.0.zip",
+                "sourceUrl": "https://gitlab.bmeouchi.fr/Elie/OpEdSync/releases/download/7.0.0.0/animethemes_7.0.0.0.zip",
                 "timestamp": "2026-10-10T21:46:58Z",
                 "version": "7.0.0.0"
             },
