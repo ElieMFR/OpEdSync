@@ -150,8 +150,21 @@ public class AnimeThemesDownloader : IDisposable
                             continue;
                         }
 
+                        // A season whose themes are all filtered out (overlap, credits, OP/ED) would leave the
+                        // item without a theme; try the previous season (or the series) instead.
+                        var usable = matches.Where(it => HasUsableThemes(it, item, configuration)).ToArray();
+                        if (usable.Length == 0)
+                        {
+                            _logger.LogInformation(
+                                "[{Id}] Ignoring {Anime} for {Name}: no theme passes the current filters",
+                                item.Id,
+                                matches[0].Name,
+                                item.Name);
+                            continue;
+                        }
+
                         pending.Remove(item);
-                        yield return new ItemWithAnime(item, new ReadOnlyCollection<Anime>(matches));
+                        yield return new ItemWithAnime(item, new ReadOnlyCollection<Anime>(usable));
                     }
                 }
             }
@@ -170,8 +183,7 @@ public class AnimeThemesDownloader : IDisposable
     {
         _logger.LogInformation("[{Id}] Attempting to filter theme songs for: {Name} (AniDB={AniId})", item.Id, item.Name, anime.Id);
 
-        bool isMovie = item.GetBaseItemKind() == BaseItemKind.Movie;
-        var collectionTypeConfig = isMovie ? configuration.MovieSettings : new CollectionTypeConfiguration { AudioSettings = configuration.AudioSettings, VideoSettings = configuration.VideoSettings };
+        var collectionTypeConfig = GetCollectionSettings(item, configuration);
 
         // Process videos
         bool videoChanged = await ProcessMediaType(MediaType.Video, anime, item, configuration.ForceSync, collectionTypeConfig, cancellationToken).ConfigureAwait(false);
@@ -194,7 +206,7 @@ public class AnimeThemesDownloader : IDisposable
     {
         var settings = type == MediaType.Audio ? configuration.AudioSettings : configuration.VideoSettings;
 
-        var distinctThemes = GetBestThemes(anime, settings).DistinctBy(it => it.Theme.Id);
+        var distinctThemes = GetUsableThemes(type, anime, settings).DistinctBy(it => it.Theme.Id);
 
         // Pick themes according to fetch type
         var requiredThemes = PickThemes(settings.FetchType, distinctThemes);
@@ -427,11 +439,16 @@ public class AnimeThemesDownloader : IDisposable
         return true;
     }
 
-    private static bool IsSatisfied(BaseItem item, PluginConfiguration configuration)
+    private static CollectionTypeConfiguration GetCollectionSettings(BaseItem item, PluginConfiguration configuration)
     {
-        var settings = item.GetBaseItemKind() == BaseItemKind.Movie
+        return item.GetBaseItemKind() == BaseItemKind.Movie
             ? configuration.MovieSettings
             : new CollectionTypeConfiguration { AudioSettings = configuration.AudioSettings, VideoSettings = configuration.VideoSettings };
+    }
+
+    private static bool IsSatisfied(BaseItem item, PluginConfiguration configuration)
+    {
+        var settings = GetCollectionSettings(item, configuration);
 
         var audioSatisfied = item.GetThemeSongs().Any() || settings.AudioSettings.FetchType == FetchType.None;
         var videoSatisfied = item.GetThemeVideos().Any() || settings.VideoSettings.FetchType == FetchType.None;
@@ -442,6 +459,28 @@ public class AnimeThemesDownloader : IDisposable
     private static bool HasVideos(Anime anime)
     {
         return anime.Themes.Any(theme => theme.Entries.Any(entry => entry.Videos.Count > 0));
+    }
+
+    private bool HasUsableThemes(Anime anime, BaseItem item, PluginConfiguration configuration)
+    {
+        var settings = GetCollectionSettings(item, configuration);
+        var active = new[] { (Type: MediaType.Audio, Settings: settings.AudioSettings), (Type: MediaType.Video, Settings: settings.VideoSettings) }
+            .Where(it => it.Settings.FetchType != FetchType.None)
+            .ToList();
+
+        // Nothing is downloaded anyway; don't let that block the lookup.
+        if (active.Count == 0)
+        {
+            return true;
+        }
+
+        return active.Any(it => GetUsableThemes(it.Type, anime, it.Settings).Any());
+    }
+
+    private IEnumerable<FlattenedTheme> GetUsableThemes(MediaType type, Anime anime, MediaTypeConfiguration settings)
+    {
+        // Some videos have no extracted audio track on AnimeThemes; they can't provide a theme song.
+        return GetBestThemes(anime, settings).Where(it => type == MediaType.Video || it.Audio is not null);
     }
 
     private static bool IsSupportedKind(BaseItem item)
