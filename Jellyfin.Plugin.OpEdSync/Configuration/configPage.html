@@ -42,6 +42,15 @@
                                max="8" step="1"/>
                         <div class="fieldDescription">Nombre de fichiers téléchargés en même temps.</div>
                     </div>
+                    <div class="selectContainer">
+                        <label class="selectLabel" for="ThemeSource">Thème utilisé pour les séries</label>
+                        <select is="emby-select" id="ThemeSource" name="ThemeSource"
+                                class="emby-select-withcolor emby-select">
+                            <option value="LatestSeason">Dernière saison</option>
+                            <option value="Series">Série (en général la saison 1)</option>
+                        </select>
+                        <div class="fieldDescription">Avec « Dernière saison », le plugin utilise l'identifiant de la saison la plus récente connue d'AnimeThemes, puis celui de la série en secours. Pour remplacer les thèmes déjà téléchargés, activez aussi « Imposer la conformité ».</div>
+                    </div>
                     <div class="checkboxContainer checkboxContainer-withDescription">
                         <label class="emby-checkbox-label">
                             <input id="ForceSync" name="ForceSync" type="checkbox" is="emby-checkbox"/>
@@ -222,6 +231,7 @@
             function readConfigFromHtml() {
                 config.DegreeOfParallelism = document.querySelector('#DegreeOfParallelism').value;
                 config.ForceSync = document.querySelector('#ForceSync').checked;
+                config.ThemeSource = document.querySelector('#ThemeSource').value;
                 config.IncludeLibraries = document.querySelector('#IncludeLibraries').value;
                 config.ExcludeLibraries = document.querySelector('#ExcludeLibraries').value;
 
@@ -251,6 +261,7 @@
             function writeConfigToHtml() {
                 document.querySelector('#DegreeOfParallelism').value = config.DegreeOfParallelism;
                 document.querySelector('#ForceSync').checked = config.ForceSync;
+                document.querySelector('#ThemeSource').value = config.ThemeSource;
                 document.querySelector('#IncludeLibraries').value = config.IncludeLibraries;
                 document.querySelector('#ExcludeLibraries').value = config.ExcludeLibraries;
 

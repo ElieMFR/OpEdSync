@@ -15,6 +15,7 @@ using Jellyfin.Plugin.OpEdSync.Configuration;
 using Jellyfin.Plugin.OpEdSync.Exceptions;
 using Jellyfin.Plugin.OpEdSync.Models;
 using MediaBrowser.Controller.Entities;
+using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.MediaEncoding;
 using MediaBrowser.Model.Entities;
 using Microsoft.Extensions.Logging;
@@ -44,16 +45,19 @@ public class AnimeThemesDownloader : IDisposable
     private readonly AnimeThemesApi _api;
     private readonly ILogger<AnimeThemesDownloader> _logger;
     private readonly IMediaEncoder _mediaEncoder;
+    private readonly ILibraryManager _libraryManager;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="AnimeThemesDownloader"/> class.
     /// </summary>
     /// <param name="mediaEncoder">Media Encoder to convert OGG files.</param>
+    /// <param name="libraryManager">Library manager, used to find the seasons of a series.</param>
     /// <param name="clientFactory">Client factory.</param>
     /// <param name="logger">Logger.</param>
-    public AnimeThemesDownloader(IMediaEncoder mediaEncoder, IHttpClientFactory clientFactory, ILogger<AnimeThemesDownloader> logger)
+    public AnimeThemesDownloader(IMediaEncoder mediaEncoder, ILibraryManager libraryManager, IHttpClientFactory clientFactory, ILogger<AnimeThemesDownloader> logger)
     {
         _mediaEncoder = mediaEncoder;
+        _libraryManager = libraryManager;
         _logger = logger;
         _client = clientFactory.CreateClient("AnimeThemes");
         _api = new AnimeThemesApi(clientFactory, logger);
@@ -67,7 +71,7 @@ public class AnimeThemesDownloader : IDisposable
     /// <returns>Whether item should be processed.</returns>
     public bool ShouldUpdate(BaseItem item, PluginConfiguration configuration)
     {
-        return IsSupportedKind(item) && GetProviderIds(item).Any() && !IsSatisfied(item, configuration);
+        return IsSupportedKind(item) && (configuration.ForceSync || !IsSatisfied(item, configuration));
     }
 
     /// <summary>
@@ -79,52 +83,54 @@ public class AnimeThemesDownloader : IDisposable
     /// <returns>A filtered list of items to be processed with their corresponding anime.</returns>
     public async IAsyncEnumerable<ItemWithAnime> ResolveItems(BaseItem[] items, PluginConfiguration configuration, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var remaining = items.Where(IsSupportedKind).ToList();
+        var pending = items
+            .Where(IsSupportedKind)
+            .Select(it => (Item: it, Candidates: GetCandidates(it, configuration)))
+            .Where(it => it.Candidates.Count > 0)
+            .ToDictionary(it => it.Item, it => it.Candidates);
 
-        foreach (var (providerKey, site) in SupportedProviders)
+        // Round N tries the N-th candidate of every item that is still unresolved.
+        for (int round = 0; pending.Count > 0; round++)
         {
-            if (remaining.Count == 0)
+            var active = pending.Where(it => it.Value.Count > round).ToList();
+            if (active.Count == 0)
             {
                 yield break;
             }
 
-            var itemsById = remaining
-                .Select(it => (Item: it, Id: TryGetProviderId(it, providerKey, out var id) ? id : (int?)null))
-                .Where(it => it.Id.HasValue)
-                .GroupBy(it => it.Id!.Value, it => it.Item)
-                .ToDictionary(it => it.Key, it => it.ToList());
-
-            if (itemsById.Count == 0)
+            foreach (var siteGroup in active.GroupBy(it => it.Value[round].Site))
             {
-                continue;
-            }
+                var itemsById = siteGroup
+                    .GroupBy(it => it.Value[round].Id, it => it.Key)
+                    .ToDictionary(it => it.Key, it => it.ToList());
 
-            Dictionary<int, Anime[]> animeById;
-            try
-            {
-                animeById = await _api.FindByExternalId(site, itemsById.Keys, cancellationToken).ConfigureAwait(false);
-            }
-            catch (HttpRequestException e)
-            {
-                // Don't let a failing lookup abort the whole run; the next run will retry.
-                _logger.LogError(e, "Lookup on {Site} failed", site);
-                continue;
-            }
-
-            foreach (var entry in animeById)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                if (entry.Value.Length == 0)
+                Dictionary<int, Anime[]> animeById;
+                try
                 {
+                    animeById = await _api.FindByExternalId(siteGroup.Key, itemsById.Keys, cancellationToken).ConfigureAwait(false);
+                }
+                catch (HttpRequestException e)
+                {
+                    // Don't let a failing lookup abort the whole run; the next run will retry.
+                    _logger.LogError(e, "Lookup on {Site} failed", siteGroup.Key);
                     continue;
                 }
 
-                // The same ID may be shared by several items (e.g. the same show in two libraries).
-                foreach (var item in itemsById[entry.Key])
+                foreach (var entry in animeById)
                 {
-                    remaining.Remove(item);
-                    yield return new ItemWithAnime(item, new ReadOnlyCollection<Anime>(entry.Value));
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    if (entry.Value.Length == 0)
+                    {
+                        continue;
+                    }
+
+                    // The same ID may be shared by several items (e.g. the same show in two libraries).
+                    foreach (var item in itemsById[entry.Key])
+                    {
+                        pending.Remove(item);
+                        yield return new ItemWithAnime(item, new ReadOnlyCollection<Anime>(entry.Value));
+                    }
                 }
             }
         }
@@ -405,11 +411,42 @@ public class AnimeThemesDownloader : IDisposable
                && int.TryParse(idAsString, NumberStyles.Integer, CultureInfo.InvariantCulture, out id);
     }
 
-    private static IEnumerable<string> GetProviderIds(BaseItem item)
+    private static IEnumerable<(string Site, int Id)> GetSiteIds(BaseItem item)
     {
-        return SupportedProviders
-            .Where(it => TryGetProviderId(item, it.ProviderKey, out _))
-            .Select(it => it.ProviderKey);
+        foreach (var (providerKey, site) in SupportedProviders)
+        {
+            if (TryGetProviderId(item, providerKey, out var id))
+            {
+                yield return (site, id);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Gets the lookups to try for an item, most preferred first.
+    /// </summary>
+    private List<(string Site, int Id)> GetCandidates(BaseItem item, PluginConfiguration configuration)
+    {
+        var candidates = new List<(string Site, int Id)>();
+
+        if (item.GetBaseItemKind() == BaseItemKind.Series && configuration.ThemeSource == ThemeSource.LatestSeason)
+        {
+            var seasons = _libraryManager.GetItemList(new InternalItemsQuery
+            {
+                ParentId = item.Id,
+                IncludeItemTypes = [BaseItemKind.Season],
+                IsVirtualItem = false,
+            });
+
+            // Newest season first. Specials (index 0) are not real seasons.
+            foreach (var season in seasons.Where(it => it.IndexNumber > 0).OrderByDescending(it => it.IndexNumber))
+            {
+                candidates.AddRange(GetSiteIds(season));
+            }
+        }
+
+        candidates.AddRange(GetSiteIds(item));
+        return candidates.Distinct().ToList();
     }
 
     /// <summary>

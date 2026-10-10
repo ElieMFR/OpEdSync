@@ -15,6 +15,7 @@ public class PluginConfiguration : BasePluginConfiguration
         // set default options here
         DegreeOfParallelism = 1;
         ForceSync = false;
+        ThemeSource = ThemeSource.LatestSeason;
         IncludeLibraries = "^.*$";
         ExcludeLibraries = string.Empty;
 
@@ -45,6 +46,11 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets or sets a string setting.
     /// </summary>
     public int DegreeOfParallelism { get; set; }
+
+    /// <summary>
+    /// Gets or sets which season of a series is used to look up themes.
+    /// </summary>
+    public ThemeSource ThemeSource { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the sync should enforce conformity.

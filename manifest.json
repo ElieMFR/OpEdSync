@@ -8,6 +8,14 @@
         "owner": "ElieM",
         "versions": [
             {
+                "checksum": "9962a719a0e35ad03140f4abeb7685bf",
+                "changelog": "Nouveau réglage « Thème utilisé pour les séries » : dernière saison par défaut. La conformité est maintenant appliquée à chaque exécution si elle est activée.",
+                "targetAbi": "12.0.0.0",
+                "sourceUrl": "https://gitlab.bmeouchi.fr/Elie/OpEdSync/raw/branch/main/dist/opedsync_1.1.0.0.zip",
+                "timestamp": "2026-10-10T22:16:27Z",
+                "version": "1.1.0.0"
+            },
+            {
                 "checksum": "35082eb71cea7f56938f699ae559e236",
                 "changelog": "Compatible Jellyfin 12, repli sur les identifiants MyAnimeList/AniList, téléchargements plus sûrs, interface en français.",
                 "targetAbi": "12.0.0.0",
