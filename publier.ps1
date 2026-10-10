@@ -5,7 +5,7 @@ $base = 'https://gitlab.bmeouchi.fr'
 $user = 'Elie'
 $repo = 'OpEdSync'
 $tag  = '7.0.0.0'
-$zip  = Join-Path $PSScriptRoot 'animethemes_7.0.0.0.zip'
+$zip  = Join-Path $PSScriptRoot 'dist/animethemes_7.0.0.0.zip'
 
 $secure = Read-Host 'Jeton Gitea' -AsSecureString
 $token  = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure))
