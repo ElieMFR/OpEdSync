@@ -1,48 +1,66 @@
-# AnimeThemes for Jellyfin
+# OpEdSync
 
-Plugin for [Jellyfin](https://jellyfin.org/) that fetches anime themes (OPs and EDs)
-from [animethemes.moe](https://animethemes.moe). Both audio files and video files are supported.
+Plugin [Jellyfin](https://jellyfin.org/) qui télécharge automatiquement les génériques d'animes (openings et endings) depuis [animethemes.moe](https://animethemes.moe). Les fichiers audio et vidéo sont pris en charge.
 
-**Themes are matched through the AniDB, MyAnimeList or AniList ID of the item (in that order of preference), so install at least one of the corresponding metadata plugins. Items without any of these IDs are ignored.**
+Compatible **Jellyfin 12.x**. Basé sur [jellyfin-plugin-animethemes](https://github.com/EusthEnoptEron/jellyfin-plugin-animethemes) d'EusthEnoptEron.
 
-Compatible with Jellyfin 10.11 (plugin v6) and Jellyfin 12.x (plugin v7+).
+> Dans Jellyfin, le plugin s'affiche sous le nom **AnimeThemes**.
 
-## How to use
+## Fonctionnement
 
-The plugin creates a new scheduled task that you can configure. By default, it will run every 6 hours.
-Also make sure to enable theme music / videos in your display settings.
+Le plugin cherche, pour chaque série ou film de ta bibliothèque, l'identifiant **AniDB**, **MyAnimeList** ou **AniList** (dans cet ordre de préférence). Il interroge ensuite AnimeThemes et enregistre les thèmes à côté du média. Les éléments sans aucun de ces identifiants sont ignorés.
 
-## How to install
+Il te faut donc au moins un plugin de métadonnées qui fournit l'un de ces identifiants (AniDB, MyAnimeList ou AniList).
 
-### Plugin Manager
+## Installation
 
-1. Add the following repository to your plugin repositories:
-   https://raw.githubusercontent.com/EusthEnoptEron/jellyfin-plugin-animethemes/main/manifest.json
-2. Find the plugin in the catalog and install it.
+1. Télécharge `animethemes_7.0.0.0.zip` depuis les releases.
+2. Arrête Jellyfin.
+3. Crée un dossier `AnimeThemes_7.0.0.0` dans le dossier `plugins` du serveur :
+   - Windows : `C:\ProgramData\Jellyfin\Server\plugins\`
+   - Docker : `/config/plugins/`
+   - Linux : `/var/lib/jellyfin/plugins/`
+4. Place-y `Jellyfin.Plugin.AnimeThemes.dll`, puis relance Jellyfin.
 
-### Manually
+Si l'ancienne version (6.x) est installée, supprime son dossier avant.
 
-1. [Grab the latest build.](https://github.com/EusthEnoptEron/jellyfin-plugin-animethemes/actions/workflows/build.yaml)
-2. Download it into your plugins folder [as described here](https://jellyfin.org/docs/general/server/plugins/).
+## Utilisation
+
+1. Ouvre **Tableau de bord → Tâches planifiées** et lance « Search For Anime Themes ». Elle s'exécute ensuite toute seule toutes les 12 heures.
+2. Active la musique de thème (et les vidéos de thème si besoin) dans les réglages d'affichage de ton profil.
 
 ## Configuration
 
-| Configuration                           | Description                                                                                               |
-|-----------------------------------------|-----------------------------------------------------------------------------------------------------------|
-| Degree of parallelism                   | How many items should be downloaded in parallel. Default is set to 1 to go easy on the servers.           |
-| Ignore themes that overlap with episode | Some shows transition into their themes. Use this setting to filter those themes out.                     |
-| Ignore themes with credits              | Whether to skip themes with credits in them. Useful for video downloads.                                  |
-| Ignore OP themes                        | Use this to control whether OPs are considered.                                                           |
-| Ignore ED themes                        | Use this to control whether EDs are considered.                                                           |
-| Fetch type                              | Determines if you want all distinct themes, only the best match, or none at all.                          |
-| Volume                                  | The desired volume, which will be baked in. For videos, 0 will result in the audio channel being removed. |
+| Réglage | Description |
+|---|---|
+| Degré de parallélisme | Nombre de téléchargements simultanés. 1 par défaut, pour ménager le serveur d'AnimeThemes. |
+| Ignorer les thèmes qui chevauchent l'épisode | Certaines séries enchaînent directement avec leur thème. |
+| Ignorer les thèmes avec crédits | Utile surtout pour les vidéos. |
+| Ignorer les OP / les ED | Choisis quels types de thèmes garder. |
+| Type de récupération | Tous les thèmes, seulement le meilleur, ou aucun. |
+| Volume | Volume intégré au fichier. À 0, la piste audio des vidéos est supprimée. |
+| Bibliothèques incluses / exclues | Expressions régulières sur le nom des bibliothèques. |
 
-## Other notes
+## Astuce d'affichage
 
-If you want the videos to cover the whole screen, try the following CSS:
+Pour que les vidéos de thème remplissent tout l'écran, ajoute ce CSS personnalisé :
 
 ```css
 body:not(.hide-scroll) > .videoPlayerContainer > video {
     object-fit: cover;
 }
 ```
+
+## Compilation
+
+Nécessite le SDK .NET 10.
+
+```bash
+dotnet build Jellyfin.Plugin.AnimeThemes -c Release
+```
+
+Le fichier `Jellyfin.Plugin.AnimeThemes.dll` se trouve ensuite dans `bin/Release/net10.0/`.
+
+## Licence
+
+GPL-3.0, comme le projet d'origine. Voir [LICENSE](LICENSE).
