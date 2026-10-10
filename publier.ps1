@@ -1,31 +1,42 @@
-# Publie le projet sur Gitea : crée le dépôt, pousse le code, crée la release et envoie le zip.
-# Le jeton est demandé au lancement (jamais écrit sur le disque).
+# Crée sur Gitea une release pour chaque version du manifest, avec ses notes (notes/<version>.md) et son zip.
+# Les releases déjà présentes sont ignorées. Le jeton est demandé au lancement et n'est jamais écrit sur le disque.
 $ErrorActionPreference = 'Stop'
 $base = 'https://gitlab.bmeouchi.fr'
-$user = 'Elie'
-$repo = 'OpEdSync'
-$tag  = '1.3.0.0'
-$zip  = Join-Path $PSScriptRoot 'dist/opedsync_1.3.0.0.zip'
+$repo = 'Elie/OpEdSync'
 
 $secure = Read-Host 'Jeton Gitea' -AsSecureString
 $token  = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure))
 $h = @{ Authorization = "token $token" }
 
-# 1. Dépôt (ignoré s'il existe déjà)
-try {
-    Invoke-RestMethod -Method Post -Uri "$base/api/v1/user/repos" -Headers $h -ContentType 'application/json' -Body (@{
-        name = $repo; description = "Génériques d'animes (OP/ED) pour Jellyfin 12"; private = $false
-    } | ConvertTo-Json)
-    Write-Host 'Dépôt créé.'
-} catch { Write-Host "Dépôt déjà présent ou erreur : $($_.Exception.Message)" }
+$manifest = Get-Content (Join-Path $PSScriptRoot 'manifest.json') -Raw -Encoding UTF8 | ConvertFrom-Json
+# Du plus ancien au plus récent, pour que la dernière version soit marquée « Latest » sur Gitea.
+$versions = @($manifest[0].versions) | Sort-Object { [version]$_.version }
 
-# 2. Code (le jeton passe par un en-tête temporaire, pas par l'URL)
-git -c "http.extraHeader=Authorization: token $token" push -u gitea main
+foreach ($v in $versions) {
+    $tag = $v.version
+    try {
+        Invoke-RestMethod -Uri "$base/api/v1/repos/$repo/releases/tags/$tag" -Headers $h | Out-Null
+        Write-Host "$tag : release déjà présente, ignorée."
+        continue
+    } catch {
+        if ($_.Exception.Response.StatusCode.value__ -ne 404) { throw }
+    }
 
-# 3. Release + zip
-$body = Get-Content (Join-Path $PSScriptRoot 'RELEASE_NOTES_1.3.0.0.md') -Raw -Encoding UTF8
-$rel = Invoke-RestMethod -Method Post -Uri "$base/api/v1/repos/$user/$repo/releases" -Headers $h -ContentType 'application/json; charset=utf-8' -Body (@{
-    tag_name = $tag; target_commitish = 'main'; name = "$tag — Compatibilité Jellyfin 12"; body = $body
-} | ConvertTo-Json)
-curl.exe -s -X POST "$base/api/v1/repos/$user/$repo/releases/$($rel.id)/assets?name=opedsync_1.3.0.0.zip" -H "Authorization: token $token" -F "attachment=@$zip" | Out-Null
-Write-Host "Terminé : $base/$user/$repo/releases"
+    $body = Get-Content (Join-Path $PSScriptRoot "notes/$tag.md") -Raw -Encoding UTF8
+    $title = ($body -split "`n")[0] -replace '^#+\s*', ''
+    $payload = @{ tag_name = $tag; name = $title.Trim(); body = $body } | ConvertTo-Json
+    $rel = Invoke-RestMethod -Method Post -Uri "$base/api/v1/repos/$repo/releases" -Headers $h `
+        -ContentType 'application/json; charset=utf-8' -Body ([Text.Encoding]::UTF8.GetBytes($payload))
+
+    # Le zip publié est celui contenu dans le tag.
+    $zipName = Split-Path $v.sourceUrl -Leaf
+    $tmp = Join-Path ([IO.Path]::GetTempPath()) $zipName
+    # Passage par cmd : la redirection PowerShell réencoderait le binaire.
+    cmd /c "git -C `"$PSScriptRoot`" show ${tag}:dist/$zipName > `"$tmp`""
+    curl.exe -s -f -X POST "$base/api/v1/repos/$repo/releases/$($rel.id)/assets?name=$zipName" `
+        -H "Authorization: token $token" -F "attachment=@$tmp" | Out-Null
+    Remove-Item $tmp
+    Write-Host "$tag : release créée avec $zipName."
+}
+
+Write-Host "Terminé : $base/$repo/releases"

@@ -9,11 +9,51 @@
         "versions": [
             {
                 "checksum": "b417407f03f5baa1126aca35b29f0bae",
-                "changelog": "Nouveau réglage « … sauf les simples transitions » (activé par défaut) : un thème qui déborde de quelques secondes sur l'épisode est accepté quand il n'existe pas de version propre. Les thèmes joués par-dessus l'épisode restent refusés.",
+                "changelog": "Nouveau réglage « … sauf les simples transitions » (activé par défaut) : un thème qui déborde de quelques secondes sur l'épisode est accepté quand il n'existe pas de version propre.",
                 "targetAbi": "12.0.0.0",
-                "sourceUrl": "https://gitlab.bmeouchi.fr/Elie/OpEdSync/raw/branch/main/dist/opedsync_1.3.0.0.zip",
+                "sourceUrl": "https://gitlab.bmeouchi.fr/Elie/OpEdSync/raw/tag/1.3.0.0/dist/opedsync_1.3.0.0.zip",
                 "timestamp": "2026-10-10T22:54:47Z",
                 "version": "1.3.0.0"
+            },
+            {
+                "checksum": "e882cfa0b938814db7541816d1fbecd5",
+                "changelog": "Si aucun thème de la dernière saison ne passe les filtres, le plugin passe à la saison précédente, puis à la série. Les vidéos sans piste audio sont écartées.",
+                "targetAbi": "12.0.0.0",
+                "sourceUrl": "https://gitlab.bmeouchi.fr/Elie/OpEdSync/raw/tag/1.2.1.0/dist/opedsync_1.2.1.0.zip",
+                "timestamp": "2026-10-10T22:52:26Z",
+                "version": "1.2.1.0"
+            },
+            {
+                "checksum": "e3895e317930c3c90c09cb8e380d0461",
+                "changelog": "Nouveau réglage « Vérifier l'année de sortie » (activé par défaut) : écarte les animés dont l'année diffère de plus d'un an de celle du média.",
+                "targetAbi": "12.0.0.0",
+                "sourceUrl": "https://gitlab.bmeouchi.fr/Elie/OpEdSync/raw/tag/1.2.0.0/dist/opedsync_1.2.0.0.zip",
+                "timestamp": "2026-10-10T22:41:51Z",
+                "version": "1.2.0.0"
+            },
+            {
+                "checksum": "ceb53e39cb4161155b9c90f8e9f7476d",
+                "changelog": "Conformité sans perte : les anciens thèmes ne sont supprimés qu'une fois le remplacement téléchargé. Saisons sans vidéo ignorées. Logo du plugin.",
+                "targetAbi": "12.0.0.0",
+                "sourceUrl": "https://gitlab.bmeouchi.fr/Elie/OpEdSync/raw/tag/1.1.1.0/dist/opedsync_1.1.1.0.zip",
+                "timestamp": "2026-10-10T22:31:08Z",
+                "version": "1.1.1.0"
+            },
+            {
+                "checksum": "9962a719a0e35ad03140f4abeb7685bf",
+                "changelog": "Nouveau réglage « Thème utilisé pour les séries » : dernière saison par défaut. « Imposer la conformité » est réellement appliqué.",
+                "targetAbi": "12.0.0.0",
+                "sourceUrl": "https://gitlab.bmeouchi.fr/Elie/OpEdSync/raw/tag/1.1.0.0/dist/opedsync_1.1.0.0.zip",
+                "timestamp": "2026-10-10T22:16:27Z",
+                "version": "1.1.0.0"
+            },
+            {
+                "checksum": "35082eb71cea7f56938f699ae559e236",
+                "changelog": "Première version d'OpEdSync : compatible Jellyfin 12, recherche par AniDB, MyAnimeList ou AniList, téléchargements plus sûrs, interface en français.",
+                "targetAbi": "12.0.0.0",
+                "sourceUrl": "https://gitlab.bmeouchi.fr/Elie/OpEdSync/raw/tag/1.0.0.0/dist/opedsync_1.0.0.0.zip",
+                "timestamp": "2026-10-10T22:05:52Z",
+                "version": "1.0.0.0"
             }
         ],
         "imageUrl": "https://gitlab.bmeouchi.fr/Elie/OpEdSync/raw/branch/main/logo.png"

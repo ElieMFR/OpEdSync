@@ -1,0 +1,8 @@
+## 1.2.0.0 — Vérification de l'année
+
+### Nouveautés
+- Nouveau réglage **« Vérifier l'année de sortie »**, activé par défaut. Un animé n'est retenu que si son année est à un an près celle du média (ou de la saison). Les plugins de métadonnées attribuent parfois un identifiant AniDB erroné (un film occidental associé à un vieil animé) : ces correspondances sont maintenant écartées.
+- Testé sur une bibliothèque réelle : 479 correspondances correctes conservées, et la plupart des erreurs écartées (par exemple Urusei Yatsura 2022 ne reçoit plus le thème de la version de 1981).
+
+### Conseil
+- La vérification ne suffit pas à elle seule pour des bibliothèques non-anime : limitez le plugin à vos bibliothèques d'anime avec « Bibliothèques incluses ».
