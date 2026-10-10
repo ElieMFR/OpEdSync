@@ -3,7 +3,9 @@
 Plugin for [Jellyfin](https://jellyfin.org/) that fetches anime themes (OPs and EDs)
 from [animethemes.moe](https://animethemes.moe). Both audio files and video files are supported.
 
-**An AniDB ID is used to find matching themes, so you'll need to install the AniDB plugin. All other series are ignored.**
+**Themes are matched through the AniDB, MyAnimeList or AniList ID of the item (in that order of preference), so install at least one of the corresponding metadata plugins. Items without any of these IDs are ignored.**
+
+Compatible with Jellyfin 10.11 (plugin v6) and Jellyfin 12.x (plugin v7+).
 
 ## How to use
 

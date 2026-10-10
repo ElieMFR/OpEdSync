@@ -74,12 +74,21 @@ public abstract class BaseThemeSearchTask
 
         var semaphore = new SemaphoreSlim(1, 1);
         int counter = 0;
-        int count = items.Count;
+        int count = Math.Max(itemsWithAnime.Count, 1);
 
         // Process in parallel
         await Parallel.ForEachAsync(itemsWithAnime, new ParallelOptions { CancellationToken = cancellationToken, MaxDegreeOfParallelism = configuration.DegreeOfParallelism }, async (item, ct) =>
         {
-            await _downloader.HandleAsync(item.Item, item.Anime.First(), configuration, ct).ConfigureAwait(false);
+            try
+            {
+                await _downloader.HandleAsync(item.Item, item.Anime.First(), configuration, ct).ConfigureAwait(false);
+            }
+            catch (Exception e) when (e is not OperationCanceledException)
+            {
+                // One broken item must not stop the others.
+                _logger.LogError(e, "[{Id}] Failed to process {Name}", item.Item.Id, item.Item.Name);
+            }
+
             await semaphore.WaitAsync(ct).ConfigureAwait(false);
             try
             {
@@ -92,18 +101,31 @@ public abstract class BaseThemeSearchTask
             }
         }).ConfigureAwait(false);
 
-        _logger.LogInformation("Ending theme search ({Count})", count);
+        _logger.LogInformation("Ending theme search ({Count} matched items)", itemsWithAnime.Count);
+    }
+
+    private Regex? TryCreateRegex(string? pattern)
+    {
+        if (string.IsNullOrWhiteSpace(pattern))
+        {
+            return null;
+        }
+
+        try
+        {
+            return new Regex(pattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
+        }
+        catch (ArgumentException e)
+        {
+            _logger.LogError(e, "Ignoring invalid library regex: {Pattern}", pattern);
+            return null;
+        }
     }
 
     private List<BaseItem> GetApplicableItems(PluginConfiguration configuration)
     {
-        var includeRegex = !string.IsNullOrWhiteSpace(configuration.IncludeLibraries)
-            ? new Regex(configuration.IncludeLibraries, RegexOptions.IgnoreCase | RegexOptions.Compiled)
-            : new Regex("^.*$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
-
-        var excludeRegex = !string.IsNullOrWhiteSpace(configuration.ExcludeLibraries)
-            ? new Regex(configuration.ExcludeLibraries, RegexOptions.IgnoreCase | RegexOptions.Compiled)
-            : null;
+        var includeRegex = TryCreateRegex(configuration.IncludeLibraries) ?? new Regex("^.*$", RegexOptions.IgnoreCase);
+        var excludeRegex = TryCreateRegex(configuration.ExcludeLibraries);
 
         var libraries = _libraryManager.GetItemList(new InternalItemsQuery { IncludeItemTypes = [BaseItemKind.CollectionFolder] });
 

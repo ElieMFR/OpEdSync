@@ -32,6 +32,14 @@ public class AnimeThemesDownloader : IDisposable
     private const string ThemeMusicDirectory = "theme-music";
     private const string ThemeVideoDirectory = "backdrops";
 
+    // Providers in order of preference: Jellyfin provider key -> AnimeThemes site name.
+    private static readonly (string ProviderKey, string Site)[] SupportedProviders =
+    [
+        ("AniDB", Sites.ANIDB),
+        ("MyAnimeList", Sites.MYANIMELIST),
+        ("AniList", Sites.ANILIST),
+    ];
+
     private readonly HttpClient _client;
     private readonly AnimeThemesApi _api;
     private readonly ILogger<AnimeThemesDownloader> _logger;
@@ -47,7 +55,7 @@ public class AnimeThemesDownloader : IDisposable
     {
         _mediaEncoder = mediaEncoder;
         _logger = logger;
-        _client = new HttpClient();
+        _client = clientFactory.CreateClient("AnimeThemes");
         _api = new AnimeThemesApi(clientFactory, logger);
     }
 
@@ -59,7 +67,7 @@ public class AnimeThemesDownloader : IDisposable
     /// <returns>Whether item should be processed.</returns>
     public bool ShouldUpdate(BaseItem item, PluginConfiguration configuration)
     {
-        return TryGetAniDbId(item, configuration, out var id) && !IsSatisfied(item, configuration);
+        return IsSupportedKind(item) && GetProviderIds(item).Any() && !IsSatisfied(item, configuration);
     }
 
     /// <summary>
@@ -71,28 +79,54 @@ public class AnimeThemesDownloader : IDisposable
     /// <returns>A filtered list of items to be processed with their corresponding anime.</returns>
     public async IAsyncEnumerable<ItemWithAnime> ResolveItems(BaseItem[] items, PluginConfiguration configuration, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var itemsByAniDb = items.GroupBy(it =>
+        var remaining = items.Where(IsSupportedKind).ToList();
+
+        foreach (var (providerKey, site) in SupportedProviders)
         {
-            if (TryGetAniDbId(it, configuration, out var id))
+            if (remaining.Count == 0)
             {
-                return id;
+                yield break;
             }
 
-            return -1;
-        }).ToDictionary((it) => it.Key, (it) => it.ToList());
+            var itemsById = remaining
+                .Select(it => (Item: it, Id: TryGetProviderId(it, providerKey, out var id) ? id : (int?)null))
+                .Where(it => it.Id.HasValue)
+                .GroupBy(it => it.Id!.Value, it => it.Item)
+                .ToDictionary(it => it.Key, it => it.ToList());
 
-        var animeByAniDb = await _api.FindByAniDbId(itemsByAniDb.Keys.Where(it => it != -1), cancellationToken).ConfigureAwait(false);
-
-        foreach (var entry in animeByAniDb)
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            if (entry.Value.Length == 0)
+            if (itemsById.Count == 0)
             {
                 continue;
             }
 
-            yield return new ItemWithAnime(itemsByAniDb[entry.Key].First(), new ReadOnlyCollection<Anime>(entry.Value));
+            Dictionary<int, Anime[]> animeById;
+            try
+            {
+                animeById = await _api.FindByExternalId(site, itemsById.Keys, cancellationToken).ConfigureAwait(false);
+            }
+            catch (HttpRequestException e)
+            {
+                // Don't let a failing lookup abort the whole run; the next run will retry.
+                _logger.LogError(e, "Lookup on {Site} failed", site);
+                continue;
+            }
+
+            foreach (var entry in animeById)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                if (entry.Value.Length == 0)
+                {
+                    continue;
+                }
+
+                // The same ID may be shared by several items (e.g. the same show in two libraries).
+                foreach (var item in itemsById[entry.Key])
+                {
+                    remaining.Remove(item);
+                    yield return new ItemWithAnime(item, new ReadOnlyCollection<Anime>(entry.Value));
+                }
+            }
         }
     }
 
@@ -235,21 +269,28 @@ public class AnimeThemesDownloader : IDisposable
         }
 
         var tempFile = Path.GetTempFileName();
+
+        // ffmpeg writes to a temporary name first, so an interrupted run never leaves a truncated theme behind
+        // (which the next run would treat as "already downloaded").
+        var partialPath = path + ".part";
         try
         {
             // Make sure directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
-            {
-                _logger.LogInformation("[{Id}] Downloading {Url} to {Path}", item.Id, url, path);
-                using var downloadStream = await _client.GetStreamAsync(url, cancellationToken).ConfigureAwait(false);
-                using var fileStream = File.OpenWrite(tempFile);
 
-                // Download file
-                await downloadStream.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
+            _logger.LogInformation("[{Id}] Downloading {Url} to {Path}", item.Id, url, path);
+            var downloadStream = await _client.GetStreamAsync(url, cancellationToken).ConfigureAwait(false);
+            await using (downloadStream.ConfigureAwait(false))
+            {
+                var fileStream = File.Create(tempFile);
+                await using (fileStream.ConfigureAwait(false))
+                {
+                    await downloadStream.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
+                }
             }
 
             // Convert OGG
-            var process = new Process
+            using var process = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
@@ -262,7 +303,7 @@ public class AnimeThemesDownloader : IDisposable
                     FileName = _mediaEncoder.EncoderPath,
                     WindowStyle = ProcessWindowStyle.Hidden,
                     ErrorDialog = false,
-                    ArgumentList = { "-i", tempFile }
+                    ArgumentList = { "-y", "-nostdin", "-loglevel", "error", "-i", tempFile }
                 },
                 EnableRaisingEvents = true
             };
@@ -287,20 +328,43 @@ public class AnimeThemesDownloader : IDisposable
                 arguments.Add(string.Create(CultureInfo.InvariantCulture, $"volume={volume:0.00}"));
             }
 
-            arguments.Add(path);
+            // The container can't be guessed from the ".part" extension.
+            arguments.Add("-f");
+            arguments.Add(type == MediaType.Audio ? "mp3" : "webm");
+            arguments.Add(partialPath);
 
             process.Start();
 
-            var error = await process.StandardError.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
-            await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
-
-            if (process.ExitCode != 0)
+            try
             {
-                var commandInfo = $"Command line: {process.StartInfo.FileName} {string.Join(" ", arguments)}";
-                throw new ConversionException(process.ExitCode, commandInfo + "\n" + error);
+                var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
+                var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
+                await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+                var error = await errorTask.ConfigureAwait(false);
+                await outputTask.ConfigureAwait(false);
+
+                if (process.ExitCode != 0)
+                {
+                    var commandInfo = $"Command line: {process.StartInfo.FileName} {string.Join(" ", arguments)}";
+                    throw new ConversionException(process.ExitCode, commandInfo + "\n" + error);
+                }
+            }
+            catch (OperationCanceledException)
+            {
+                if (!process.HasExited)
+                {
+                    process.Kill(true);
+                }
+
+                throw;
             }
 
+            File.Move(partialPath, path, true);
             _logger.LogInformation("[{Id}] Successfully downloaded theme song!", item.Id);
+        }
+        catch (OperationCanceledException)
+        {
+            throw;
         }
         catch (Exception e)
         {
@@ -310,36 +374,42 @@ public class AnimeThemesDownloader : IDisposable
         finally
         {
             File.Delete(tempFile);
+            File.Delete(partialPath);
         }
 
         return true;
     }
 
-    private bool IsSatisfied(BaseItem item, PluginConfiguration configuration)
+    private static bool IsSatisfied(BaseItem item, PluginConfiguration configuration)
     {
-        var audioSatisfied = item.GetThemeSongs().Any() || configuration.AudioSettings.FetchType == FetchType.None;
-        var videoSatisfied = item.GetThemeVideos().Any() || configuration.VideoSettings.FetchType == FetchType.None;
+        var settings = item.GetBaseItemKind() == BaseItemKind.Movie
+            ? configuration.MovieSettings
+            : new CollectionTypeConfiguration { AudioSettings = configuration.AudioSettings, VideoSettings = configuration.VideoSettings };
+
+        var audioSatisfied = item.GetThemeSongs().Any() || settings.AudioSettings.FetchType == FetchType.None;
+        var videoSatisfied = item.GetThemeVideos().Any() || settings.VideoSettings.FetchType == FetchType.None;
 
         return audioSatisfied && videoSatisfied;
     }
 
-    private bool TryGetAniDbId(BaseItem item, PluginConfiguration configuration, out int id)
+    private static bool IsSupportedKind(BaseItem item)
+    {
+        var kind = item.GetBaseItemKind();
+        return kind == BaseItemKind.Series || kind == BaseItemKind.Movie;
+    }
+
+    private static bool TryGetProviderId(BaseItem item, string providerKey, out int id)
     {
         id = -1;
+        return item.TryGetProviderId(providerKey, out var idAsString)
+               && int.TryParse(idAsString, NumberStyles.Integer, CultureInfo.InvariantCulture, out id);
+    }
 
-        // Ignore non-series and already processed ones.
-        if (item.GetBaseItemKind() != BaseItemKind.Series && item.GetBaseItemKind() != BaseItemKind.Movie)
-        {
-            return false;
-        }
-
-        if (item.TryGetProviderId("AniDB", out var idAsString))
-        {
-            id = int.Parse(idAsString, CultureInfo.InvariantCulture);
-            return true;
-        }
-
-        return false;
+    private static IEnumerable<string> GetProviderIds(BaseItem item)
+    {
+        return SupportedProviders
+            .Where(it => TryGetProviderId(item, it.ProviderKey, out _))
+            .Select(it => it.ProviderKey);
     }
 
     /// <summary>

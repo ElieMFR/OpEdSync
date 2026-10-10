@@ -9,4 +9,14 @@ public static class Sites
     /// Site for AniDB.
     /// </summary>
     public const string ANIDB = "aniDB";
+
+    /// <summary>
+    /// Site for MyAnimeList.
+    /// </summary>
+    public const string MYANIMELIST = "MyAnimeList";
+
+    /// <summary>
+    /// Site for AniList.
+    /// </summary>
+    public const string ANILIST = "AniList";
 }

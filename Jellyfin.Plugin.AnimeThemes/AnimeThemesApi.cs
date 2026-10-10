@@ -32,16 +32,17 @@ public sealed class AnimeThemesApi : IDisposable
     }
 
     /// <summary>
-    /// Finds anime with all their themes by their AniDB Ids.
+    /// Finds anime with all their themes by their IDs on an external site.
     /// </summary>
-    /// <param name="ids">IDs on AniDB.</param>
+    /// <param name="site">The external site, see <see cref="Sites"/>.</param>
+    /// <param name="ids">IDs on that site.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A dictionary with an entry for each passed <paramref name="ids"/>.</returns>
-    public async ValueTask<Dictionary<int, Anime[]>> FindByAniDbId(IEnumerable<int> ids, CancellationToken cancellationToken = default)
+    public async ValueTask<Dictionary<int, Anime[]>> FindByExternalId(string site, IEnumerable<int> ids, CancellationToken cancellationToken = default)
     {
         var idList = ids.Distinct().ToArray();
 
-        _logger.LogInformation("Looking up {Count} shows in the AnimeThemes db...", idList.Length);
+        _logger.LogInformation("Looking up {Count} shows ({Site}) in the AnimeThemes db...", idList.Length, site);
 
         if (idList.Length > 100)
         {
@@ -52,7 +53,7 @@ public sealed class AnimeThemesApi : IDisposable
         var arguments = new Dictionary<string, string?>
         {
             { "filter[resource][external_id]", string.Join(",", idList.Select(it => it.ToString(CultureInfo.InvariantCulture))) },
-            { "filter[resource][site]", Sites.ANIDB },
+            { "filter[resource][site]", site },
             { "filter[has]", "resources" },
             { "page[size]", idList.Length.ToString(CultureInfo.InvariantCulture) },
             { "include", "animethemes.animethemeentries.videos.audio,resources" },
@@ -69,7 +70,11 @@ public sealed class AnimeThemesApi : IDisposable
         await using var contentDisposal = content.ConfigureAwait(false);
 
         var response = await JsonSerializer.DeserializeAsync<AnimeResponse>(content, cancellationToken: cancellationToken).ConfigureAwait(false);
-        var animeByAniId = response?.Anime.GroupBy(a => a.AniDbId!.Value).ToDictionary(a => a.Key, a => a.ToArray()) ?? new Dictionary<int, Anime[]>();
+        var animeByAniId = response?.Anime
+            .Select(a => (Id: a.GetExternalId(site), Anime: a))
+            .Where(a => a.Id.HasValue)
+            .GroupBy(a => a.Id!.Value, a => a.Anime)
+            .ToDictionary(a => a.Key, a => a.ToArray()) ?? new Dictionary<int, Anime[]>();
 
         _logger.LogInformation("Of a total of {TotalCount} shows, we were able to find entries for {FinalCount} shows", idList.Length, animeByAniId.Count);
 
