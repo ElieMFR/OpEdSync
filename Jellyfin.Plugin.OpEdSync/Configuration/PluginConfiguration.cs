@@ -16,6 +16,7 @@ public class PluginConfiguration : BasePluginConfiguration
         DegreeOfParallelism = 1;
         ForceSync = false;
         ThemeSource = ThemeSource.LatestSeason;
+        CheckYear = true;
         IncludeLibraries = "^.*$";
         ExcludeLibraries = string.Empty;
 
@@ -46,6 +47,11 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets or sets a string setting.
     /// </summary>
     public int DegreeOfParallelism { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether an anime is only accepted when its year is close to the item's.
+    /// </summary>
+    public bool CheckYear { get; set; }
 
     /// <summary>
     /// Gets or sets which season of a series is used to look up themes.

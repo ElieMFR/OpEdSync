@@ -4,8 +4,8 @@ $ErrorActionPreference = 'Stop'
 $base = 'https://gitlab.bmeouchi.fr'
 $user = 'Elie'
 $repo = 'OpEdSync'
-$tag  = '1.1.1.0'
-$zip  = Join-Path $PSScriptRoot 'dist/opedsync_1.1.1.0.zip'
+$tag  = '1.2.0.0'
+$zip  = Join-Path $PSScriptRoot 'dist/opedsync_1.2.0.0.zip'
 
 $secure = Read-Host 'Jeton Gitea' -AsSecureString
 $token  = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($secure))
@@ -23,9 +23,9 @@ try {
 git -c "http.extraHeader=Authorization: token $token" push -u gitea main
 
 # 3. Release + zip
-$body = Get-Content (Join-Path $PSScriptRoot 'RELEASE_NOTES_1.1.1.0.md') -Raw -Encoding UTF8
+$body = Get-Content (Join-Path $PSScriptRoot 'RELEASE_NOTES_1.2.0.0.md') -Raw -Encoding UTF8
 $rel = Invoke-RestMethod -Method Post -Uri "$base/api/v1/repos/$user/$repo/releases" -Headers $h -ContentType 'application/json; charset=utf-8' -Body (@{
     tag_name = $tag; target_commitish = 'main'; name = "$tag — Compatibilité Jellyfin 12"; body = $body
 } | ConvertTo-Json)
-curl.exe -s -X POST "$base/api/v1/repos/$user/$repo/releases/$($rel.id)/assets?name=opedsync_1.1.1.0.zip" -H "Authorization: token $token" -F "attachment=@$zip" | Out-Null
+curl.exe -s -X POST "$base/api/v1/repos/$user/$repo/releases/$($rel.id)/assets?name=opedsync_1.2.0.0.zip" -H "Authorization: token $token" -F "attachment=@$zip" | Out-Null
 Write-Host "Terminé : $base/$user/$repo/releases"

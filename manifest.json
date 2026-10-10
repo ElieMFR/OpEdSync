@@ -8,12 +8,12 @@
         "owner": "ElieM",
         "versions": [
             {
-                "checksum": "ceb53e39cb4161155b9c90f8e9f7476d",
-                "changelog": "Logo du plugin. Conformité plus sûre : les anciens thèmes ne sont supprimés qu'une fois le remplacement téléchargé. Une saison sans vidéo sur AnimeThemes est ignorée au profit de la précédente.",
+                "checksum": "e3895e317930c3c90c09cb8e380d0461",
+                "changelog": "Nouveau réglage « Vérifier l'année de sortie » (activé par défaut) : un animé dont l'année diffère de plus d'un an de celle du média est ignoré, ce qui écarte la plupart des identifiants erronés.",
                 "targetAbi": "12.0.0.0",
-                "sourceUrl": "https://gitlab.bmeouchi.fr/Elie/OpEdSync/raw/branch/main/dist/opedsync_1.1.1.0.zip",
-                "timestamp": "2026-10-10T22:31:08Z",
-                "version": "1.1.1.0"
+                "sourceUrl": "https://gitlab.bmeouchi.fr/Elie/OpEdSync/raw/branch/main/dist/opedsync_1.2.0.0.zip",
+                "timestamp": "2026-10-10T22:41:51Z",
+                "version": "1.2.0.0"
             }
         ],
         "imageUrl": "https://gitlab.bmeouchi.fr/Elie/OpEdSync/raw/branch/main/logo.png"

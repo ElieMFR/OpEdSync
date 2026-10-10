@@ -131,8 +131,27 @@ public class AnimeThemesDownloader : IDisposable
                     // The same ID may be shared by several items (e.g. the same show in two libraries).
                     foreach (var item in itemsById[entry.Key])
                     {
+                        var year = pending[item][round].Year;
+                        var matches = configuration.CheckYear
+                            ? animeWithVideos.Where(it => YearMatches(it.Year, year)).ToArray()
+                            : animeWithVideos;
+
+                        if (matches.Length == 0)
+                        {
+                            // Metadata providers sometimes attach the ID of an unrelated anime; a release year
+                            // that is way off is the cheapest tell.
+                            _logger.LogInformation(
+                                "[{Id}] Ignoring {Anime} for {Name}: year {AnimeYear} does not match {Year}",
+                                item.Id,
+                                animeWithVideos[0].Name,
+                                item.Name,
+                                animeWithVideos[0].Year,
+                                year);
+                            continue;
+                        }
+
                         pending.Remove(item);
-                        yield return new ItemWithAnime(item, new ReadOnlyCollection<Anime>(animeWithVideos));
+                        yield return new ItemWithAnime(item, new ReadOnlyCollection<Anime>(matches));
                     }
                 }
             }
@@ -438,13 +457,20 @@ public class AnimeThemesDownloader : IDisposable
                && int.TryParse(idAsString, NumberStyles.Integer, CultureInfo.InvariantCulture, out id);
     }
 
-    private static IEnumerable<(string Site, int Id)> GetSiteIds(BaseItem item)
+    private static bool YearMatches(int? animeYear, int? itemYear)
     {
+        // Unknown on either side: nothing to compare, keep the match.
+        return animeYear is null || itemYear is null || Math.Abs(animeYear.Value - itemYear.Value) <= 1;
+    }
+
+    private static IEnumerable<(string Site, int Id, int? Year)> GetSiteIds(BaseItem item)
+    {
+        var year = item.ProductionYear ?? item.PremiereDate?.Year;
         foreach (var (providerKey, site) in SupportedProviders)
         {
             if (TryGetProviderId(item, providerKey, out var id))
             {
-                yield return (site, id);
+                yield return (site, id, year);
             }
         }
     }
@@ -452,9 +478,9 @@ public class AnimeThemesDownloader : IDisposable
     /// <summary>
     /// Gets the lookups to try for an item, most preferred first.
     /// </summary>
-    private List<(string Site, int Id)> GetCandidates(BaseItem item, PluginConfiguration configuration)
+    private List<(string Site, int Id, int? Year)> GetCandidates(BaseItem item, PluginConfiguration configuration)
     {
-        var candidates = new List<(string Site, int Id)>();
+        var candidates = new List<(string Site, int Id, int? Year)>();
 
         if (item.GetBaseItemKind() == BaseItemKind.Series && configuration.ThemeSource == ThemeSource.LatestSeason)
         {
