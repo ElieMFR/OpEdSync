@@ -28,16 +28,16 @@ public class ScheduledThemeSearchTask : BaseThemeSearchTask, IScheduledTask
     }
 
     /// <inheritdoc />
-    public string Name { get; } = "Search For Anime Themes";
+    public string Name { get; } = "Rechercher les thèmes d'anime";
 
     /// <inheritdoc />
     public string Key { get; } = "opedsync.search";
 
     /// <inheritdoc />
-    public string Description { get; } = "Updates all themes according to the settings. This also happens after every full scan.";
+    public string Description { get; } = "Met à jour tous les thèmes selon les réglages du plugin.";
 
     /// <inheritdoc />
-    public string Category { get; } = "Theme Songs";
+    public string Category { get; } = "Thèmes musicaux";
 
     /// <inheritdoc />
     public Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)

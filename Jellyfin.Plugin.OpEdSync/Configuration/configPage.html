@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="utf-8">
     <title>OpEdSync</title>
@@ -34,51 +34,51 @@
         <div class="content-primary">
             <form id="AnimeThemesConfigForm">
                 <div class="verticalSection">
-                    <h2>General</h2>
+                    <h2>Général</h2>
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="DegreeOfParallelism">Degree of
-                            Parallelism</label>
+                        <label class="inputLabel inputLabelUnfocused" for="DegreeOfParallelism">Degré de
+                            parallélisme</label>
                         <input id="DegreeOfParallelism" name="DegreeOfParallelism" type="number" is="emby-input" min="0"
                                max="8" step="1"/>
-                        <div class="fieldDescription">How many files should be downloaded simultaneously.</div>
+                        <div class="fieldDescription">Nombre de fichiers téléchargés en même temps.</div>
                     </div>
                     <div class="checkboxContainer checkboxContainer-withDescription">
                         <label class="emby-checkbox-label">
                             <input id="ForceSync" name="ForceSync" type="checkbox" is="emby-checkbox"/>
-                            <span>Enforce conformity with the configuration.</span>
+                            <span>Imposer la conformité avec la configuration.</span>
                         </label>
-                        <div class="fieldDescription">When this is enabled, every run will check every anime if the
-                            downloaded themes still conform to the configuration, and download / delete themes
-                            accordingly.
+                        <div class="fieldDescription">Si activé, chaque exécution vérifie pour chaque anime que les thèmes
+                            téléchargés respectent toujours la configuration, puis télécharge ou supprime
+                            les thèmes en conséquence.
                         </div>
                     </div>
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="IncludeLibraries">Included Libraries (Regex)</label>
+                        <label class="inputLabel inputLabelUnfocused" for="IncludeLibraries">Bibliothèques incluses (expression régulière)</label>
                         <input id="IncludeLibraries" name="IncludeLibraries" type="text" is="emby-input"/>
-                        <div class="fieldDescription">Matching libraries will be searched for anime themes <strong>unless they are matched by the excluded regex</strong>. Case-insensitive.</div>
+                        <div class="fieldDescription">Les bibliothèques correspondantes sont analysées <strong>sauf si elles correspondent à l'expression d'exclusion</strong>. Insensible à la casse.</div>
                     </div>
                     <div class="inputContainer">
-                        <label class="inputLabel inputLabelUnfocused" for="ExcludeLibraries">Excluded Libraries (Regex)</label>
+                        <label class="inputLabel inputLabelUnfocused" for="ExcludeLibraries">Bibliothèques exclues (expression régulière)</label>
                         <input id="ExcludeLibraries" name="ExcludeLibraries" type="text" is="emby-input"/>
-                        <div class="fieldDescription">Matching libraries will be ignored even if they are matched by the above regex. Leave empty to ignore. Case-insensitive.</div>
+                        <div class="fieldDescription">Les bibliothèques correspondantes sont ignorées, même si elles correspondent à l'expression ci-dessus. Laisser vide pour ne rien exclure. Insensible à la casse.</div>
                     </div>
                 </div>
 
                 <fieldset>
                     <legend class="at-tab-header">
-                        <h3 id="at-series-title" class="emby-button selected">Series</h3>
-                        <h3 id="at-movies-title" class="emby-button">Movies</h3>
+                        <h3 id="at-series-title" class="emby-button selected">Séries</h3>
+                        <h3 id="at-movies-title" class="emby-button">Films</h3>
                     </legend>
                     <div class="verticalSection">
-                        <h2>Audio Files</h2>
+                        <h2>Fichiers audio</h2>
 
                         <div class="selectContainer">
-                            <label class="selectLabel" for="AudioFetchType">Fetch Behavior</label>
+                            <label class="selectLabel" for="AudioFetchType">Mode de récupération</label>
                             <select is="emby-select" id="AudioFetchType" name="AudioFetchType"
                                     class="emby-select-withcolor emby-select">
-                                <option value="None">Don't download</option>
-                                <option value="Single">Single theme</option>
-                                <option value="All">All themes</option>
+                                <option value="None">Ne pas télécharger</option>
+                                <option value="Single">Un seul thème</option>
+                                <option value="All">Tous les thèmes</option>
                             </select>
                         </div>
 
@@ -86,26 +86,26 @@
                             <label class="emby-checkbox-label">
                                 <input id="AudioIgnoreOverlapping" name="AudioIgnoreOverlapping" type="checkbox"
                                        is="emby-checkbox"/>
-                                <span>Ignore themes that overlap with episode</span>
+                                <span>Ignorer les thèmes qui chevauchent l'épisode</span>
                             </label>
                         </div>
                         <div class="checkboxContainer checkboxContainer-withDescription">
                             <label class="emby-checkbox-label">
                                 <input id="AudioIgnoreThemesWithCredits" name="AudioIgnoreThemesWithCredits" type="checkbox"
                                        is="emby-checkbox"/>
-                                <span>Ignore themes that contain credits</span>
+                                <span>Ignorer les thèmes avec crédits</span>
                             </label>
                         </div>
                         <div class="checkboxContainer checkboxContainer-withDescription">
                             <label class="emby-checkbox-label">
                                 <input id="AudioIgnoreOPs" name="AudioIgnoreOPs" type="checkbox" is="emby-checkbox"/>
-                                <span>Ignore OP themes</span>
+                                <span>Ignorer les openings (OP)</span>
                             </label>
                         </div>
                         <div class="checkboxContainer checkboxContainer-withDescription">
                             <label class="emby-checkbox-label">
                                 <input id="AudioIgnoreEDs" name="AudioIgnoreEDs" type="checkbox" is="emby-checkbox"/>
-                                <span>Ignore ED themes</span>
+                                <span>Ignorer les endings (ED)</span>
                             </label>
                         </div>
 
@@ -113,20 +113,20 @@
                             <label class="inputLabel inputLabelUnfocused" for="AudioVolume">Volume</label>
                             <input id="AudioVolume" name="AudioVolume" type="range" is="emby-input" min="0" max="1"
                                    step="0.05"/>
-                            <div class="fieldDescription">Volume of the downloaded files. Will be baked in.</div>
+                            <div class="fieldDescription">Volume des fichiers téléchargés, appliqué directement dans le fichier.</div>
                         </div>
                     </div>
 
                     <div class="verticalSection">
-                        <h2>Video Files</h2>
+                        <h2>Fichiers vidéo</h2>
 
                         <div class="selectContainer">
-                            <label class="selectLabel" for="VideoFetchType">Fetch Behavior</label>
+                            <label class="selectLabel" for="VideoFetchType">Mode de récupération</label>
                             <select is="emby-select" id="VideoFetchType" name="VideoFetchType"
                                     class="emby-select-withcolor emby-select">
-                                <option value="None">Don't download</option>
-                                <option value="Single">Single theme</option>
-                                <option value="All">All themes</option>
+                                <option value="None">Ne pas télécharger</option>
+                                <option value="Single">Un seul thème</option>
+                                <option value="All">Tous les thèmes</option>
                             </select>
                         </div>
 
@@ -134,26 +134,26 @@
                             <label class="emby-checkbox-label">
                                 <input id="VideoIgnoreOverlapping" name="VideoIgnoreOverlapping" type="checkbox"
                                        is="emby-checkbox"/>
-                                <span>Ignore themes that overlap with episode</span>
+                                <span>Ignorer les thèmes qui chevauchent l'épisode</span>
                             </label>
                         </div>
                         <div class="checkboxContainer checkboxContainer-withDescription">
                             <label class="emby-checkbox-label">
                                 <input id="VideoIgnoreThemesWithCredits" name="VideoIgnoreThemesWithCredits" type="checkbox"
                                        is="emby-checkbox"/>
-                                <span>Ignore themes that contain credits</span>
+                                <span>Ignorer les thèmes avec crédits</span>
                             </label>
                         </div>
                         <div class="checkboxContainer checkboxContainer-withDescription">
                             <label class="emby-checkbox-label">
                                 <input id="VideoIgnoreOPs" name="VideoIgnoreOPs" type="checkbox" is="emby-checkbox"/>
-                                <span>Ignore OP themes</span>
+                                <span>Ignorer les openings (OP)</span>
                             </label>
                         </div>
                         <div class="checkboxContainer checkboxContainer-withDescription">
                             <label class="emby-checkbox-label">
                                 <input id="VideoIgnoreEDs" name="VideoIgnoreEDs" type="checkbox" is="emby-checkbox"/>
-                                <span>Ignore ED themes</span>
+                                <span>Ignorer les endings (ED)</span>
                             </label>
                         </div>
 
@@ -161,8 +161,8 @@
                             <label class="inputLabel inputLabelUnfocused" for="VideoVolume">Volume</label>
                             <input id="VideoVolume" name="VideoVolume" type="range" is="emby-input" min="0" max="1"
                                    step="0.05"/>
-                            <div class="fieldDescription">Volume of the downloaded files. Set to 0 to mute. Will be baked
-                                in.
+                            <div class="fieldDescription">Volume des fichiers téléchargés. Mettre 0 pour couper le son. Appliqué
+                                directement dans le fichier.
                             </div>
                         </div>
                     </div>
@@ -170,7 +170,7 @@
 
                 <div>
                     <button is="emby-button" type="submit" class="raised button-submit block emby-button">
-                        <span>Save</span>
+                        <span>Enregistrer</span>
                     </button>
                 </div>
             </form>

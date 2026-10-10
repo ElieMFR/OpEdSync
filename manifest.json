@@ -1,15 +1,15 @@
 [
     {
         "category": "Metadata",
-        "description": "Plugin for Jellyfin that fetches anime themes (OPs and EDs) from animethemes.moe.\n**Items are matched through their AniDB, MyAnimeList or AniList ID, so install at least one of those metadata plugins.**\n",
+        "description": "Télécharge automatiquement les génériques d'animes (OP et ED) depuis animethemes.moe.\n**Les séries sont retrouvées grâce à leur identifiant AniDB, MyAnimeList ou AniList : installez au moins un plugin de métadonnées qui le fournit.**\n",
         "guid": "c99b0ba5-9cbf-4ee0-b45f-40873c6b5b0b",
         "name": "OpEdSync",
-        "overview": "Plugin for Jellyfin that fetches anime themes (OPs and EDs) from animethemes.moe",
+        "overview": "Télécharge automatiquement les génériques d'animes (OP et ED) depuis animethemes.moe",
         "owner": "ElieM",
         "versions": [
             {
-                "checksum": "d5ef0cce1413da98d95e4e55374ca08b",
-                "changelog": "Jellyfin 12 support, MyAnimeList/AniList lookups, safer downloads.",
+                "checksum": "35082eb71cea7f56938f699ae559e236",
+                "changelog": "Compatible Jellyfin 12, repli sur les identifiants MyAnimeList/AniList, téléchargements plus sûrs, interface en français.",
                 "targetAbi": "12.0.0.0",
                 "sourceUrl": "https://gitlab.bmeouchi.fr/Elie/OpEdSync/raw/branch/main/dist/opedsync_1.0.0.0.zip",
                 "timestamp": "2026-10-10T22:04:54Z",
