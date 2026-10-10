@@ -8,12 +8,12 @@
         "owner": "ElieM",
         "versions": [
             {
-                "checksum": "e882cfa0b938814db7541816d1fbecd5",
-                "changelog": "Si aucun thème de la dernière saison ne passe les filtres (chevauchement, crédits, OP/ED ignorés), le plugin passe à la saison précédente, puis à la série. Les vidéos sans piste audio sont écartées pour les thèmes musicaux.",
+                "checksum": "b417407f03f5baa1126aca35b29f0bae",
+                "changelog": "Nouveau réglage « … sauf les simples transitions » (activé par défaut) : un thème qui déborde de quelques secondes sur l'épisode est accepté quand il n'existe pas de version propre. Les thèmes joués par-dessus l'épisode restent refusés.",
                 "targetAbi": "12.0.0.0",
-                "sourceUrl": "https://gitlab.bmeouchi.fr/Elie/OpEdSync/raw/branch/main/dist/opedsync_1.2.1.0.zip",
-                "timestamp": "2026-10-10T22:52:26Z",
-                "version": "1.2.1.0"
+                "sourceUrl": "https://gitlab.bmeouchi.fr/Elie/OpEdSync/raw/branch/main/dist/opedsync_1.3.0.0.zip",
+                "timestamp": "2026-10-10T22:54:47Z",
+                "version": "1.3.0.0"
             }
         ],
         "imageUrl": "https://gitlab.bmeouchi.fr/Elie/OpEdSync/raw/branch/main/logo.png"

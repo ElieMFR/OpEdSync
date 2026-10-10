@@ -107,6 +107,14 @@
                         </div>
                         <div class="checkboxContainer checkboxContainer-withDescription">
                             <label class="emby-checkbox-label">
+                                <input id="AudioAllowTransitions" name="AudioAllowTransitions" type="checkbox"
+                                       is="emby-checkbox"/>
+                                <span>… sauf les simples transitions</span>
+                            </label>
+                            <div class="fieldDescription">Accepte un thème dont seuls le début ou la fin débordent sur l'épisode (quelques secondes), quand il n'existe pas de version propre. Les thèmes joués par-dessus l'épisode restent refusés.</div>
+                        </div>
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label">
                                 <input id="AudioIgnoreThemesWithCredits" name="AudioIgnoreThemesWithCredits" type="checkbox"
                                        is="emby-checkbox"/>
                                 <span>Ignorer les thèmes avec crédits</span>
@@ -152,6 +160,14 @@
                                        is="emby-checkbox"/>
                                 <span>Ignorer les thèmes qui chevauchent l'épisode</span>
                             </label>
+                        </div>
+                        <div class="checkboxContainer checkboxContainer-withDescription">
+                            <label class="emby-checkbox-label">
+                                <input id="VideoAllowTransitions" name="VideoAllowTransitions" type="checkbox"
+                                       is="emby-checkbox"/>
+                                <span>… sauf les simples transitions</span>
+                            </label>
+                            <div class="fieldDescription">Accepte un thème dont seuls le début ou la fin débordent sur l'épisode (quelques secondes), quand il n'existe pas de version propre. Les thèmes joués par-dessus l'épisode restent refusés.</div>
                         </div>
                         <div class="checkboxContainer checkboxContainer-withDescription">
                             <label class="emby-checkbox-label">
@@ -249,6 +265,7 @@
 
                 target.AudioSettings.FetchType = document.querySelector('#AudioFetchType').value;
                 target.AudioSettings.IgnoreOverlapping = document.querySelector('#AudioIgnoreOverlapping').checked;
+                target.AudioSettings.AllowTransitions = document.querySelector('#AudioAllowTransitions').checked;
                 target.AudioSettings.IgnoreThemesWithCredits = document.querySelector('#AudioIgnoreThemesWithCredits').checked;
                 target.AudioSettings.IgnoreEDs = document.querySelector('#AudioIgnoreEDs').checked;
                 target.AudioSettings.IgnoreOPs = document.querySelector('#AudioIgnoreOPs').checked;
@@ -256,6 +273,7 @@
 
                 target.VideoSettings.FetchType = document.querySelector('#VideoFetchType').value;
                 target.VideoSettings.IgnoreOverlapping = document.querySelector('#VideoIgnoreOverlapping').checked;
+                target.VideoSettings.AllowTransitions = document.querySelector('#VideoAllowTransitions').checked;
                 target.VideoSettings.IgnoreThemesWithCredits = document.querySelector('#VideoIgnoreThemesWithCredits').checked;
                 target.VideoSettings.IgnoreEDs = document.querySelector('#VideoIgnoreEDs').checked;
                 target.VideoSettings.IgnoreOPs = document.querySelector('#VideoIgnoreOPs').checked;
@@ -280,6 +298,7 @@
 
                 document.querySelector('#AudioFetchType').value = target.AudioSettings.FetchType;
                 document.querySelector('#AudioIgnoreOverlapping').checked = target.AudioSettings.IgnoreOverlapping;
+                document.querySelector('#AudioAllowTransitions').checked = target.AudioSettings.AllowTransitions;
                 document.querySelector('#AudioIgnoreThemesWithCredits').checked = target.AudioSettings.IgnoreThemesWithCredits;
                 document.querySelector('#AudioIgnoreEDs').checked = target.AudioSettings.IgnoreEDs;
                 document.querySelector('#AudioIgnoreOPs').checked = target.AudioSettings.IgnoreOPs;
@@ -287,6 +306,7 @@
 
                 document.querySelector('#VideoFetchType').value = target.VideoSettings.FetchType;
                 document.querySelector('#VideoIgnoreOverlapping').checked = target.VideoSettings.IgnoreOverlapping;
+                document.querySelector('#VideoAllowTransitions').checked = target.VideoSettings.AllowTransitions;
                 document.querySelector('#VideoIgnoreThemesWithCredits').checked = target.VideoSettings.IgnoreThemesWithCredits;
                 document.querySelector('#VideoIgnoreEDs').checked = target.VideoSettings.IgnoreEDs;
                 document.querySelector('#VideoIgnoreOPs').checked = target.VideoSettings.IgnoreOPs;

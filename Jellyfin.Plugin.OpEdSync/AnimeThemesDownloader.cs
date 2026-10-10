@@ -551,7 +551,9 @@ public class AnimeThemesDownloader : IDisposable
     {
         return anime.Themes.SelectMany(theme => theme.Entries.SelectMany(entry => entry.Videos.Select(video => Wrap(theme, entry, video))))
             .OrderBy(Rate)
-            .Where(it => !settings.IgnoreOverlapping || it.Video.Overlap == OverlapType.None)
+            .Where(it => !settings.IgnoreOverlapping
+                         || it.Video.Overlap == OverlapType.None
+                         || (settings.AllowTransitions && it.Video.Overlap == OverlapType.Transition))
             .Where(it => !settings.IgnoreThemesWithCredits || it.Video.Creditless)
             .Where(it => !settings.IgnoreEDs || it.Theme.Type != ThemeType.ED)
             .Where(it => !settings.IgnoreOPs || it.Theme.Type != ThemeType.OP);
