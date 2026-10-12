@@ -1,5 +1,6 @@
 using System;
 using System.Net.Http.Headers;
+using Jellyfin.Plugin.OpEdSync.Web;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Plugins;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,6 +14,7 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
     public void RegisterServices(IServiceCollection serviceCollection, IServerApplicationHost applicationHost)
     {
         serviceCollection.AddScoped<AnimeThemesDownloader>();
+        serviceCollection.AddHostedService<ExoPlayerFixRegistration>();
 
         var productHeader = new ProductInfoHeaderValue(
             "jf-plugin-opedsync",

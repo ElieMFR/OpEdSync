@@ -25,6 +25,8 @@
   <ItemGroup>
     <None Remove="Configuration\configPage.html" />
     <EmbeddedResource Include="Configuration\configPage.html" />
+    <None Remove="Web\exoPlayerFix.js" />
+    <EmbeddedResource Include="Web\exoPlayerFix.js" />
   </ItemGroup>
 
 </Project>

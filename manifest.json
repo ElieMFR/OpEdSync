@@ -8,6 +8,14 @@
         "owner": "ElieM",
         "versions": [
             {
+                "checksum": "bb18d860c476cbe9f1995a430eefc526",
+                "changelog": "Appli Android (lecteur intégré) : on peut de nouveau relancer une vidéo après en avoir lu une qui avait coupé la musique de thème, sans fermer l'appli. Nécessite le plugin File Transformation.",
+                "targetAbi": "12.0.0.0",
+                "sourceUrl": "https://gitlab.bmeouchi.fr/Elie/OpEdSync/raw/tag/1.4.0.0/dist/opedsync_1.4.0.0.zip",
+                "timestamp": "2026-10-12T19:55:43Z",
+                "version": "1.4.0.0"
+            },
+            {
                 "checksum": "b417407f03f5baa1126aca35b29f0bae",
                 "changelog": "Nouveau réglage « … sauf les simples transitions » (activé par défaut) : un thème qui déborde de quelques secondes sur l'épisode est accepté quand il n'existe pas de version propre.",
                 "targetAbi": "12.0.0.0",
