@@ -1,18 +1,20 @@
 ---
 name: "OpEdSync"
 guid: "c99b0ba5-9cbf-4ee0-b45f-40873c6b5b0b"
-version: 1
+version: "1.5.0.0"
 targetAbi: "12.0.0.0"
 framework: "net10.0"
-overview: "Télécharge automatiquement les génériques d'animes (OP et ED) depuis animethemes.moe"
+overview: "Génériques d'animes depuis AnimeThemes / Anime openings and endings from AnimeThemes"
 description: >
-  Télécharge automatiquement les génériques d'animes (OP et ED) depuis animethemes.moe.
+  Télécharge automatiquement les génériques d'animes (openings et endings) depuis animethemes.moe. Les séries sont retrouvées grâce à leur identifiant AniDB, MyAnimeList ou AniList : installez au moins un plugin de métadonnées qui le fournit.
 
-  **Les séries sont retrouvées grâce à leur identifiant AniDB, MyAnimeList ou AniList : installez au moins un plugin de métadonnées qui le fournit.**
+  Automatically downloads anime openings and endings from animethemes.moe. Series are matched through their AniDB, MyAnimeList or AniList ID: install at least one metadata plugin that provides it.
 
 category: "Metadata"
 owner: "ElieM"
 artifacts:
   - "Jellyfin.Plugin.OpEdSync.dll"
 changelog: |-
-  - Compatible Jellyfin 12, repli MyAnimeList/AniList, téléchargements plus sûrs, interface en français
+  - Nouvelle page de réglages avec tableau de bord / New settings page with a dashboard
+  - Interface en français ou en anglais selon Jellyfin / French or English interface following Jellyfin
+  - Corrections : parallélisme à 0, theme.mp3 préservé, volume appliqué / Fixes: parallelism 0, theme.mp3 kept, volume applied

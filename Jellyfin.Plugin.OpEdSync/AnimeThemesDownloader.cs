@@ -14,6 +14,7 @@ using Jellyfin.Data.Enums;
 using Jellyfin.Plugin.OpEdSync.Configuration;
 using Jellyfin.Plugin.OpEdSync.Exceptions;
 using Jellyfin.Plugin.OpEdSync.Models;
+using Jellyfin.Plugin.OpEdSync.Reports;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Controller.MediaEncoding;
@@ -29,7 +30,6 @@ namespace Jellyfin.Plugin.OpEdSync;
 /// </summary>
 public class AnimeThemesDownloader : IDisposable
 {
-    private const string ThemeMusicFileName = "theme.mp3";
     private const string ThemeMusicDirectory = "theme-music";
     private const string ThemeVideoDirectory = "backdrops";
 
@@ -71,7 +71,8 @@ public class AnimeThemesDownloader : IDisposable
     /// <returns>Whether item should be processed.</returns>
     public bool ShouldUpdate(BaseItem item, PluginConfiguration configuration)
     {
-        return IsSupportedKind(item) && (configuration.ForceSync || !IsSatisfied(item, configuration));
+        return IsSupportedKind(item)
+               && (configuration.ForceSync || !IsSatisfied(item, configuration) || HasOutdatedVolume(item, configuration));
     }
 
     /// <summary>
@@ -79,13 +80,24 @@ public class AnimeThemesDownloader : IDisposable
     /// </summary>
     /// <param name="items">Chunk of items.</param>
     /// <param name="configuration">Plugin configuration to do some pre-filtering.</param>
+    /// <param name="report">Report of the run, told why unresolved items stay without theme.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A filtered list of items to be processed with their corresponding anime.</returns>
-    public async IAsyncEnumerable<ItemWithAnime> ResolveItems(BaseItem[] items, PluginConfiguration configuration, [EnumeratorCancellation] CancellationToken cancellationToken)
+    public async IAsyncEnumerable<ItemWithAnime> ResolveItems(BaseItem[] items, PluginConfiguration configuration, RunReport report, [EnumeratorCancellation] CancellationToken cancellationToken)
     {
-        var pending = items
+        ArgumentNullException.ThrowIfNull(report);
+
+        var withCandidates = items
             .Where(IsSupportedKind)
             .Select(it => (Item: it, Candidates: GetCandidates(it, configuration)))
+            .ToList();
+
+        foreach (var (item, _) in withCandidates.Where(it => it.Candidates.Count == 0))
+        {
+            report.SetReason(item.Id, MissingReason.NoId);
+        }
+
+        var pending = withCandidates
             .Where(it => it.Candidates.Count > 0)
             .ToDictionary(it => it.Item, it => it.Candidates);
 
@@ -95,7 +107,7 @@ public class AnimeThemesDownloader : IDisposable
             var active = pending.Where(it => it.Value.Count > round).ToList();
             if (active.Count == 0)
             {
-                yield break;
+                break;
             }
 
             foreach (var siteGroup in active.GroupBy(it => it.Value[round].Site))
@@ -113,6 +125,11 @@ public class AnimeThemesDownloader : IDisposable
                 {
                     // Don't let a failing lookup abort the whole run; the next run will retry.
                     _logger.LogError(e, "Lookup on {Site} failed", siteGroup.Key);
+                    foreach (var item in itemsById.Values.SelectMany(it => it))
+                    {
+                        report.SetReason(item.Id, MissingReason.LookupFailed);
+                    }
+
                     continue;
                 }
 
@@ -125,6 +142,14 @@ public class AnimeThemesDownloader : IDisposable
                     var animeWithVideos = entry.Value.Where(HasVideos).ToArray();
                     if (animeWithVideos.Length == 0)
                     {
+                        if (entry.Value.Length > 0)
+                        {
+                            foreach (var item in itemsById[entry.Key])
+                            {
+                                report.SetReason(item.Id, MissingReason.NoVideo);
+                            }
+                        }
+
                         continue;
                     }
 
@@ -147,6 +172,7 @@ public class AnimeThemesDownloader : IDisposable
                                 item.Name,
                                 animeWithVideos[0].Year,
                                 year);
+                            report.SetReason(item.Id, MissingReason.YearMismatch);
                             continue;
                         }
 
@@ -160,14 +186,22 @@ public class AnimeThemesDownloader : IDisposable
                                 item.Id,
                                 matches[0].Name,
                                 item.Name);
+                            report.SetReason(item.Id, MissingReason.Filtered);
                             continue;
                         }
 
                         pending.Remove(item);
+                        report.ClearReason(item.Id);
                         yield return new ItemWithAnime(item, new ReadOnlyCollection<Anime>(usable));
                     }
                 }
             }
+        }
+
+        // Whatever was not found anywhere: AnimeThemes does not know it (a more precise reason, if any, is kept).
+        foreach (var item in pending.Keys)
+        {
+            report.SetReason(item.Id, MissingReason.NotOnAnimeThemes);
         }
     }
 
@@ -177,19 +211,24 @@ public class AnimeThemesDownloader : IDisposable
     /// <param name="item">The DB item to process.</param>
     /// <param name="anime">The anime object belonging to the item.</param>
     /// <param name="configuration">Configuration of the plugin.</param>
+    /// <param name="report">Report of the run.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>Task that runts until item is done processing.</returns>
-    public async ValueTask HandleAsync(BaseItem item, Anime anime, PluginConfiguration configuration, CancellationToken cancellationToken)
+    public async ValueTask HandleAsync(BaseItem item, Anime anime, PluginConfiguration configuration, RunReport report, CancellationToken cancellationToken)
     {
-        _logger.LogInformation("[{Id}] Attempting to filter theme songs for: {Name} (AniDB={AniId})", item.Id, item.Name, anime.Id);
+        ArgumentNullException.ThrowIfNull(item);
+        ArgumentNullException.ThrowIfNull(anime);
+        ArgumentNullException.ThrowIfNull(report);
+
+        _logger.LogInformation("[{Id}] Attempting to filter theme songs for: {Name} (AnimeThemes={AnimeId}, {AnimeName})", item.Id, item.Name, anime.Id, anime.Name);
 
         var collectionTypeConfig = GetCollectionSettings(item, configuration);
 
         // Process videos
-        bool videoChanged = await ProcessMediaType(MediaType.Video, anime, item, configuration.ForceSync, collectionTypeConfig, cancellationToken).ConfigureAwait(false);
+        bool videoChanged = await ProcessMediaType(MediaType.Video, anime, item, configuration.ForceSync, collectionTypeConfig, report, cancellationToken).ConfigureAwait(false);
 
         // Process audios
-        bool audioChanged = await ProcessMediaType(MediaType.Audio, anime, item, configuration.ForceSync, collectionTypeConfig, cancellationToken).ConfigureAwait(false);
+        bool audioChanged = await ProcessMediaType(MediaType.Audio, anime, item, configuration.ForceSync, collectionTypeConfig, report, cancellationToken).ConfigureAwait(false);
 
         if (videoChanged || audioChanged)
         {
@@ -202,7 +241,7 @@ public class AnimeThemesDownloader : IDisposable
         }
     }
 
-    private async ValueTask<bool> ProcessMediaType(MediaType type, Anime anime, BaseItem item, bool forceSync, CollectionTypeConfiguration configuration, CancellationToken cancellationToken = default)
+    private async ValueTask<bool> ProcessMediaType(MediaType type, Anime anime, BaseItem item, bool forceSync, CollectionTypeConfiguration configuration, RunReport report, CancellationToken cancellationToken = default)
     {
         var settings = type == MediaType.Audio ? configuration.AudioSettings : configuration.VideoSettings;
 
@@ -218,7 +257,24 @@ public class AnimeThemesDownloader : IDisposable
         foreach (var (url, relativePath) in links)
         {
             // Download if needed
-            changesMade |= await Download(type, url, item, relativePath, settings.Volume, cancellationToken).ConfigureAwait(false);
+            switch (await Download(type, url, item, relativePath, settings.Volume, cancellationToken).ConfigureAwait(false))
+            {
+                case DownloadResult.Downloaded:
+                    report.CountAdded();
+                    changesMade = true;
+                    break;
+                case DownloadResult.Failed:
+                    report.CountFailed();
+                    report.SetReason(item.Id, MissingReason.DownloadFailed);
+                    break;
+            }
+
+            // The same theme at another volume (the volume setting changed) is now redundant.
+            var target = Path.Combine(item.ContainingFolderPath, relativePath);
+            if (File.Exists(target))
+            {
+                changesMade |= RemoveFiles(item, type, existing => ThemeFileRules.SupersededVariants(existing, target), report);
+            }
         }
 
         if (forceSync)
@@ -231,13 +287,9 @@ public class AnimeThemesDownloader : IDisposable
 
             if (replacementsReady)
             {
-                if (type == MediaType.Audio)
-                {
-                    // We don't need this file because we're using the directory variant.
-                    changesMade |= RemoveFile(item, ThemeMusicFileName);
-                }
-
-                changesMade |= CleanDirectory(item, type, links.Select(it => Path.GetFileName(it.Filepath)));
+                // Only files written by the plugin are touched: a user supplied theme.mp3 always stays.
+                var keep = links.Select(it => Path.GetFileName(it.Filepath)).ToList();
+                changesMade |= RemoveFiles(item, type, existing => ThemeFileRules.FilesToRemove(existing, keep), report);
             }
             else
             {
@@ -271,60 +323,45 @@ public class AnimeThemesDownloader : IDisposable
         {
             var link = isAudio ? theme.Audio.Link : theme.Video.Link;
             var path = isAudio
-                ? Path.Combine(ThemeMusicDirectory, $"{theme.Audio.Filename}__{settings.Volume * 100:0}.mp3")
-                : Path.Combine(ThemeVideoDirectory, $"{theme.Video.Filename}__{settings.Volume * 100:0}.webm");
+                ? Path.Combine(ThemeMusicDirectory, ThemeFileRules.BuildFileName(theme.Audio.Filename, settings.Volume, "mp3"))
+                : Path.Combine(ThemeVideoDirectory, ThemeFileRules.BuildFileName(theme.Video.Filename, settings.Volume, "webm"));
 
             yield return (link, path);
         }
     }
 
-    private static bool RemoveFile(BaseItem series, string filename)
-    {
-        var path = Path.Combine(series.ContainingFolderPath, filename);
-        if (!File.Exists(path))
-        {
-            return false;
-        }
+    private static string GetThemeDirectory(BaseItem item, MediaType type)
+        => Path.Combine(item.ContainingFolderPath, type == MediaType.Audio ? ThemeMusicDirectory : ThemeVideoDirectory);
 
-        File.Delete(path);
-        return true;
+    private static string[] ListThemeFiles(BaseItem item, MediaType type)
+    {
+        var directory = GetThemeDirectory(item, type);
+        return Directory.Exists(directory)
+            ? Directory.GetFiles(directory, type == MediaType.Audio ? "*.mp3" : "*.webm")
+            : [];
     }
 
-    private bool CleanDirectory(BaseItem series, MediaType mediaType, IEnumerable<string> allowedNames)
+    private bool RemoveFiles(BaseItem item, MediaType type, Func<string[], IEnumerable<string>> select, RunReport report)
     {
-        var directory = mediaType == MediaType.Audio ? ThemeMusicDirectory : ThemeVideoDirectory;
-        var searchPattern = mediaType == MediaType.Audio ? "*.mp3" : "*.webm";
-
-        var path = Path.Combine(series.ContainingFolderPath, directory);
-        if (!Directory.Exists(path))
+        int removed = 0;
+        foreach (var filepath in select(ListThemeFiles(item, type)).ToList())
         {
-            return false;
+            _logger.LogInformation("[{Id}] Removing obsolete theme: {Theme}", item.Id, filepath);
+            File.Delete(filepath);
+            removed++;
         }
 
-        var allowedNamesSet = allowedNames.ToHashSet();
-        bool removed = false;
-
-        foreach (var filepath in Directory.GetFiles(path, searchPattern))
-        {
-            var name = Path.GetFileName(filepath);
-            if (!allowedNamesSet.Contains(name))
-            {
-                _logger.LogInformation("[{Id}] Removing obsolete theme: {Theme}", series.Id, filepath);
-                File.Delete(filepath);
-                removed = true;
-            }
-        }
-
-        return removed;
+        report.CountRemoved(removed);
+        return removed > 0;
     }
 
-    private async ValueTask<bool> Download(MediaType type, string url, BaseItem item, string relativePath, double volume = 1.0, CancellationToken cancellationToken = default)
+    private async ValueTask<DownloadResult> Download(MediaType type, string url, BaseItem item, string relativePath, double volume = 1.0, CancellationToken cancellationToken = default)
     {
         var path = Path.Combine(item.ContainingFolderPath, relativePath);
         if (File.Exists(path))
         {
             // Nothing to do
-            return false;
+            return DownloadResult.AlreadyThere;
         }
 
         var tempFile = Path.GetTempFileName();
@@ -427,8 +464,8 @@ public class AnimeThemesDownloader : IDisposable
         }
         catch (Exception e)
         {
-            _logger.LogError(e, "Download failed");
-            return false;
+            _logger.LogError(e, "[{Id}] Download failed for {Name}: {Url}", item.Id, item.Name, url);
+            return DownloadResult.Failed;
         }
         finally
         {
@@ -436,12 +473,18 @@ public class AnimeThemesDownloader : IDisposable
             File.Delete(partialPath);
         }
 
-        return true;
+        return DownloadResult.Downloaded;
     }
 
-    private static CollectionTypeConfiguration GetCollectionSettings(BaseItem item, PluginConfiguration configuration)
+    /// <summary>
+    /// Gets the settings that apply to an item (movies follow the series settings unless configured otherwise).
+    /// </summary>
+    /// <param name="item">Item.</param>
+    /// <param name="configuration">Configuration.</param>
+    /// <returns>The settings.</returns>
+    internal static CollectionTypeConfiguration GetCollectionSettings(BaseItem item, PluginConfiguration configuration)
     {
-        return item.GetBaseItemKind() == BaseItemKind.Movie
+        return item.GetBaseItemKind() == BaseItemKind.Movie && configuration.SeparateMovieSettings
             ? configuration.MovieSettings
             : new CollectionTypeConfiguration { AudioSettings = configuration.AudioSettings, VideoSettings = configuration.VideoSettings };
     }
@@ -454,6 +497,21 @@ public class AnimeThemesDownloader : IDisposable
         var videoSatisfied = item.GetThemeVideos().Any() || settings.VideoSettings.FetchType == FetchType.None;
 
         return audioSatisfied && videoSatisfied;
+    }
+
+    /// <summary>
+    /// Tells whether an item has at least one candidate ID (on the item or, for a series, on a season).
+    /// </summary>
+    /// <param name="item">Item.</param>
+    /// <param name="configuration">Configuration.</param>
+    /// <returns>Whether a lookup is possible.</returns>
+    internal bool HasAnyId(BaseItem item, PluginConfiguration configuration) => GetCandidates(item, configuration).Count > 0;
+
+    private static bool HasOutdatedVolume(BaseItem item, PluginConfiguration configuration)
+    {
+        var settings = GetCollectionSettings(item, configuration);
+        return (settings.AudioSettings.FetchType != FetchType.None && ThemeFileRules.HasOutdatedVolume(ListThemeFiles(item, MediaType.Audio), settings.AudioSettings.Volume))
+               || (settings.VideoSettings.FetchType != FetchType.None && ThemeFileRules.HasOutdatedVolume(ListThemeFiles(item, MediaType.Video), settings.VideoSettings.Volume));
     }
 
     private static bool HasVideos(Anime anime)

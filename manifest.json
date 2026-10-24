@@ -1,12 +1,20 @@
 [
     {
         "category": "Metadata",
-        "description": "Télécharge automatiquement les génériques d'animes (OP et ED) depuis animethemes.moe.\nLes séries sont retrouvées grâce à leur identifiant AniDB, MyAnimeList ou AniList : installez au moins un plugin de métadonnées qui le fournit.\n",
+        "description": "Télécharge automatiquement les génériques d'animes (openings et endings) depuis animethemes.moe. Les séries sont retrouvées grâce à leur identifiant AniDB, MyAnimeList ou AniList : installez au moins un plugin de métadonnées qui le fournit.\n\nAutomatically downloads anime openings and endings from animethemes.moe. Series are matched through their AniDB, MyAnimeList or AniList ID: install at least one metadata plugin that provides it.\n",
         "guid": "c99b0ba5-9cbf-4ee0-b45f-40873c6b5b0b",
         "name": "OpEdSync",
-        "overview": "Télécharge automatiquement les génériques d'animes (OP et ED) depuis animethemes.moe",
+        "overview": "Génériques d'animes depuis AnimeThemes / Anime openings and endings from AnimeThemes",
         "owner": "ElieM",
         "versions": [
+            {
+                "checksum": "4056b13911b0aa70c3091dcc302d6422",
+                "changelog": "Tableau de bord dans les réglages, interface en français ou en anglais selon Jellyfin, plusieurs corrections. / Dashboard in the settings, French or English interface following Jellyfin, several fixes.",
+                "targetAbi": "12.0.0.0",
+                "sourceUrl": "https://github.com/ElieMFR/OpEdSync/releases/download/1.5.0.0/opedsync_1.5.0.0.zip",
+                "timestamp": "2026-10-24T16:09:06Z",
+                "version": "1.5.0.0"
+            },
             {
                 "checksum": "bb18d860c476cbe9f1995a430eefc526",
                 "changelog": "Appli Android (lecteur intégré) : on peut de nouveau relancer une vidéo après en avoir lu une qui avait coupé la musique de thème, sans fermer l'appli. Nécessite le plugin File Transformation.",
@@ -64,6 +72,6 @@
                 "version": "1.0.0.0"
             }
         ],
-        "imageUrl": "https://gitlab.bmeouchi.fr/Elie/OpEdSync/raw/branch/main/logo.png"
+        "imageUrl": "https://raw.githubusercontent.com/ElieMFR/OpEdSync/main/logo.png"
     }
 ]

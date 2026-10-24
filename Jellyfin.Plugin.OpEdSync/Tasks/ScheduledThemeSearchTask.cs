@@ -2,7 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using MediaBrowser.Controller.Library;
+using Jellyfin.Plugin.OpEdSync.Reports;
+using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Model.Tasks;
 using Microsoft.Extensions.Logging;
 
@@ -14,30 +15,35 @@ namespace Jellyfin.Plugin.OpEdSync.Tasks;
 public class ScheduledThemeSearchTask : BaseThemeSearchTask, IScheduledTask
 {
     private readonly ILogger<ScheduledThemeSearchTask> _logger;
+    private readonly IServerConfigurationManager _serverConfiguration;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="ScheduledThemeSearchTask"/> class.
     /// </summary>
     /// <param name="downloader">Downloader.</param>
-    /// <param name="libraryManager">Library Manager.</param>
-    /// <param name="userManager">User Manager.</param>
+    /// <param name="librarySelector">Library selector.</param>
+    /// <param name="summaryStore">Store for the summary of the run.</param>
+    /// <param name="serverConfiguration">Server configuration, for the display language.</param>
     /// <param name="logger">Logger.</param>
-    public ScheduledThemeSearchTask(AnimeThemesDownloader downloader, ILibraryManager libraryManager, IUserManager userManager, ILogger<ScheduledThemeSearchTask> logger) : base(libraryManager, downloader, userManager, logger)
+    public ScheduledThemeSearchTask(AnimeThemesDownloader downloader, LibrarySelector librarySelector, RunSummaryStore summaryStore, IServerConfigurationManager serverConfiguration, ILogger<ScheduledThemeSearchTask> logger) : base(librarySelector, downloader, summaryStore, logger)
     {
         _logger = logger;
+        _serverConfiguration = serverConfiguration;
     }
 
     /// <inheritdoc />
-    public string Name { get; } = "Rechercher les thèmes d'anime";
+    public string Name => Text("Rechercher les thèmes d'anime", "Search for anime themes");
 
     /// <inheritdoc />
     public string Key { get; } = "opedsync.search";
 
     /// <inheritdoc />
-    public string Description { get; } = "Met à jour tous les thèmes selon les réglages du plugin.";
+    public string Description => Text(
+        "Télécharge les génériques d'animes manquants depuis AnimeThemes, selon les réglages d'OpEdSync.",
+        "Downloads missing anime openings and endings from AnimeThemes, following the OpEdSync settings.");
 
     /// <inheritdoc />
-    public string Category { get; } = "Thèmes musicaux";
+    public string Category => Text("Thèmes musicaux", "Theme songs");
 
     /// <inheritdoc />
     public Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
@@ -51,4 +57,7 @@ public class ScheduledThemeSearchTask : BaseThemeSearchTask, IScheduledTask
     {
         yield return new TaskTriggerInfo { Type = TaskTriggerInfoType.IntervalTrigger, IntervalTicks = TimeSpan.FromHours(12).Ticks };
     }
+
+    private string Text(string french, string english)
+        => Localization.Pick(_serverConfiguration.Configuration.UICulture, french, english);
 }

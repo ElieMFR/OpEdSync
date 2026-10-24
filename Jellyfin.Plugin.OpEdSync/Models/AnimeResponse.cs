@@ -7,6 +7,8 @@ namespace Jellyfin.Plugin.OpEdSync.Models;
 /// Represents a response to the anime endpoint.
 /// </summary>
 /// <param name="Anime">List of found anime.</param>
+/// <param name="Links">Pagination links.</param>
 public record AnimeResponse(
-    [property: JsonPropertyName("anime")] Collection<Anime> Anime
+    [property: JsonPropertyName("anime")] Collection<Anime> Anime,
+    [property: JsonPropertyName("links")] PageLinks? Links
 );

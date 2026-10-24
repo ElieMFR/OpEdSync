@@ -22,11 +22,11 @@
                 const stale = playbackManager && playbackManager._currentPlayer;
 
                 if (stale && stale !== this && !playbackManager.currentItem(stale)) {
-                    console.info('OpEdSync: lecteur inactif retiré avant ExoPlayer (' + stale.name + ')');
+                    console.info('OpEdSync: stale player removed before ExoPlayer (' + stale.name + ')');
                     playbackManager._currentPlayer = null;
                 }
             } catch (e) {
-                console.warn('OpEdSync: correctif ExoPlayer ignoré', e);
+                console.warn('OpEdSync: ExoPlayer fix skipped', e);
             }
 
             return play.call(this, options);
@@ -49,6 +49,6 @@
             }
         });
     } catch (e) {
-        console.warn('OpEdSync: impossible de surveiller window.ExoPlayer', e);
+        console.warn('OpEdSync: cannot watch window.ExoPlayer', e);
     }
 })();

@@ -33,11 +33,11 @@ public sealed class ExoPlayerFixRegistration : IHostedService
     {
         if (TryRegister())
         {
-            _logger.LogInformation("OpEdSync: correctif de relance ExoPlayer injecté dans l'interface web");
+            _logger.LogInformation("OpEdSync: ExoPlayer replay fix injected into the web client");
         }
         else
         {
-            _logger.LogWarning("OpEdSync: plugin File Transformation absent, le correctif de relance ExoPlayer (appli Android) n'est pas actif");
+            _logger.LogWarning("OpEdSync: File Transformation plugin not found, the ExoPlayer replay fix (Android app) is not active");
         }
 
         return Task.CompletedTask;
@@ -81,7 +81,7 @@ public sealed class ExoPlayerFixRegistration : IHostedService
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "OpEdSync: échec de l'enregistrement auprès de File Transformation");
+            _logger.LogWarning(ex, "OpEdSync: registration with File Transformation failed");
             return false;
         }
     }

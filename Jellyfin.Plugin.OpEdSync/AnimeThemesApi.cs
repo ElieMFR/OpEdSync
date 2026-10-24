@@ -17,6 +17,12 @@ namespace Jellyfin.Plugin.OpEdSync;
 /// </summary>
 public sealed class AnimeThemesApi : IDisposable
 {
+    // Largest page accepted by the API.
+    private const int MaxPageSize = 100;
+
+    // Safety net against a pagination loop.
+    private const int MaxPages = 10;
+
     private readonly HttpClient _client;
     private readonly ILogger<AnimeThemesDownloader> _logger;
 
@@ -55,26 +61,34 @@ public sealed class AnimeThemesApi : IDisposable
             { "filter[resource][external_id]", string.Join(",", idList.Select(it => it.ToString(CultureInfo.InvariantCulture))) },
             { "filter[resource][site]", site },
             { "filter[has]", "resources" },
-            { "page[size]", idList.Length.ToString(CultureInfo.InvariantCulture) },
+            { "page[size]", MaxPageSize.ToString(CultureInfo.InvariantCulture) },
             { "include", "animethemes.animethemeentries.videos.audio,resources" },
         };
         // @formatter:on
 
-        var uri = QueryHelpers.AddQueryString("/anime/", arguments);
+        string? uri = QueryHelpers.AddQueryString("/anime/", arguments);
+        var found = new List<Anime>();
 
-        _logger.LogInformation("Fetching from API: {Uri} (length={Length})", uri, uri.Length);
-        var result = await _client.GetAsync(uri, cancellationToken).ConfigureAwait(false);
-        result.EnsureSuccessStatusCode();
+        // One ID can match several anime, so a page may not hold everything: follow the next links.
+        for (int page = 0; uri is not null && page < MaxPages; page++)
+        {
+            _logger.LogInformation("Fetching from API: {Uri} (length={Length})", uri, uri.Length);
+            using var result = await _client.GetAsync(new Uri(uri, UriKind.RelativeOrAbsolute), cancellationToken).ConfigureAwait(false);
+            result.EnsureSuccessStatusCode();
 
-        var content = await result.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-        await using var contentDisposal = content.ConfigureAwait(false);
+            var content = await result.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+            await using var contentDisposal = content.ConfigureAwait(false);
 
-        var response = await JsonSerializer.DeserializeAsync<AnimeResponse>(content, cancellationToken: cancellationToken).ConfigureAwait(false);
-        var animeByAniId = response?.Anime
+            var response = await JsonSerializer.DeserializeAsync<AnimeResponse>(content, cancellationToken: cancellationToken).ConfigureAwait(false);
+            found.AddRange(response?.Anime ?? []);
+            uri = response?.Links?.Next;
+        }
+
+        var animeByAniId = found
             .Select(a => (Id: a.GetExternalId(site), Anime: a))
             .Where(a => a.Id.HasValue)
             .GroupBy(a => a.Id!.Value, a => a.Anime)
-            .ToDictionary(a => a.Key, a => a.ToArray()) ?? new Dictionary<int, Anime[]>();
+            .ToDictionary(a => a.Key, a => a.ToArray());
 
         _logger.LogInformation("Of a total of {TotalCount} shows, we were able to find entries for {FinalCount} shows", idList.Length, animeByAniId.Count);
 

@@ -17,7 +17,8 @@ public class PluginConfiguration : BasePluginConfiguration
         ForceSync = false;
         ThemeSource = ThemeSource.LatestSeason;
         CheckYear = true;
-        IncludeLibraries = "^.*$";
+        // New installs only look at libraries whose name contains "anim" (Animés, Anime, Animation...).
+        IncludeLibraries = "anim";
         ExcludeLibraries = string.Empty;
 
         AudioSettings = new MediaTypeConfiguration()
@@ -41,12 +42,30 @@ public class PluginConfiguration : BasePluginConfiguration
         };
 
         MovieSettings = new CollectionTypeConfiguration();
+        LibraryIds = [];
     }
 
     /// <summary>
-    /// Gets or sets a string setting.
+    /// Gets or sets how many items are processed at the same time. Clamped between 1 and 8 when used.
     /// </summary>
     public int DegreeOfParallelism { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether <see cref="LibraryIds"/> is used instead of the regular expressions.
+    /// Set by the configuration page; older settings keep using <see cref="IncludeLibraries"/>.
+    /// </summary>
+    public bool UseLibraryList { get; set; }
+
+    /// <summary>
+    /// Gets or sets the IDs of the libraries to work on, when <see cref="UseLibraryList"/> is set.
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "Serialized to XML.")]
+    public string[] LibraryIds { get; set; }
+
+    /// <summary>
+    /// Gets or sets a value indicating whether movies use <see cref="MovieSettings"/> instead of the series settings.
+    /// </summary>
+    public bool SeparateMovieSettings { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether an anime is only accepted when its year is close to the item's.

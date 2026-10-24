@@ -1,5 +1,6 @@
 using System;
 using System.Net.Http.Headers;
+using Jellyfin.Plugin.OpEdSync.Reports;
 using Jellyfin.Plugin.OpEdSync.Web;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Plugins;
@@ -14,6 +15,8 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
     public void RegisterServices(IServiceCollection serviceCollection, IServerApplicationHost applicationHost)
     {
         serviceCollection.AddScoped<AnimeThemesDownloader>();
+        serviceCollection.AddSingleton<LibrarySelector>();
+        serviceCollection.AddSingleton<RunSummaryStore>();
         serviceCollection.AddHostedService<ExoPlayerFixRegistration>();
 
         var productHeader = new ProductInfoHeaderValue(
