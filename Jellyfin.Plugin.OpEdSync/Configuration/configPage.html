@@ -286,7 +286,8 @@
                     startupSub: 'au démarrage du serveur', manual: 'manuel', manualSub: 'aucun déclencheur', soon: 'bientôt',
                     every: 'toutes les {0}', daily: 'chaque jour', weekly: 'chaque semaine', running_sub: 'passage en cours',
                     unit_m: '{0} min', unit_h: '{0} h', unit_d: '{0} j',
-                    noLibrary: 'Aucune bibliothèque cochée' + NB + ': le plugin ne fait rien.',
+                    noLibrary: 'Aucune bibliothèque cochée', noLibraryHelp: "Le plugin ne fait rien" + NB + ": cochez vos bibliothèques d'animés ci-dessous.",
+                    noLibrarySub: 'aucune bibliothèque', justNow: "à l'instant",
                     reasons: {
                         NoId: 'Aucun identifiant AniDB, MyAnimeList ou AniList', NotOnAnimeThemes: 'Pas sur AnimeThemes',
                         NoVideo: 'Pas encore de vidéo sur AnimeThemes', YearMismatch: 'Année trop éloignée (identifiant douteux)',
@@ -327,7 +328,8 @@
                     startupSub: 'when the server starts', manual: 'manual', manualSub: 'no trigger', soon: 'soon',
                     every: 'every {0}', daily: 'every day', weekly: 'every week', running_sub: 'run in progress',
                     unit_m: '{0} min', unit_h: '{0} h', unit_d: '{0} d',
-                    noLibrary: 'No library ticked: the plugin does nothing.',
+                    noLibrary: 'No library ticked', noLibraryHelp: 'The plugin does nothing: tick your anime libraries below.',
+                    noLibrarySub: 'no library', justNow: 'just now',
                     reasons: {
                         NoId: 'No AniDB, MyAnimeList or AniList ID', NotOnAnimeThemes: 'Not on AnimeThemes',
                         NoVideo: 'No video on AnimeThemes yet', YearMismatch: 'Release year too far (doubtful ID)',
@@ -380,6 +382,11 @@
 
                 var hours = Math.round(minutes / 60);
                 return hours < 48 ? format(t.unit_h, hours) : format(t.unit_d, Math.round(hours / 24));
+            }
+
+            function since(date) {
+                var ms = Date.now() - date.getTime();
+                return ms < 60000 ? t.justNow : format(t.ago, duration(ms));
             }
 
             function clock(date) {
@@ -505,6 +512,11 @@
             }
 
             function renderStats(stats) {
+                var anyLibrary = false;
+                for (var k = 0; k < (stats.Libraries || []).length; k++) {
+                    anyLibrary = anyLibrary || stats.Libraries[k].Included;
+                }
+
                 var total = stats.Total || 0;
                 var withTheme = stats.WithTheme || 0;
                 var missing = total - withTheme;
@@ -514,20 +526,20 @@
                 $('#opsCoverageSub').textContent = format(t.coverageSub, number(withTheme), number(total))
                     + (stats.FromPlugin ? ' · ' + format(t.fromPlugin, number(stats.FromPlugin)) : '');
                 $('#opsCoverageBar').style.width = percent + '%';
-                $('#opsMissing').textContent = number(missing);
-                $('#opsMissingSub').textContent = missing ? t.missingSub : t.missingNone;
+                $('#opsMissing').textContent = anyLibrary ? number(missing) : '—';
+                $('#opsMissingSub').textContent = !anyLibrary ? t.noLibrarySub : (missing ? t.missingSub : t.missingNone);
 
                 var run = stats.LastRun;
                 if (run) {
                     $('#opsLastAdded').textContent = plural(run.Added, t.added0, t.added1, t.addedN);
-                    $('#opsLastRunSub').textContent = format(t.ago, duration(Date.now() - new Date(run.EndedUtc).getTime()))
+                    $('#opsLastRunSub').textContent = since(new Date(run.EndedUtc))
                         + ' · ' + plural(run.Failed, t.failed0, t.failed1, t.failedN) + (run.Cancelled ? ' · ' + t.cancelled : '');
                 } else {
                     $('#opsLastAdded').textContent = '—';
                     $('#opsLastRunSub').textContent = t.never;
                 }
 
-                $('#opsReasonsTitle').textContent = missing === 0 ? t.reasonsTitleNone
+                $('#opsReasonsTitle').textContent = !anyLibrary ? t.noLibrary : missing === 0 ? t.reasonsTitleNone
                     : (missing === 1 ? t.reasonsTitleOne : format(t.reasonsTitle, number(missing)));
 
                 var reasons = stats.Reasons || {};
@@ -539,13 +551,8 @@
                     }
                 }
 
-                var anyLibrary = false;
-                for (var k = 0; k < (stats.Libraries || []).length; k++) {
-                    anyLibrary = anyLibrary || stats.Libraries[k].Included;
-                }
-
                 if (!anyLibrary) {
-                    rows = '<p class="ops-danger">' + escapeHtml(t.noLibrary) + '</p>';
+                    rows = '<p class="ops-danger">' + escapeHtml(t.noLibraryHelp) + '</p>';
                 }
 
                 $('#opsReasons').innerHTML = rows;
