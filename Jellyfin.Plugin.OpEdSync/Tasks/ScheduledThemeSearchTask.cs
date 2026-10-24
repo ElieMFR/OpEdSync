@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Jellyfin.Plugin.OpEdSync.Api;
 using Jellyfin.Plugin.OpEdSync.Reports;
 using MediaBrowser.Controller.Configuration;
 using MediaBrowser.Model.Tasks;
@@ -23,9 +24,10 @@ public class ScheduledThemeSearchTask : BaseThemeSearchTask, IScheduledTask
     /// <param name="downloader">Downloader.</param>
     /// <param name="librarySelector">Library selector.</param>
     /// <param name="summaryStore">Store for the summary of the run.</param>
+    /// <param name="statsService">Statistics of the configuration page.</param>
     /// <param name="serverConfiguration">Server configuration, for the display language.</param>
     /// <param name="logger">Logger.</param>
-    public ScheduledThemeSearchTask(AnimeThemesDownloader downloader, LibrarySelector librarySelector, RunSummaryStore summaryStore, IServerConfigurationManager serverConfiguration, ILogger<ScheduledThemeSearchTask> logger) : base(librarySelector, downloader, summaryStore, logger)
+    public ScheduledThemeSearchTask(AnimeThemesDownloader downloader, LibrarySelector librarySelector, RunSummaryStore summaryStore, StatsService statsService, IServerConfigurationManager serverConfiguration, ILogger<ScheduledThemeSearchTask> logger) : base(librarySelector, downloader, summaryStore, statsService, logger)
     {
         _logger = logger;
         _serverConfiguration = serverConfiguration;

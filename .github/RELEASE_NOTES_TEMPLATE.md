@@ -31,7 +31,11 @@ Every release opens with:
 
 ## Manifest `changelog`
 
-One short line in each language: `French summary. / English summary.`
+A link to the GitHub release, like NotifySync, so Jellyfin's version history opens the full notes:
+
+```html
+<a style='color:white;text-decoration:none' href="https://github.com/ElieMFR/OpEdSync/releases/tag/X.Y.Z.W">📋 <span style='text-decoration:underline'>Release Notes X.Y.Z.W</span></a>
+```
 
 ## Shape
 

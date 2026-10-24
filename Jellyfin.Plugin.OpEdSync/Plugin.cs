@@ -52,7 +52,16 @@ public class Plugin : BasePlugin<PluginConfiguration>, IHasWebPages
     {
         return
         [
-            new PluginPageInfo { Name = this.Name, EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Configuration.configPage.html", GetType().Namespace) }
+            new PluginPageInfo
+            {
+                Name = this.Name,
+                DisplayName = this.Name,
+                EmbeddedResourcePath = string.Format(CultureInfo.InvariantCulture, "{0}.Configuration.configPage.html", GetType().Namespace),
+
+                // Entry in the dashboard menu, under the plugins, like NotifySync and Media Carousel.
+                EnableInMainMenu = true,
+                MenuIcon = "library_music",
+            }
         ];
     }
 }

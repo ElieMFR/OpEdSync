@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Jellyfin.Plugin.OpEdSync.Api;
 using Jellyfin.Plugin.OpEdSync.Reports;
 using Microsoft.Extensions.Logging;
 
@@ -21,6 +22,7 @@ public abstract class BaseThemeSearchTask
     private readonly AnimeThemesDownloader _downloader;
     private readonly LibrarySelector _librarySelector;
     private readonly RunSummaryStore _summaryStore;
+    private readonly StatsService _statsService;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BaseThemeSearchTask"/> class.
@@ -28,9 +30,11 @@ public abstract class BaseThemeSearchTask
     /// <param name="librarySelector">Library selector.</param>
     /// <param name="downloader">Downloader.</param>
     /// <param name="summaryStore">Store for the summary of the run.</param>
+    /// <param name="statsService">Statistics of the configuration page, refreshed after the run.</param>
     /// <param name="logger">Logger.</param>
-    protected BaseThemeSearchTask(LibrarySelector librarySelector, AnimeThemesDownloader downloader, RunSummaryStore summaryStore, ILogger logger)
+    protected BaseThemeSearchTask(LibrarySelector librarySelector, AnimeThemesDownloader downloader, RunSummaryStore summaryStore, StatsService statsService, ILogger logger)
     {
+        _statsService = statsService;
         _librarySelector = librarySelector;
         _downloader = downloader;
         _summaryStore = summaryStore;
@@ -118,6 +122,7 @@ public abstract class BaseThemeSearchTask
         finally
         {
             _summaryStore.Save(report.ToSummary(cancelled));
+            _statsService.Invalidate();
         }
     }
 }

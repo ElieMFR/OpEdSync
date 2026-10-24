@@ -16,6 +16,11 @@ public sealed class StatsResponse
     public IReadOnlyList<LibraryInfo> Libraries { get; set; } = [];
 
     /// <summary>
+    /// Gets or sets when these figures were computed.
+    /// </summary>
+    public DateTime ComputedUtc { get; set; }
+
+    /// <summary>
     /// Gets or sets the number of series and movies in the selected libraries.
     /// </summary>
     public int Total { get; set; }

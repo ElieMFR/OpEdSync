@@ -21,4 +21,9 @@ public sealed class LibraryInfo
     /// Gets or sets a value indicating whether the plugin works on this library.
     /// </summary>
     public bool Included { get; set; }
+
+    /// <summary>
+    /// Gets or sets the number of series and movies in the library.
+    /// </summary>
+    public int ItemCount { get; set; }
 }
