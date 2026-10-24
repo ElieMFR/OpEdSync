@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <img src="https://img.shields.io/github/v/release/ElieMFR/OpEdSync?label=version&color=blue&cacheSeconds=3600" alt="Version">
+  <img src="https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2FElieMFR%2FOpEdSync%2Fmain%2Fmanifest.json&query=%24%5B0%5D.versions%5B0%5D.version&label=version&color=blue&cacheSeconds=3600" alt="Version">
   <img src="https://img.shields.io/badge/.NET-10.0-purple" alt=".NET">
   <img src="https://img.shields.io/badge/Jellyfin-12.x-blueviolet" alt="Jellyfin">
   <img src="https://img.shields.io/badge/license-GPL--3.0-green" alt="License">
@@ -56,11 +56,11 @@ Open an anime: its opening plays in the background. The dashboard at the top of 
 
 *   **Openings and endings from [AnimeThemes](https://animethemes.moe)**: the community database of anime themes, as theme music and, if you want it, as theme video.
 *   **The right season**: a series gets the theme of its latest season known to AnimeThemes, and falls back to the previous one when a season has nothing yet.
-*   **Clean versions first**: themes without on-screen credits or episode overlap are preferred; simple transitions are accepted only when there is nothing cleaner.
+*   **Clean versions first**: themes without on-screen credits or episode overlap are preferred. Simple transitions are accepted only when there is nothing cleaner.
 *   **Three ID sources**: AniDB, MyAnimeList or AniList, whichever your metadata plugins provide.
 *   **Wrong matches ruled out**: an anime whose release year is far from the media's is ignored, so a western film with a wrong ID does not get an anime theme.
 *   **A dashboard that explains itself**: coverage, items without theme with the reason for each (no ID, not on AnimeThemes, no video yet, ruled out), last and next run.
-*   **Your files are safe**: the plugin only ever touches the files it wrote; your own `theme.mp3` stays.
+*   **Your files are safe**: the plugin only ever touches the files it wrote, your own `theme.mp3` stays.
 *   **Android app fix**: in the Jellyfin Android app (built-in player), a video started over the theme music no longer blocks the next one (needs File Transformation).
 *   **Bilingual**: French when Jellyfin is in French, English for every other language.
 
@@ -94,7 +94,7 @@ If the former **AnimeThemes** plugin is installed, uninstall it: both would down
 | **For series, use** | The latest season | Or the series itself, usually season 1. |
 | **Openings and endings** | Both | Or openings only, or endings only. |
 | **Themes that overlap with the episode** | Accept simple transitions | Or clean themes only, or accept everything. |
-| **Volume** | 50 % | Baked into the file; a change applies on the next run. |
+| **Volume** | 50 % | Baked into the file. A change applies on the next run. |
 | **Theme video** | Off | Animated background on the series page. Takes a lot of disk space. |
 | **Check the release year** | On | Rules out most wrong IDs. |
 | **Simultaneous downloads** | 1 | Up to 4. 1 spares the AnimeThemes server. |
@@ -110,7 +110,7 @@ The scheduled task **Search for anime themes** runs every 12 hours.
 | **A series has no theme** | Open the OpEdSync settings: the dashboard gives the reason. "No ID" means your metadata plugins did not identify it. |
 | **A western film or series plays an anime opening** | A metadata plugin gave it a wrong ID. Untick that library in OpEdSync, keep **Check the release year** on, and delete the wrong file in its `theme-music` folder. |
 | **Every item says "Not analysed yet"** | Click **Run now**: the reasons are filled by the first run. |
-| **The volume did not change** | It applies on the next run; click **Run now**. |
+| **The volume did not change** | It applies on the next run: click **Run now**. |
 | **Android app: videos stop starting** | Install **File Transformation**, then restart Jellyfin. |
 
 ## 🎨 Recommended Theme
@@ -157,11 +157,11 @@ Ouvrez un animé : son générique se joue en fond. Le tableau de bord en haut d
 
 *   **Openings et endings depuis [AnimeThemes](https://animethemes.moe)** : la base communautaire des génériques d'animés, en musique de thème et, si vous le voulez, en vidéo de thème.
 *   **La bonne saison** : une série reçoit le thème de sa dernière saison connue d'AnimeThemes, et revient à la précédente quand une saison n'a encore rien.
-*   **Versions propres d'abord** : les génériques sans crédits à l'écran ni débordement sur l'épisode sont préférés ; les simples transitions ne sont acceptées que s'il n'y a rien de plus propre.
+*   **Versions propres d'abord** : les génériques sans crédits à l'écran ni débordement sur l'épisode sont préférés. Les simples transitions ne sont acceptées que s'il n'y a rien de plus propre.
 *   **Trois sources d'identifiants** : AniDB, MyAnimeList ou AniList, selon ce que fournissent vos plugins de métadonnées.
 *   **Mauvaises correspondances écartées** : un animé dont l'année est éloignée de celle du média est ignoré, un film occidental au mauvais identifiant ne reçoit donc pas de générique d'animé.
 *   **Un tableau de bord qui s'explique** : couverture, médias sans thème avec la raison de chacun (pas d'identifiant, absent d'AnimeThemes, pas encore de vidéo, écarté), dernier et prochain passage.
-*   **Vos fichiers sont protégés** : le plugin ne touche qu'aux fichiers qu'il a écrits ; votre propre `theme.mp3` reste en place.
+*   **Vos fichiers sont protégés** : le plugin ne touche qu'aux fichiers qu'il a écrits, votre propre `theme.mp3` reste en place.
 *   **Correctif pour l'appli Android** : dans l'appli Jellyfin Android (lecteur intégré), une vidéo lancée pendant la musique de thème ne bloque plus la suivante (nécessite File Transformation).
 *   **Bilingue** : en français si Jellyfin est en français, en anglais pour toutes les autres langues.
 
@@ -195,7 +195,7 @@ Si l'ancien plugin **AnimeThemes** est installé, désinstallez-le : les deux t�
 | **Pour les séries, utiliser** | La dernière saison | Ou la série elle-même, en général la saison 1. |
 | **Openings et endings** | Les deux | Ou openings seulement, ou endings seulement. |
 | **Génériques qui débordent sur l'épisode** | Accepter les simples transitions | Ou génériques propres seulement, ou tout accepter. |
-| **Volume** | 50 % | Appliqué dans le fichier ; un changement est pris en compte au passage suivant. |
+| **Volume** | 50 % | Appliqué dans le fichier. Un changement est pris en compte au passage suivant. |
 | **Vidéo de thème** | Désactivée | Fond animé sur la page de la série. Prend beaucoup de place sur le disque. |
 | **Vérifier l'année de sortie** | Activé | Écarte la plupart des identifiants erronés. |
 | **Téléchargements simultanés** | 1 | Jusqu'à 4. 1 ménage le serveur d'AnimeThemes. |
@@ -211,7 +211,7 @@ La tâche planifiée **Rechercher les thèmes d'anime** tourne toutes les 12 heu
 | **Une série n'a pas de thème** | Ouvrez les réglages d'OpEdSync : le tableau de bord donne la raison. « Aucun identifiant » veut dire que vos plugins de métadonnées ne l'ont pas identifiée. |
 | **Un film ou une série occidentale joue un générique d'animé** | Un plugin de métadonnées lui a donné un mauvais identifiant. Décochez cette bibliothèque dans OpEdSync, gardez **Vérifier l'année de sortie** activé, et supprimez le mauvais fichier dans son dossier `theme-music`. |
 | **Tout est « Pas encore analysé »** | Cliquez sur **Lancer maintenant** : les raisons sont remplies par le premier passage. |
-| **Le volume n'a pas changé** | Il s'applique au passage suivant ; cliquez sur **Lancer maintenant**. |
+| **Le volume n'a pas changé** | Il s'applique au passage suivant : cliquez sur **Lancer maintenant**. |
 | **Appli Android : les vidéos ne se lancent plus** | Installez **File Transformation**, puis redémarrez Jellyfin. |
 
 ## 🎨 Thème recommandé

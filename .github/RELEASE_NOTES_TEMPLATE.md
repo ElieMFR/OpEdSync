@@ -11,6 +11,8 @@ and becomes the release body.
 - Sections, in this order, only those that apply: `🛡️ Security`, `✨ New` or `✨ Improvement`, `🐛 Fixes`, `🔧 Internal: nothing changes on screen`.
 - In French: `🛡️ Sécurité`, `✨ Nouveautés` or `✨ Amélioration`, `🐛 Corrections`, `🔧 Interne : rien ne change à l'écran`.
 - No long dash (U+2014) in public texts.
+- No semicolons in public texts: split the sentence or use a colon.
+- No `v` in front of version numbers: `1.5.0.0`, not `v1.5.0.0`.
 
 ## Banner
 
