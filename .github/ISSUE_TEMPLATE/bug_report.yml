@@ -1,0 +1,87 @@
+name: "Report a problem / Signaler un problème"
+description: "Something does not work as expected / Quelque chose ne fonctionne pas comme prévu"
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting this. A few details make the problem faster to reproduce. **Remove your keys, tokens and passwords** from logs and screenshots before pasting them.
+
+        *Merci de prendre le temps de signaler ça. Quelques précisions permettent de reproduire le problème plus vite. **Retirez vos clés, jetons et mots de passe** des logs et des captures avant de les coller.*
+  - type: input
+    id: component_version
+    attributes:
+      label: "Plugin version / Version du plugin"
+      description: "Dashboard → Plugins / Tableau de bord → Extensions"
+      placeholder: "1.5.0.0"
+    validations:
+      required: true
+  - type: input
+    id: jellyfin_version
+    attributes:
+      label: "Jellyfin server version / Version du serveur Jellyfin"
+      placeholder: "12.2.0"
+    validations:
+      required: true
+  - type: textarea
+    id: item
+    attributes:
+      label: "Series or movie concerned / Série ou film concerné"
+      description: "Its name, the reason shown on the OpEdSync dashboard, and its AniDB, MyAnimeList or AniList ID if you know it. / Son nom, la raison affichée dans le tableau de bord d'OpEdSync, et son identifiant AniDB, MyAnimeList ou AniList si vous le connaissez."
+      placeholder: "Bleach (2004), AniDB 2369, Filtered / Écarté par les réglages"
+  - type: dropdown
+    id: client
+    attributes:
+      label: "Where does it happen? / Où le problème apparaît-il ?"
+      multiple: true
+      options:
+        - "Desktop browser / Navigateur sur ordinateur"
+        - "Phone or tablet browser / Navigateur sur téléphone ou tablette"
+        - "Android app / Appli Android"
+        - "Android TV or Google TV / Android TV ou Google TV"
+        - "Samsung (Tizen)"
+        - "LG (webOS)"
+        - "iOS"
+        - "Server only (task, downloads) / Serveur seulement (tâche, téléchargements)"
+        - "Other (details below) / Autre (précisez plus bas)"
+    validations:
+      required: true
+  - type: input
+    id: client_version
+    attributes:
+      label: "Client, version and device / Client, version et appareil"
+      description: "Browser and version, or app and version. For a TV, also the model and year. / Navigateur et version, ou appli et version. Pour une TV, aussi le modèle et l'année."
+      placeholder: "Android app 2.7.3, Pixel 10 Pro"
+  - type: textarea
+    id: others
+    attributes:
+      label: "Other active plugins and theme / Autres plugins et thème actifs"
+      description: "Especially metadata plugins (AniDB, MyAnimeList, AniList) and those that change the interface (File Transformation, theme). / Surtout les plugins de métadonnées (AniDB, MyAnimeList, AniList) et ceux qui modifient l'interface (File Transformation, thème)."
+  - type: textarea
+    id: what
+    attributes:
+      label: "What happens, and what you expected / Ce qui se passe, et ce que vous attendiez"
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: "How to reproduce it / Comment le reproduire"
+      placeholder: |
+        1. …
+        2. …
+  - type: textarea
+    id: logs
+    attributes:
+      label: "Logs or screenshot / Logs ou capture d'écran"
+      description: "Lines containing OpEdSync from the server log. Hide personal data. / Les lignes contenant OpEdSync dans le journal du serveur. Masquez les données personnelles."
+      render: shell
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: "Before sending / Avant d'envoyer"
+      options:
+        - label: "I searched the existing issues, closed ones included. / J'ai cherché dans les issues existantes, y compris fermées."
+          required: true
+        - label: "I removed my keys, tokens and passwords from what I paste here. / J'ai retiré mes clés, jetons et mots de passe de ce que je colle ici."
+          required: true

@@ -1,0 +1,39 @@
+name: Build and test
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ['**/*.md', 'notes/**', 'manifest.json', 'logo.png']
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Build
+        run: dotnet build Jellyfin.Plugin.OpEdSync -c Release
+
+      - name: Test
+        run: dotnet test tests/Jellyfin.Plugin.OpEdSync.Tests -c Release
+
+      - name: Check the configuration page script
+        run: |
+          python3 - <<'EOF'
+          import re
+          page = open('Jellyfin.Plugin.OpEdSync/Configuration/configPage.html', encoding='utf-8').read()
+          open('page.js', 'w', encoding='utf-8').write(re.search(r'<script type="text/javascript">(.*)</script>', page, re.S).group(1))
+          EOF
+          node --check page.js
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Jellyfin.Plugin.OpEdSync
+          path: Jellyfin.Plugin.OpEdSync/bin/Release/net10.0/Jellyfin.Plugin.OpEdSync.dll

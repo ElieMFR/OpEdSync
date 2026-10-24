@@ -27,7 +27,7 @@ Every release opens with:
 
 - Title: `🎵 OpEdSync X.Y.Z.W · Jellyfin 12`
 - Tag: `X.Y.Z.W`, without `v`: the download links of the catalog depend on it.
-- Asset: `opedsync_X.Y.Z.W.zip`, the same file as `dist/`, whose MD5 is the manifest `checksum`.
+- Asset: `opedsync_X.Y.Z.W.zip`, built by `tools/package.ps1` (DLL at the root of the zip). The MD5 it prints is the manifest `checksum`, and the download link is the release asset.
 
 ## Manifest `changelog`
 
