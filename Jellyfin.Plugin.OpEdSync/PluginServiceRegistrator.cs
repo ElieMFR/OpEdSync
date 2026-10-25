@@ -19,6 +19,7 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         serviceCollection.AddSingleton<LibrarySelector>();
         serviceCollection.AddSingleton<RunSummaryStore>();
         serviceCollection.AddSingleton<StatsService>();
+        serviceCollection.AddSingleton<StatusService>();
         serviceCollection.AddHostedService<ExoPlayerFixRegistration>();
 
         var productHeader = new ProductInfoHeaderValue(
@@ -34,5 +35,13 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
                 c.DefaultRequestHeaders.UserAgent.Add(productHeader);
             })
             .AddHttpMessageHandler<PollyResilienceHandler>();
+
+        // Same address, no retries: a status check must answer within seconds.
+        serviceCollection.AddHttpClient(StatusService.CheckClientName, c =>
+        {
+            c.BaseAddress = new Uri("https://api.animethemes.moe");
+            c.DefaultRequestHeaders.UserAgent.Add(productHeader);
+            c.Timeout = TimeSpan.FromSeconds(8);
+        });
     }
 }

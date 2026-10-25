@@ -107,6 +107,7 @@ public sealed class StatsService
                 Name = it.Name,
                 Included = _librarySelector.IsIncluded(it, configuration),
                 ItemCount = CountItems(it),
+                CollectionType = (it as CollectionFolder)?.CollectionType?.ToString() ?? string.Empty,
             })
             .OrderBy(it => it.Name, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
@@ -161,13 +162,15 @@ public sealed class StatsService
         return response;
     }
 
+    // Only the number is asked for: loading every item of a large film library took seconds.
     private int CountItems(BaseItem library)
-        => _libraryManager.GetItemList(
-            new InternalItemsQuery
-            {
-                IncludeItemTypes = [BaseItemKind.Series, BaseItemKind.Movie],
-                IsVirtualItem = false,
-                Recursive = true,
-            },
-            [library]).Count;
+        => _libraryManager.GetItemsResult(new InternalItemsQuery
+        {
+            IncludeItemTypes = [BaseItemKind.Series, BaseItemKind.Movie],
+            IsVirtualItem = false,
+            Recursive = true,
+            ParentId = library.Id,
+            Limit = 0,
+            EnableTotalRecordCount = true,
+        }).TotalRecordCount;
 }

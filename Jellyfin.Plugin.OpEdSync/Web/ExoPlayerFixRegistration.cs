@@ -28,10 +28,16 @@ public sealed class ExoPlayerFixRegistration : IHostedService
         _logger = logger;
     }
 
+    /// <summary>
+    /// Gets a value indicating whether the fix was registered with File Transformation at startup.
+    /// </summary>
+    public static bool IsActive { get; private set; }
+
     /// <inheritdoc />
     public Task StartAsync(CancellationToken cancellationToken)
     {
-        if (TryRegister())
+        IsActive = TryRegister();
+        if (IsActive)
         {
             _logger.LogInformation("OpEdSync: ExoPlayer replay fix injected into the web client");
         }

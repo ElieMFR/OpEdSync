@@ -49,13 +49,48 @@
         #OpEdSyncConfigPage .ops-volume { display: flex; align-items: center; }
         #OpEdSyncConfigPage .ops-volume input { flex: 1; }
         #OpEdSyncConfigPage .ops-volume output { min-width: 3.5em; text-align: right; margin-left: 0.8em; }
+        #OpEdSyncConfigPage .ops-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; padding: 1em 1.2em; border-radius: 0.6em; background: rgba(0, 164, 220, 0.08); border: 1px solid rgba(0, 164, 220, 0.25); margin-bottom: 1em; }
+        #OpEdSyncConfigPage .ops-brand { display: flex; align-items: center; margin: 0.3em 0; }
+        #OpEdSyncConfigPage .ops-logo { width: 2.6em; height: 2.6em; border-radius: 50%; background: rgba(0, 164, 220, 0.2); display: flex; align-items: center; justify-content: center; margin-right: 0.8em; }
+        #OpEdSyncConfigPage .ops-logo .material-icons { color: #00a4dc; font-size: 1.5em; }
+        #OpEdSyncConfigPage .ops-brand h2 { margin: 0; }
+        #OpEdSyncConfigPage .ops-version { display: inline-block; font-size: 0.75em; padding: 0.15em 0.6em; border-radius: 0.3em; background: rgba(128, 128, 128, 0.25); color: inherit; text-decoration: none; margin-right: 0.5em; }
+        #OpEdSyncConfigPage .ops-version:focus { outline: 2px solid #00a4dc; }
+        #OpEdSyncConfigPage .ops-head-actions { display: flex; align-items: center; flex-wrap: wrap; margin: 0.3em 0; }
+        #OpEdSyncConfigPage .ops-link-button { background: none; border: 1px solid rgba(128, 128, 128, 0.4); border-radius: 0.3em; color: inherit; padding: 0.45em 0.8em; margin-right: 0.6em; cursor: pointer; font: inherit; font-size: 0.85em; }
+        #OpEdSyncConfigPage .ops-link-button:focus { outline: 2px solid #00a4dc; }
+        #OpEdSyncConfigPage .ops-state-row { display: flex; align-items: center; padding: 0.55em 0; border-top: 1px solid rgba(128, 128, 128, 0.2); }
+        #OpEdSyncConfigPage .ops-state-row:first-child { border-top: 0; }
+        #OpEdSyncConfigPage .ops-state-row > .material-icons { margin-right: 0.6em; }
+        #OpEdSyncConfigPage .ops-state-text { flex: 1; min-width: 0; }
+        #OpEdSyncConfigPage .ops-state-text small { display: block; opacity: 0.7; }
+        #OpEdSyncConfigPage .ops-good { color: #66bb6a; }
+        #OpEdSyncConfigPage .ops-warn { color: #ffb74d; }
+        #OpEdSyncConfigPage .ops-bad { color: #e57373; }
+        #OpEdSyncConfigPage .ops-actions { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-gap: 0.8em; }
+        #OpEdSyncConfigPage .ops-action { display: flex; align-items: flex-start; text-align: left; padding: 0.9em 1em; border-radius: 0.5em; background: rgba(128, 128, 128, 0.12); border: 1px solid transparent; color: inherit; font: inherit; cursor: pointer; text-decoration: none; }
+        #OpEdSyncConfigPage .ops-action:focus { outline: 2px solid #00a4dc; }
+        #OpEdSyncConfigPage .ops-action .material-icons { color: #00a4dc; margin-right: 0.6em; }
+        #OpEdSyncConfigPage .ops-action b { display: block; font-weight: 600; }
+        #OpEdSyncConfigPage .ops-action small { display: block; opacity: 0.7; margin-top: 0.2em; }
+        #OpEdSyncConfigPage .ops-lib-tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; margin: 0.6em 0; }
+        #OpEdSyncConfigPage .ops-lib-filter { flex: 1 1 14em; margin: 0.3em 0.8em 0.3em 0; padding: 0.55em 0.8em; border-radius: 0.3em; border: 1px solid rgba(128, 128, 128, 0.35); background: rgba(0, 0, 0, 0.15); color: inherit; font: inherit; }
+        #OpEdSyncConfigPage .ops-lib-count { opacity: 0.75; margin-right: 0.8em; }
+        #OpEdSyncConfigPage .ops-lib-list { border-radius: 0.4em; background: rgba(0, 0, 0, 0.12); padding: 0.3em 0.8em; max-height: 22em; overflow-y: auto; }
+        #OpEdSyncConfigPage .ops-lib-row { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(128, 128, 128, 0.15); }
+        #OpEdSyncConfigPage .ops-lib-row:first-child { border-top: 0; }
+        #OpEdSyncConfigPage .ops-lib-row .checkboxContainer { margin: 0.35em 0; }
+        #OpEdSyncConfigPage .ops-lib-type { font-size: 0.8em; opacity: 0.6; margin-left: 1em; white-space: nowrap; }
+        #OpEdSyncConfigPage .ops-savebar { position: -webkit-sticky; position: sticky; bottom: 0; padding: 0.8em 0; background: linear-gradient(rgba(16, 16, 16, 0), rgba(16, 16, 16, 0.92) 35%); }
+        #OpEdSyncConfigPage.ops-no-help .fieldDescription, #OpEdSyncConfigPage.ops-no-help .ops-hint, #OpEdSyncConfigPage.ops-no-help .ops-action small { display: none; }
         @media (max-width: 1100px) {
+            #OpEdSyncConfigPage .ops-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             #OpEdSyncConfigPage .ops-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             #OpEdSyncConfigPage .ops-libraries { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             #OpEdSyncConfigPage .ops-grid { grid-template-columns: minmax(0, 1fr); }
         }
         @media (max-width: 560px) {
-            #OpEdSyncConfigPage .ops-cards, #OpEdSyncConfigPage .ops-libraries { grid-template-columns: minmax(0, 1fr); }
+            #OpEdSyncConfigPage .ops-cards, #OpEdSyncConfigPage .ops-libraries, #OpEdSyncConfigPage .ops-actions { grid-template-columns: minmax(0, 1fr); }
         }
         @media (prefers-reduced-motion: reduce) {
             #OpEdSyncConfigPage .ops-chevron { transition: none; }
@@ -64,14 +99,20 @@
 
     <div data-role="content">
         <div class="content-primary">
-            <div class="ops-head">
-                <div class="ops-title">
-                    <h2>OpEdSync</h2>
-                    <span id="opsTaskState" class="ops-pill">…</span>
+            <div class="ops-header">
+                <div class="ops-brand">
+                    <div class="ops-logo"><span class="material-icons library_music" aria-hidden="true"></span></div>
+                    <div>
+                        <h2>OpEdSync</h2>
+                        <div><a id="opsVersion" class="ops-version" href="https://github.com/ElieMFR/OpEdSync/releases" target="_blank" rel="noopener">…</a><span id="opsTaskState" class="ops-pill">…</span></div>
+                    </div>
                 </div>
-                <button is="emby-button" type="button" id="opsRun" class="raised emby-button ops-run">
-                    <span class="material-icons play_arrow" aria-hidden="true"></span><span id="opsRunLabel" data-ops-t="runNow"></span>
-                </button>
+                <div class="ops-head-actions">
+                    <button type="button" id="opsHelpToggle" class="ops-link-button"></button>
+                    <button is="emby-button" type="button" id="opsRun" class="raised emby-button ops-run">
+                        <span class="material-icons play_arrow" aria-hidden="true"></span><span id="opsRunLabel" data-ops-t="runNow"></span>
+                    </button>
+                </div>
             </div>
 
             <div class="ops-cards">
@@ -108,11 +149,30 @@
                 </details>
             </div>
 
+            <div class="ops-section">
+                <div class="ops-section-title"><span class="material-icons fact_check" aria-hidden="true"></span><span data-ops-t="state"></span></div>
+                <div id="opsState"><p class="ops-muted" data-ops-t="checking"></p></div>
+            </div>
+
+            <div class="ops-section">
+                <div class="ops-section-title"><span class="material-icons bolt" aria-hidden="true"></span><span data-ops-t="actions"></span></div>
+                <div class="ops-actions">
+                    <button type="button" class="ops-action" id="opsActionRun"><span class="material-icons play_arrow" aria-hidden="true"></span><span><b data-ops-t="actRun"></b><small data-ops-t="actRunHelp"></small></span></button>
+                    <button type="button" class="ops-action" id="opsActionRefresh"><span class="material-icons refresh" aria-hidden="true"></span><span><b data-ops-t="actRefresh"></b><small data-ops-t="actRefreshHelp"></small></span></button>
+                    <button type="button" class="ops-action" id="opsActionCheck"><span class="material-icons wifi_tethering" aria-hidden="true"></span><span><b data-ops-t="actCheck"></b><small data-ops-t="actCheckHelp"></small></span></button>
+                    <a class="ops-action" href="#/dashboard/logs"><span class="material-icons article" aria-hidden="true"></span><span><b data-ops-t="actLogs"></b><small data-ops-t="actLogsHelp"></small></span></a>
+                </div>
+            </div>
+
             <form id="OpEdSyncConfigForm">
                 <div class="ops-section">
                     <div class="ops-section-title"><span class="material-icons video_library" aria-hidden="true"></span><span data-ops-t="libraries"></span></div>
                     <div class="fieldDescription" data-ops-t="librariesHelp" style="margin-bottom: 0.8em;"></div>
-                    <div class="ops-libraries" id="opsLibraries"><p class="ops-muted">…</p></div>
+                    <div class="ops-lib-tools">
+                        <input type="search" id="opsLibFilter" class="ops-lib-filter" autocomplete="off"/>
+                        <span><span class="ops-lib-count" id="opsLibCount"></span><button type="button" class="ops-link-button" id="opsLibAll" data-ops-t="selectAll"></button><button type="button" class="ops-link-button" id="opsLibNone" data-ops-t="selectNone"></button></span>
+                    </div>
+                    <div class="ops-lib-list" id="opsLibraries"><p class="ops-muted">…</p></div>
                 </div>
 
                 <div class="ops-section">
@@ -232,7 +292,7 @@
                     </div>
                 </div>
 
-                <div>
+                <div class="ops-savebar">
                     <button is="emby-button" type="submit" class="raised button-submit block emby-button">
                         <span data-ops-t="save"></span>
                     </button>
@@ -253,89 +313,259 @@
             var NB = ' ';
 
             var texts = {
-                fr: {
-                    runNow: 'Lancer maintenant', running: 'En cours', ready: 'Prêt', lastFailed: 'Dernier passage en échec',
-                    coverage: 'Couverture', withoutTheme: 'Sans thème', lastRun: 'Dernier passage', nextRun: 'Prochain passage',
-                    coverageSub: '{0} / {1} séries et films', fromPlugin: 'dont {0} téléchargés par OpEdSync',
-                    missingSub: 'raisons ci-dessous', missingNone: 'tout est couvert',
-                    profileHint: 'Pour les entendre' + NB + ': votre profil → Affichage → Thèmes musicaux.',
-                    reasonsTitle: 'Pourquoi {0} séries et films n\'ont pas de thème', reasonsTitleOne: 'Pourquoi 1 série ou film n\'a pas de thème',
-                    reasonsTitleNone: 'Tous les médias ont un thème', showList: 'Voir la liste',
-                    libraries: 'Bibliothèques',
-                    librariesHelp: 'Cochez seulement vos bibliothèques d\'animés' + NB + ': ailleurs, de mauvais identifiants donneraient de mauvais génériques.',
-                    music: 'Thèmes musicaux', themesToKeep: 'Génériques à télécharger', fetchSingle: 'Un seul, le meilleur',
-                    fetchAll: 'Tous', fetchNone: 'Aucun', seriesUse: 'Pour une série, prendre', latestSeason: 'La dernière saison',
-                    firstSeason: 'La série (en général la saison 1)',
-                    seriesUseHelp: 'Si AnimeThemes n\'a rien pour la dernière saison, le plugin prend la précédente.',
-                    themeTypes: 'Openings et endings', typesBoth: 'Les deux', typesOp: 'Openings uniquement', typesEd: 'Endings uniquement',
-                    overlap: 'Génériques qui débordent sur l\'épisode', overlapTransitions: 'Propres, ou avec une courte transition',
-                    overlapStrict: 'Propres uniquement', overlapAll: 'Tous',
-                    overlapHelp: 'Une transition garde quelques secondes de l\'épisode au début ou à la fin. Une version propre est toujours préférée.',
-                    volume: 'Volume', volumeHelp: 'Appliqué dans le fichier. Un changement est pris en compte au passage suivant.',
-                    video: 'Thèmes vidéo', videoHelp: 'Le générique en vidéo, en fond de la page de la série. Prend beaucoup de place sur le disque.',
-                    noCredits: 'Sans crédits à l\'écran', videoVolumeHelp: 'À 0 %, la piste audio est retirée.',
-                    advanced: 'Avancé', checkYear: 'Vérifier l\'année de sortie',
-                    checkYearHelp: 'Ignore un animé dont l\'année diffère de plus d\'un an de celle du média' + NB + ': écarte la plupart des identifiants erronés.',
-                    parallelism: 'Téléchargements simultanés', parallelismHelp: '1 suffit et ménage le serveur d\'AnimeThemes.',
-                    forceSync: 'Mettre à jour les thèmes déjà téléchargés',
-                    forceSyncHelp: 'À chaque passage, remplace ceux qui ne correspondent plus aux réglages. Le passage revoit alors toute la bibliothèque. Vos propres fichiers (theme.mp3) ne sont jamais touchés.',
-                    save: 'Enregistrer', on: 'activés', off: 'désactivés',
-                    added0: 'aucun ajout', added1: '+1 thème', addedN: '+{0} thèmes',
-                    failed0: 'aucun échec', failed1: '1 échec', failedN: '{0} échecs', cancelled: 'interrompu', never: 'jamais lancé',
-                    ago: 'il y a {0}', at: 'à {0}', today: 'aujourd\'hui', tomorrow: 'demain', startup: 'au démarrage',
-                    startupSub: 'au démarrage du serveur', manual: 'manuel', manualSub: 'aucun déclencheur', soon: 'bientôt',
-                    every: 'toutes les {0}', daily: 'chaque jour', weekly: 'chaque semaine', running_sub: 'passage en cours',
-                    unit_m: '{0} min', unit_h: '{0} h', unit_d: '{0} j',
-                    noLibrary: 'Aucune bibliothèque cochée', noLibraryHelp: "Le plugin ne fait rien" + NB + ": cochez vos bibliothèques d'animés ci-dessous.",
-                    noLibrarySub: 'aucune bibliothèque', justNow: "à l'instant",
-                    reasons: {
-                        NoId: 'Aucun identifiant AniDB, MyAnimeList ou AniList', NotOnAnimeThemes: 'Pas sur AnimeThemes',
-                        NoVideo: 'Pas encore de vidéo sur AnimeThemes', YearMismatch: 'Année trop éloignée (identifiant douteux)',
-                        Filtered: 'Génériques exclus par vos réglages', DownloadFailed: 'Échec du téléchargement',
-                        LookupFailed: 'AnimeThemes injoignable', NotAnalysed: 'En attente du prochain passage'
-                    }
+                "fr": {
+                    "runNow": "Lancer maintenant",
+                    "running": "En cours",
+                    "ready": "Prêt",
+                    "lastFailed": "Dernier passage en échec",
+                    "coverage": "Couverture",
+                    "withoutTheme": "Sans thème",
+                    "lastRun": "Dernier passage",
+                    "nextRun": "Prochain passage",
+                    "coverageSub": "{0} médias sur {1} ont un thème.",
+                    "fromPlugin": "OpEdSync en a téléchargé {0}.",
+                    "missingSub": "Les raisons sont détaillées plus bas.",
+                    "missingNone": "Tous les médias ont un thème.",
+                    "profileHint": "Pour entendre les thèmes, activez-les dans votre profil : Affichage → Thèmes musicaux.",
+                    "reasonsTitle": "Pourquoi {0} séries et films n'ont pas de thème",
+                    "reasonsTitleOne": "Pourquoi 1 série ou film n'a pas de thème",
+                    "reasonsTitleNone": "Tous les médias ont un thème",
+                    "showList": "Voir la liste",
+                    "libraries": "Bibliothèques",
+                    "librariesHelp": "Cochez uniquement vos bibliothèques d'animés. Sinon, des films ou des séries pourraient recevoir un générique qui n'est pas le leur.",
+                    "music": "Thèmes musicaux",
+                    "themesToKeep": "Génériques à télécharger",
+                    "fetchSingle": "Un seul, le meilleur",
+                    "fetchAll": "Tous",
+                    "fetchNone": "Aucun",
+                    "seriesUse": "Pour une série, utiliser",
+                    "latestSeason": "Sa dernière saison",
+                    "firstSeason": "La série (en général la saison 1)",
+                    "seriesUseHelp": "Si AnimeThemes n'a rien pour la dernière saison, le plugin prend la précédente.",
+                    "themeTypes": "Openings et endings",
+                    "typesBoth": "Les deux",
+                    "typesOp": "Openings uniquement",
+                    "typesEd": "Endings uniquement",
+                    "overlap": "Génériques qui débordent sur l'épisode",
+                    "overlapTransitions": "Propres, ou avec une courte transition",
+                    "overlapStrict": "Propres uniquement",
+                    "overlapAll": "Tous",
+                    "overlapHelp": "Une transition garde quelques secondes de l'épisode au début ou à la fin. Une version propre est toujours préférée.",
+                    "volume": "Volume",
+                    "volumeHelp": "Le volume est appliqué dans le fichier. Un changement s’applique au passage suivant.",
+                    "video": "Thèmes vidéo",
+                    "videoHelp": "Le générique s’affiche en vidéo, en fond de la page de la série. Ça prend beaucoup de place sur le disque.",
+                    "noCredits": "Sans crédits à l'écran",
+                    "videoVolumeHelp": "À 0 %, la piste audio est retirée.",
+                    "advanced": "Avancé",
+                    "checkYear": "Vérifier l'année de sortie",
+                    "checkYearHelp": "Le plugin écarte un animé sorti plus d’un an avant ou après le média. Ça évite la plupart des identifiants erronés.",
+                    "parallelism": "Téléchargements simultanés",
+                    "parallelismHelp": "Un seul à la fois suffit et ménage le serveur d’AnimeThemes.",
+                    "forceSync": "Mettre à jour les thèmes déjà téléchargés",
+                    "forceSyncHelp": "À chaque passage, le plugin remplace les thèmes qui ne correspondent plus aux réglages. Chaque passage revoit alors toute la bibliothèque. Vos propres fichiers (theme.mp3) ne sont jamais touchés.",
+                    "save": "Sauvegarder",
+                    "on": "activés",
+                    "off": "désactivés",
+                    "added0": "aucun ajout",
+                    "added1": "+1 thème",
+                    "addedN": "+{0} thèmes",
+                    "failed0": "sans échec",
+                    "failed1": "avec 1 échec",
+                    "failedN": "avec {0} échecs",
+                    "cancelled": "Le passage a été interrompu.",
+                    "never": "Aucun passage pour l'instant.",
+                    "ago": "il y a {0}",
+                    "at": "à {0}",
+                    "today": "aujourd'hui",
+                    "tomorrow": "demain",
+                    "startup": "au démarrage",
+                    "startupSub": "La tâche tourne au démarrage du serveur.",
+                    "manual": "manuel",
+                    "manualSub": "La tâche n'a aucun déclencheur.",
+                    "soon": "bientôt",
+                    "every": "toutes les {0}",
+                    "daily": "chaque jour",
+                    "weekly": "chaque semaine",
+                    "running_sub": "Un passage est en cours.",
+                    "nextSentence": "{0}. La tâche tourne {1}.",
+                    "unit_m": "{0} min",
+                    "unit_h": "{0} h",
+                    "unit_d": "{0} j",
+                    "noLibrary": "Aucune bibliothèque cochée",
+                    "noLibraryHelp": "Le plugin ne fait rien tant qu’aucune bibliothèque n’est cochée. Cochez vos bibliothèques d’animés plus bas.",
+                    "noLibrarySub": "Aucune bibliothèque n'est cochée.",
+                    "justNow": "à l'instant",
+                    "checking": "Vérification en cours…",
+                    "helpOn": "Masquer les aides",
+                    "helpOff": "Afficher les aides",
+                    "releaseNotes": "Notes de version",
+                    "state": "État",
+                    "actions": "Actions",
+                    "actRun": "Lancer un passage",
+                    "actRunHelp": "Le plugin cherche et télécharge les génériques manquants.",
+                    "actRefresh": "Recalculer les chiffres",
+                    "actRefreshHelp": "Les chiffres sont recalculés tout de suite.",
+                    "actCheck": "Vérifier AnimeThemes",
+                    "actCheckHelp": "Le plugin teste la connexion au service.",
+                    "actLogs": "Journal du serveur",
+                    "actLogsHelp": "Cherchez « OpEdSync » dans le journal.",
+                    "atOk": "AnimeThemes répond",
+                    "atKo": "AnimeThemes ne répond pas",
+                    "atSub": "Réponse en {0} ms, vérifiée {1}.",
+                    "atKoSub": "Erreur : {0}. Vérifiée {1}.",
+                    "idsOk": "Identifiants d’animés",
+                    "idsOkSub": "Fournis par {0}.",
+                    "idsKo": "Aucun plugin d’identifiants",
+                    "idsKoSub": "Installez AniDB, MyAnimeList ou AniList : sans identifiant, aucun générique ne peut être trouvé.",
+                    "ftOk": "Correctif de l’appli Android actif",
+                    "ftOkSub": "Il s’appuie sur File Transformation {0}.",
+                    "ftKo": "Correctif de l’appli Android inactif",
+                    "ftKoSub": "Installez File Transformation pour l’activer. Le reste du plugin fonctionne sans.",
+                    "ftRestart": "Correctif de l’appli Android pas encore actif",
+                    "ftRestartSub": "File Transformation est installé : redémarrez Jellyfin.",
+                    "filter": "Filtrer les bibliothèques…",
+                    "selected": "{0} sur {1} cochées",
+                    "selectAll": "Tout cocher",
+                    "selectNone": "Tout décocher",
+                    "reasons": {
+                        "NoId": "Aucun identifiant AniDB, MyAnimeList ou AniList",
+                        "NotOnAnimeThemes": "Introuvable sur AnimeThemes",
+                        "NoVideo": "Pas encore de vidéo sur AnimeThemes",
+                        "YearMismatch": "Année trop éloignée (identifiant douteux)",
+                        "Filtered": "Génériques exclus par vos réglages",
+                        "DownloadFailed": "Échec du téléchargement",
+                        "LookupFailed": "AnimeThemes n’a pas répondu",
+                        "NotAnalysed": "En attente du prochain passage"
+                    },
+                    "timeout": "délai dépassé"
                 },
-                en: {
-                    runNow: 'Run now', running: 'Running', ready: 'Ready', lastFailed: 'Last run failed',
-                    coverage: 'Coverage', withoutTheme: 'Without theme', lastRun: 'Last run', nextRun: 'Next run',
-                    coverageSub: '{0} / {1} series and movies', fromPlugin: '{0} downloaded by OpEdSync',
-                    missingSub: 'reasons below', missingNone: 'everything is covered',
-                    profileHint: 'To hear them: your profile → Display → Theme songs.',
-                    reasonsTitle: 'Why {0} series and movies have no theme', reasonsTitleOne: 'Why 1 series or movie has no theme',
-                    reasonsTitleNone: 'Every item has a theme', showList: 'Show the list',
-                    libraries: 'Libraries',
-                    librariesHelp: 'Only tick your anime libraries: elsewhere, wrong IDs would give wrong themes.',
-                    music: 'Theme songs', themesToKeep: 'Themes to download', fetchSingle: 'One, the best',
-                    fetchAll: 'All', fetchNone: 'None', seriesUse: 'For a series, use', latestSeason: 'The latest season',
-                    firstSeason: 'The series (usually season 1)',
-                    seriesUseHelp: 'When AnimeThemes has nothing for the latest season, the plugin takes the previous one.',
-                    themeTypes: 'Openings and endings', typesBoth: 'Both', typesOp: 'Openings only', typesEd: 'Endings only',
-                    overlap: 'Themes that overlap with the episode', overlapTransitions: 'Clean, or with a short transition',
-                    overlapStrict: 'Clean only', overlapAll: 'All',
-                    overlapHelp: 'A transition keeps a few seconds of the episode at the start or the end. A clean version is always preferred.',
-                    volume: 'Volume', volumeHelp: 'Baked into the file. A change applies on the next run.',
-                    video: 'Theme videos', videoHelp: 'The theme as a video, behind the series page. Takes a lot of disk space.',
-                    noCredits: 'Without on-screen credits', videoVolumeHelp: 'At 0 %, the audio track is removed.',
-                    advanced: 'Advanced', checkYear: 'Check the release year',
-                    checkYearHelp: 'Ignores an anime whose year is more than one year away from the media\'s: rules out most wrong IDs.',
-                    parallelism: 'Simultaneous downloads', parallelismHelp: '1 is enough and spares the AnimeThemes server.',
-                    forceSync: 'Update themes already downloaded',
-                    forceSyncHelp: 'On every run, replaces those that no longer match the settings. The run then goes through the whole library. Your own files (theme.mp3) are never touched.',
-                    save: 'Save', on: 'on', off: 'off',
-                    added0: 'nothing added', added1: '+1 theme', addedN: '+{0} themes',
-                    failed0: 'no failures', failed1: '1 failure', failedN: '{0} failures', cancelled: 'cancelled', never: 'never run',
-                    ago: '{0} ago', at: 'at {0}', today: 'today', tomorrow: 'tomorrow', startup: 'at startup',
-                    startupSub: 'when the server starts', manual: 'manual', manualSub: 'no trigger', soon: 'soon',
-                    every: 'every {0}', daily: 'every day', weekly: 'every week', running_sub: 'run in progress',
-                    unit_m: '{0} min', unit_h: '{0} h', unit_d: '{0} d',
-                    noLibrary: 'No library ticked', noLibraryHelp: 'The plugin does nothing: tick your anime libraries below.',
-                    noLibrarySub: 'no library', justNow: 'just now',
-                    reasons: {
-                        NoId: 'No AniDB, MyAnimeList or AniList ID', NotOnAnimeThemes: 'Not on AnimeThemes',
-                        NoVideo: 'No video on AnimeThemes yet', YearMismatch: 'Release year too far (doubtful ID)',
-                        Filtered: 'Themes excluded by your settings', DownloadFailed: 'Download failed',
-                        LookupFailed: 'AnimeThemes unreachable', NotAnalysed: 'Waiting for the next run'
-                    }
+                "en": {
+                    "runNow": "Run now",
+                    "running": "Running",
+                    "ready": "Ready",
+                    "lastFailed": "Last run failed",
+                    "coverage": "Coverage",
+                    "withoutTheme": "Without theme",
+                    "lastRun": "Last run",
+                    "nextRun": "Next run",
+                    "coverageSub": "{0} of {1} items have a theme.",
+                    "fromPlugin": "OpEdSync downloaded {0} of them.",
+                    "missingSub": "The reasons are listed below.",
+                    "missingNone": "Every item has a theme.",
+                    "profileHint": "To hear the themes, turn them on in your profile: Display → Theme songs.",
+                    "reasonsTitle": "Why {0} series and movies have no theme",
+                    "reasonsTitleOne": "Why 1 series or movie has no theme",
+                    "reasonsTitleNone": "Every item has a theme",
+                    "showList": "Show the list",
+                    "libraries": "Libraries",
+                    "librariesHelp": "Only tick your anime libraries. Otherwise, films or series could get a theme that isn't theirs.",
+                    "music": "Theme songs",
+                    "themesToKeep": "Themes to download",
+                    "fetchSingle": "One, the best",
+                    "fetchAll": "All",
+                    "fetchNone": "None",
+                    "seriesUse": "For a series, use",
+                    "latestSeason": "Its latest season",
+                    "firstSeason": "The series (usually season 1)",
+                    "seriesUseHelp": "When AnimeThemes has nothing for the latest season, the plugin takes the previous one.",
+                    "themeTypes": "Openings and endings",
+                    "typesBoth": "Both",
+                    "typesOp": "Openings only",
+                    "typesEd": "Endings only",
+                    "overlap": "Themes that overlap with the episode",
+                    "overlapTransitions": "Clean, or with a short transition",
+                    "overlapStrict": "Clean only",
+                    "overlapAll": "All",
+                    "overlapHelp": "A transition keeps a few seconds of the episode at the start or the end. A clean version is always preferred.",
+                    "volume": "Volume",
+                    "volumeHelp": "The volume is baked into the file. A change applies on the next run.",
+                    "video": "Theme videos",
+                    "videoHelp": "The theme shows as a video behind the series page. It takes a lot of disk space.",
+                    "noCredits": "Without on-screen credits",
+                    "videoVolumeHelp": "At 0 %, the audio track is removed.",
+                    "advanced": "Advanced",
+                    "checkYear": "Check the release year",
+                    "checkYearHelp": "The plugin rules out an anime released more than one year before or after the media. This avoids most wrong IDs.",
+                    "parallelism": "Simultaneous downloads",
+                    "parallelismHelp": "One at a time is enough and spares the AnimeThemes server.",
+                    "forceSync": "Update themes already downloaded",
+                    "forceSyncHelp": "On every run, the plugin replaces the themes that no longer match the settings. Every run then goes through the whole library. Your own files (theme.mp3) are never touched.",
+                    "save": "Save",
+                    "on": "on",
+                    "off": "off",
+                    "added0": "nothing added",
+                    "added1": "+1 theme",
+                    "addedN": "+{0} themes",
+                    "failed0": "with no failures",
+                    "failed1": "with 1 failure",
+                    "failedN": "with {0} failures",
+                    "cancelled": "The run was cancelled.",
+                    "never": "No run yet.",
+                    "ago": "{0} ago",
+                    "at": "at {0}",
+                    "today": "today",
+                    "tomorrow": "tomorrow",
+                    "startup": "at startup",
+                    "startupSub": "The task runs when the server starts.",
+                    "manual": "manual",
+                    "manualSub": "The task has no trigger.",
+                    "soon": "soon",
+                    "every": "every {0}",
+                    "daily": "every day",
+                    "weekly": "every week",
+                    "running_sub": "A run is in progress.",
+                    "nextSentence": "{0}. The task runs {1}.",
+                    "unit_m": "{0} min",
+                    "unit_h": "{0} h",
+                    "unit_d": "{0} d",
+                    "noLibrary": "No library ticked",
+                    "noLibraryHelp": "The plugin does nothing while no library is ticked. Tick your anime libraries below.",
+                    "noLibrarySub": "No library is ticked.",
+                    "justNow": "just now",
+                    "checking": "Checking…",
+                    "helpOn": "Hide help",
+                    "helpOff": "Show help",
+                    "releaseNotes": "Release notes",
+                    "state": "Status",
+                    "actions": "Actions",
+                    "actRun": "Start a run",
+                    "actRunHelp": "The plugin looks for and downloads missing themes.",
+                    "actRefresh": "Recompute the figures",
+                    "actRefreshHelp": "The figures are computed again right away.",
+                    "actCheck": "Check AnimeThemes",
+                    "actCheckHelp": "The plugin tests the connection to the service.",
+                    "actLogs": "Server log",
+                    "actLogsHelp": "Search the log for \"OpEdSync\".",
+                    "atOk": "AnimeThemes answers",
+                    "atKo": "AnimeThemes does not answer",
+                    "atSub": "Answered in {0} ms, checked {1}.",
+                    "atKoSub": "Error: {0}. Checked {1}.",
+                    "idsOk": "Anime IDs",
+                    "idsOkSub": "Provided by {0}.",
+                    "idsKo": "No ID plugin",
+                    "idsKoSub": "Install AniDB, MyAnimeList or AniList: without an ID, no theme can be found.",
+                    "ftOk": "Android app fix active",
+                    "ftOkSub": "It relies on File Transformation {0}.",
+                    "ftKo": "Android app fix inactive",
+                    "ftKoSub": "Install File Transformation to turn it on. The rest of the plugin works without it.",
+                    "ftRestart": "Android app fix not active yet",
+                    "ftRestartSub": "File Transformation is installed: restart Jellyfin.",
+                    "filter": "Filter libraries…",
+                    "selected": "{0} of {1} ticked",
+                    "selectAll": "Tick all",
+                    "selectNone": "Untick all",
+                    "reasons": {
+                        "NoId": "No AniDB, MyAnimeList or AniList ID",
+                        "NotOnAnimeThemes": "Not found on AnimeThemes",
+                        "NoVideo": "No video on AnimeThemes yet",
+                        "YearMismatch": "Release year too far (doubtful ID)",
+                        "Filtered": "Themes excluded by your settings",
+                        "DownloadFailed": "Download failed",
+                        "LookupFailed": "AnimeThemes did not answer",
+                        "NotAnalysed": "Waiting for the next run"
+                    },
+                    "timeout": "timed out"
                 }
             };
 
@@ -382,6 +612,10 @@
 
                 var hours = Math.round(minutes / 60);
                 return hours < 48 ? format(t.unit_h, hours) : format(t.unit_d, Math.round(hours / 24));
+            }
+
+            function capitalize(text) {
+                return text ? text.charAt(0).toUpperCase() + text.slice(1) : text;
             }
 
             function since(date) {
@@ -503,12 +737,128 @@
                 var html = '';
                 for (var i = 0; i < libraries.length; i++) {
                     var library = libraries[i];
-                    html += '<div class="checkboxContainer"><label class="emby-checkbox-label">'
+                    html += '<div class="ops-lib-row" data-name="' + escapeHtml(String(library.Name).toLowerCase()) + '">'
+                        + '<div class="checkboxContainer"><label class="emby-checkbox-label">'
                         + '<input type="checkbox" is="emby-checkbox" data-id="' + escapeHtml(library.Id) + '"' + (library.Included ? ' checked' : '') + '/>'
-                        + '<span>' + escapeHtml(library.Name) + '<span class="ops-count">' + number(library.ItemCount) + '</span></span></label></div>';
+                        + '<span>' + escapeHtml(library.Name) + '<span class="ops-count">' + number(library.ItemCount) + '</span></span></label></div>'
+                        + '<span class="ops-lib-type">' + escapeHtml(library.CollectionType || '') + '</span></div>';
                 }
 
                 $('#opsLibraries').innerHTML = html;
+                var boxes = page.querySelectorAll('#opsLibraries input[type=checkbox]');
+                for (var j = 0; j < boxes.length; j++) {
+                    boxes[j].addEventListener('change', updateLibraryCount);
+                }
+
+                applyLibraryFilter();
+                updateLibraryCount();
+            }
+
+            function updateLibraryCount() {
+                var boxes = page.querySelectorAll('#opsLibraries input[type=checkbox]');
+                var checked = 0;
+                for (var i = 0; i < boxes.length; i++) {
+                    checked += boxes[i].checked ? 1 : 0;
+                }
+
+                $('#opsLibCount').textContent = format(t.selected, checked, boxes.length);
+            }
+
+            function applyLibraryFilter() {
+                var text = $('#opsLibFilter').value.trim().toLowerCase();
+                var rows = page.querySelectorAll('#opsLibraries .ops-lib-row');
+                for (var i = 0; i < rows.length; i++) {
+                    rows[i].style.display = !text || rows[i].getAttribute('data-name').indexOf(text) !== -1 ? '' : 'none';
+                }
+            }
+
+            // "Tick all" only touches the libraries the filter shows.
+            function tickLibraries(value) {
+                var rows = page.querySelectorAll('#opsLibraries .ops-lib-row');
+                for (var i = 0; i < rows.length; i++) {
+                    if (rows[i].style.display !== 'none') {
+                        rows[i].querySelector('input[type=checkbox]').checked = value;
+                    }
+                }
+
+                updateLibraryCount();
+            }
+
+            function icon(name, cls) {
+                return '<span class="material-icons ' + name + ' ' + cls + '" aria-hidden="true"></span>';
+            }
+
+            function stateRow(ok, level, title, sub) {
+                var iconName = ok ? 'check_circle' : (level === 'bad' ? 'error_outline' : 'warning_amber');
+                var cls = ok ? 'ops-good' : (level === 'bad' ? 'ops-bad' : 'ops-warn');
+                return '<div class="ops-state-row">' + icon(iconName, cls) + '<div class="ops-state-text">' + escapeHtml(title)
+                    + (sub ? '<small>' + escapeHtml(sub) + '</small>' : '') + '</div></div>';
+            }
+
+            function renderStatus(status) {
+                var version = $('#opsVersion');
+                version.textContent = status.Version || '…';
+                version.title = t.releaseNotes;
+                if (status.Version) {
+                    version.href = 'https://github.com/ElieMFR/OpEdSync/releases/tag/' + encodeURIComponent(status.Version);
+                }
+
+                var rows = '';
+                var check = status.AnimeThemes;
+                if (check) {
+                    var when = since(new Date(check.CheckedUtc));
+                    rows += check.Reachable
+                        ? stateRow(true, null, t.atOk, format(t.atSub, number(check.LatencyMs), when))
+                        : stateRow(false, 'bad', t.atKo, format(t.atKoSub, check.Error === 'timeout' ? t.timeout : (check.Error || ('HTTP ' + check.StatusCode)), when));
+                }
+
+                var providers = [];
+                var fileTransformation = null;
+                var deps = status.Dependencies || [];
+                for (var i = 0; i < deps.length; i++) {
+                    if (deps[i].Role === 'Ids' && deps[i].Installed && deps[i].Active) {
+                        providers.push(deps[i].Name + (deps[i].Version ? ' ' + deps[i].Version : ''));
+                    } else if (deps[i].Role === 'AndroidFix') {
+                        fileTransformation = deps[i];
+                    }
+                }
+
+                rows += providers.length
+                    ? stateRow(true, null, t.idsOk, format(t.idsOkSub, providers.join(', ')))
+                    : stateRow(false, 'bad', t.idsKo, t.idsKoSub);
+
+                if (status.AndroidFixActive) {
+                    rows += stateRow(true, null, t.ftOk, format(t.ftOkSub, fileTransformation && fileTransformation.Version ? fileTransformation.Version : ''));
+                } else if (fileTransformation && fileTransformation.Installed) {
+                    rows += stateRow(false, 'warn', t.ftRestart, t.ftRestartSub);
+                } else {
+                    rows += stateRow(false, 'warn', t.ftKo, t.ftKoSub);
+                }
+
+                $('#opsState').innerHTML = rows;
+            }
+
+            function loadStatus(recheck) {
+                return ApiClient.getJSON(ApiClient.getUrl('OpEdSync/Status', recheck ? { recheck: true } : {})).then(renderStatus);
+            }
+
+            // Per-viewer convenience: remember whether the help texts are hidden.
+            function readHelpPreference() {
+                try {
+                    return localStorage.getItem('opedsync-help') !== 'off';
+                } catch (e) {
+                    return true;
+                }
+            }
+
+            function showHelp(visible) {
+                page.classList.toggle('ops-no-help', !visible);
+                $('#opsHelpToggle').textContent = visible ? t.helpOn : t.helpOff;
+                try {
+                    localStorage.setItem('opedsync-help', visible ? 'on' : 'off');
+                } catch (e) {
+                    // Storage may be unavailable (private window): the choice just won't be remembered.
+                }
             }
 
             function renderStats(stats) {
@@ -523,8 +873,8 @@
                 var percent = total ? Math.round(withTheme / total * 100) : 0;
 
                 $('#opsCoverage').textContent = total ? percent + ' %' : '—';
-                $('#opsCoverageSub').textContent = format(t.coverageSub, number(withTheme), number(total))
-                    + (stats.FromPlugin ? ' · ' + format(t.fromPlugin, number(stats.FromPlugin)) : '');
+                $('#opsCoverageSub').textContent = !anyLibrary ? '' : format(t.coverageSub, number(withTheme), number(total))
+                    + (stats.FromPlugin ? ' ' + format(t.fromPlugin, number(stats.FromPlugin)) : '');
                 $('#opsCoverageBar').style.width = percent + '%';
                 $('#opsMissing').textContent = anyLibrary ? number(missing) : '—';
                 $('#opsMissingSub').textContent = !anyLibrary ? t.noLibrarySub : (missing ? t.missingSub : t.missingNone);
@@ -532,8 +882,8 @@
                 var run = stats.LastRun;
                 if (run) {
                     $('#opsLastAdded').textContent = plural(run.Added, t.added0, t.added1, t.addedN);
-                    $('#opsLastRunSub').textContent = since(new Date(run.EndedUtc))
-                        + ' · ' + plural(run.Failed, t.failed0, t.failed1, t.failedN) + (run.Cancelled ? ' · ' + t.cancelled : '');
+                    $('#opsLastRunSub').textContent = capitalize(since(new Date(run.EndedUtc)))
+                        + ', ' + plural(run.Failed, t.failed0, t.failed1, t.failedN) + '.' + (run.Cancelled ? ' ' + t.cancelled : '');
                 } else {
                     $('#opsLastAdded').textContent = '—';
                     $('#opsLastRunSub').textContent = t.never;
@@ -633,7 +983,7 @@
                 } else if (schedule.next) {
                     var remaining = schedule.next.getTime() - Date.now();
                     $('#opsNextRun').textContent = remaining > 60000 ? format(t.at, clock(schedule.next)) : t.soon;
-                    $('#opsNextRunSub').textContent = dayLabel(schedule.next) + ' · ' + schedule.label;
+                    $('#opsNextRunSub').textContent = format(t.nextSentence, capitalize(dayLabel(schedule.next)), schedule.label);
                 } else if (schedule.startup) {
                     $('#opsNextRun').textContent = t.startup;
                     $('#opsNextRunSub').textContent = t.startupSub;
@@ -683,6 +1033,11 @@
 
             page.addEventListener('pageshow', function () {
                 translatePage();
+                $('#opsLibFilter').placeholder = t.filter;
+                showHelp(readHelpPreference());
+                loadStatus(false).catch(function (e) {
+                    console.error('OpEdSync: status failed to load', e);
+                });
                 Dashboard.showLoadingMsg();
 
                 // The settings show at once; the figures take about a second and fill in when they arrive.
@@ -727,7 +1082,7 @@
                 showVideoState(this.value);
             });
 
-            $('#opsRun').addEventListener('click', function () {
+            function startTask() {
                 if (!task || task.State === 'Running') {
                     return;
                 }
@@ -738,6 +1093,27 @@
                     renderTask();
                     watchTask();
                 });
+            }
+
+            $('#opsRun').addEventListener('click', startTask);
+            $('#opsActionRun').addEventListener('click', startTask);
+
+            $('#opsActionRefresh').addEventListener('click', function () {
+                $('#opsCoverage').textContent = '…';
+                loadStats(true);
+            });
+
+            $('#opsActionCheck').addEventListener('click', function () {
+                $('#opsState').innerHTML = '<p class="ops-muted">' + escapeHtml(t.checking) + '</p>';
+                loadStatus(true);
+            });
+
+            $('#opsLibFilter').addEventListener('input', applyLibraryFilter);
+            $('#opsLibAll').addEventListener('click', function () { tickLibraries(true); });
+            $('#opsLibNone').addEventListener('click', function () { tickLibraries(false); });
+
+            $('#opsHelpToggle').addEventListener('click', function () {
+                showHelp(page.classList.contains('ops-no-help'));
             });
 
             $('#OpEdSyncConfigForm').addEventListener('submit', function (e) {

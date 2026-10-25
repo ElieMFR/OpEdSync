@@ -26,4 +26,9 @@ public sealed class LibraryInfo
     /// Gets or sets the number of series and movies in the library.
     /// </summary>
     public int ItemCount { get; set; }
+
+    /// <summary>
+    /// Gets or sets the Jellyfin collection type (tvshows, movies...), empty when mixed.
+    /// </summary>
+    public string CollectionType { get; set; } = string.Empty;
 }
