@@ -115,7 +115,7 @@ The scheduled task **Search for anime themes** runs every 12 hours.
 
 ## 🎨 Recommended Theme
 
-OpEdSync pairs well with the [**ElegantFin Cinema Edition**](https://github.com/peterdu1109/ElegantFin) theme, a streaming-inspired CSS theme for Jellyfin.
+OpEdSync pairs well with the [**ElegantFin Cinema Edition**](https://github.com/ElieMFR/ElegantFin) theme, a streaming-inspired CSS theme for Jellyfin.
 
 ## 👥 Authors and Credits
 
@@ -216,7 +216,7 @@ La tâche planifiée **Rechercher les thèmes d'anime** tourne toutes les 12 heu
 
 ## 🎨 Thème recommandé
 
-OpEdSync s'accorde bien avec le thème [**ElegantFin Cinema Edition**](https://github.com/peterdu1109/ElegantFin), un thème CSS pour Jellyfin inspiré des plateformes de streaming.
+OpEdSync s'accorde bien avec le thème [**ElegantFin Cinema Edition**](https://github.com/ElieMFR/ElegantFin), un thème CSS pour Jellyfin inspiré des plateformes de streaming.
 
 ## 👥 Auteurs et crédits
 
