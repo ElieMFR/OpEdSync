@@ -1,3 +1,4 @@
+using System;
 using MediaBrowser.Model.Plugins;
 
 namespace Jellyfin.Plugin.OpEdSync.Configuration;
@@ -7,6 +8,11 @@ namespace Jellyfin.Plugin.OpEdSync.Configuration;
 /// </summary>
 public class PluginConfiguration : BasePluginConfiguration
 {
+    /// <summary>
+    /// Address of the public AnimeThemes API.
+    /// </summary>
+    public const string DefaultAnimeThemesBaseUrl = "https://api.animethemes.moe";
+
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginConfiguration"/> class.
     /// </summary>
@@ -20,6 +26,7 @@ public class PluginConfiguration : BasePluginConfiguration
         // New installs only look at libraries whose name contains "anim" (Animés, Anime, Animation...).
         IncludeLibraries = "anim";
         ExcludeLibraries = string.Empty;
+        AnimeThemesBaseUrl = DefaultAnimeThemesBaseUrl;
 
         AudioSettings = new MediaTypeConfiguration()
         {
@@ -95,4 +102,21 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets or sets the video settings.
     /// </summary>
     public MediaTypeConfiguration VideoSettings { get; set; }
+
+    /// <summary>
+    /// Gets or sets the address of the AnimeThemes API. Not shown on the configuration page: only the test bench
+    /// points it at a fake AnimeThemes. Read when an HTTP client is created; see <see cref="ResolveAnimeThemesBaseUrl"/>.
+    /// </summary>
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Design", "CA1056:URI-like properties should not be strings", Justification = "Serialized to XML.")]
+    public string AnimeThemesBaseUrl { get; set; }
+
+    /// <summary>
+    /// Gets the AnimeThemes address to use: the configured one when it is an absolute http(s) address, the public API otherwise.
+    /// </summary>
+    /// <param name="configured">Configured address, possibly empty or missing from older settings.</param>
+    /// <returns>The address.</returns>
+    public static Uri ResolveAnimeThemesBaseUrl(string? configured)
+        => Uri.TryCreate(configured?.Trim(), UriKind.Absolute, out var uri) && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
+            ? uri
+            : new Uri(DefaultAnimeThemesBaseUrl);
 }

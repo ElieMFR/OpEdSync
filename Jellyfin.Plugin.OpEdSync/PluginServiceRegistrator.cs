@@ -1,6 +1,7 @@
 using System;
 using System.Net.Http.Headers;
 using Jellyfin.Plugin.OpEdSync.Api;
+using Jellyfin.Plugin.OpEdSync.Configuration;
 using Jellyfin.Plugin.OpEdSync.Reports;
 using Jellyfin.Plugin.OpEdSync.Web;
 using MediaBrowser.Controller;
@@ -28,10 +29,11 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
 
         serviceCollection.AddTransient<PollyResilienceHandler>();
 
+        // The address is read each time a client is created, so a changed setting applies to the next run.
         serviceCollection
             .AddHttpClient("AnimeThemes", c =>
             {
-                c.BaseAddress = new Uri("https://api.animethemes.moe");
+                c.BaseAddress = PluginConfiguration.ResolveAnimeThemesBaseUrl(Plugin.Instance?.Configuration.AnimeThemesBaseUrl);
                 c.DefaultRequestHeaders.UserAgent.Add(productHeader);
             })
             .AddHttpMessageHandler<PollyResilienceHandler>();
@@ -39,7 +41,7 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         // Same address, no retries: a status check must answer within seconds.
         serviceCollection.AddHttpClient(StatusService.CheckClientName, c =>
         {
-            c.BaseAddress = new Uri("https://api.animethemes.moe");
+            c.BaseAddress = PluginConfiguration.ResolveAnimeThemesBaseUrl(Plugin.Instance?.Configuration.AnimeThemesBaseUrl);
             c.DefaultRequestHeaders.UserAgent.Add(productHeader);
             c.Timeout = TimeSpan.FromSeconds(8);
         });
