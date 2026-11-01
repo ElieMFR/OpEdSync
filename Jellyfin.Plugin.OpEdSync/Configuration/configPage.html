@@ -438,6 +438,7 @@
                         "Filtered": "Génériques exclus par vos réglages",
                         "DownloadFailed": "Échec du téléchargement",
                         "LookupFailed": "AnimeThemes n’a pas répondu",
+                        "SharedFolder": "Film rangé avec d’autres dans un même dossier : Jellyfin ne lui associe aucun générique",
                         "NotAnalysed": "En attente du prochain passage"
                     },
                     "timeout": "délai dépassé"
@@ -567,6 +568,7 @@
                         "Filtered": "Themes excluded by your settings",
                         "DownloadFailed": "Download failed",
                         "LookupFailed": "AnimeThemes did not answer",
+                        "SharedFolder": "Movie stored with others in one folder: Jellyfin attaches no theme to it",
                         "NotAnalysed": "Waiting for the next run"
                     },
                     "timeout": "timed out"
@@ -897,7 +899,7 @@
                     : (missing === 1 ? t.reasonsTitleOne : format(t.reasonsTitle, number(missing)));
 
                 var reasons = stats.Reasons || {};
-                var order = ['NoId', 'NotOnAnimeThemes', 'NoVideo', 'YearMismatch', 'Filtered', 'DownloadFailed', 'LookupFailed', 'NotAnalysed'];
+                var order = ['NoId', 'NotOnAnimeThemes', 'NoVideo', 'YearMismatch', 'Filtered', 'DownloadFailed', 'LookupFailed', 'SharedFolder', 'NotAnalysed'];
                 var rows = '';
                 for (var i = 0; i < order.length; i++) {
                     if (reasons[order[i]]) {

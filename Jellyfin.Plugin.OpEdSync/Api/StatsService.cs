@@ -142,7 +142,9 @@ public sealed class StatsService
                 continue;
             }
 
-            var reason = !downloader.HasAnyId(item, configuration)
+            var reason = !AnimeThemesDownloader.HasOwnThemeFolder(item)
+                ? MissingReason.SharedFolder
+                : !downloader.HasAnyId(item, configuration)
                 ? MissingReason.NoId
                 : summary?.Reasons.GetValueOrDefault(item.Id, MissingReason.NotAnalysed) ?? MissingReason.NotAnalysed;
 

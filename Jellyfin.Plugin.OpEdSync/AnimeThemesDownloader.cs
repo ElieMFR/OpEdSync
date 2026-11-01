@@ -285,21 +285,15 @@ public class AnimeThemesDownloader : IDisposable
             }
         }
 
-        // Movies sharing a folder share its theme folders: removing files there would delete the others' themes.
-        bool sharedFolder = item.IsInMixedFolder;
         bool allOnDisk = links.Length > 0 && links.All(it => File.Exists(Path.Combine(item.ContainingFolderPath, it.Filepath)));
 
         // Once the new selection is complete, files at an older volume are replaced, even when the best theme changed name.
-        if (allOnDisk && !sharedFolder)
+        if (allOnDisk)
         {
             changesMade |= RemoveFiles(item, type, existing => ThemeFileRules.OutdatedVolumeFiles(existing, settings.Volume), report);
         }
 
-        if (forceSync && sharedFolder)
-        {
-            _logger.LogInformation("[{Id}] Keeping existing {Type} themes: the folder is shared with other items", item.Id, type);
-        }
-        else if (forceSync)
+        if (forceSync)
         {
             // Only clean up once the replacements are on disk, so a failed download or a show without
             // matching themes never loses the theme it already had. "None" is an explicit request to clear them.
@@ -597,10 +591,22 @@ public class AnimeThemesDownloader : IDisposable
         return GetBestThemes(anime, settings).Where(it => type == MediaType.Video || it.Audio is not null);
     }
 
+    /// <summary>
+    /// Tells whether Jellyfin would attach theme folders to the item. It does not for a movie sharing its folder with
+    /// other movies (checked on Jellyfin 12.4): themes downloaded there would be ignored and their files shared by all.
+    /// </summary>
+    /// <param name="item">Item.</param>
+    /// <returns>Whether the item has a theme folder of its own.</returns>
+    public static bool HasOwnThemeFolder(BaseItem item)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+        return !(item.GetBaseItemKind() == BaseItemKind.Movie && item.IsInMixedFolder);
+    }
+
     private static bool IsSupportedKind(BaseItem item)
     {
         var kind = item.GetBaseItemKind();
-        return kind == BaseItemKind.Series || kind == BaseItemKind.Movie;
+        return (kind == BaseItemKind.Series || kind == BaseItemKind.Movie) && HasOwnThemeFolder(item);
     }
 
     private static bool TryGetProviderId(BaseItem item, string providerKey, out int id)

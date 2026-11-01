@@ -44,4 +44,9 @@ public enum MissingReason
     /// The lookup on AnimeThemes failed (network, server error).
     /// </summary>
     LookupFailed = 7,
+
+    /// <summary>
+    /// The movie shares its folder with other movies: Jellyfin attaches no theme to it, so none is downloaded.
+    /// </summary>
+    SharedFolder = 8,
 }
