@@ -5,7 +5,7 @@ namespace Jellyfin.Plugin.OpEdSync.Models;
 /// <summary>
 /// Enum of all possible video sources.
 /// </summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[JsonConverter(typeof(VideoSourceConverter))]
 public enum VideoSource
 {
     /// <summary>

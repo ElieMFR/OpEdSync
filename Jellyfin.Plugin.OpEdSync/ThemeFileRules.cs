@@ -4,6 +4,7 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace Jellyfin.Plugin.OpEdSync;
 
@@ -24,6 +25,16 @@ public static partial class ThemeFileRules
     /// <param name="value">Configured value.</param>
     /// <returns>A value between 1 and <see cref="MaxParallelism"/>.</returns>
     public static int ClampParallelism(int value) => Math.Clamp(value, 1, MaxParallelism);
+
+    /// <summary>
+    /// Tells whether an exception is a timeout rather than the run being cancelled. HttpClient reports its own
+    /// timeout as <see cref="System.Threading.Tasks.TaskCanceledException"/>, which must fail one item, not stop the run.
+    /// </summary>
+    /// <param name="exception">Caught exception.</param>
+    /// <param name="cancellationToken">Token of the run.</param>
+    /// <returns>Whether the exception is a cancellation that the run did not ask for.</returns>
+    public static bool IsTimeout(Exception exception, CancellationToken cancellationToken)
+        => exception is OperationCanceledException && !cancellationToken.IsCancellationRequested;
 
     /// <summary>
     /// Converts a volume between 0 and 1 to the percentage used in file names.
@@ -93,11 +104,51 @@ public static partial class ThemeFileRules
     /// <param name="volume">Configured volume between 0 and 1.</param>
     /// <returns>Whether at least one plugin file has an outdated volume.</returns>
     public static bool HasOutdatedVolume(IEnumerable<string> existing, double volume)
+        => OutdatedVolumeFiles(existing, volume).Any();
+
+    /// <summary>
+    /// Lists the plugin files written with another volume than the configured one.
+    /// </summary>
+    /// <param name="existing">File names currently on disk.</param>
+    /// <param name="volume">Configured volume between 0 and 1.</param>
+    /// <returns>The plugin files with an outdated volume.</returns>
+    public static IEnumerable<string> OutdatedVolumeFiles(IEnumerable<string> existing, double volume)
     {
         var expected = ToPercent(volume).ToString(CultureInfo.InvariantCulture);
-        return existing
-            .Select(it => PluginFilePattern().Match(Path.GetFileName(it)))
-            .Any(it => it.Success && it.Groups["volume"].Value != expected);
+        return existing.Where(it =>
+        {
+            var match = PluginFilePattern().Match(Path.GetFileName(it));
+            return match.Success && match.Groups["volume"].Value != expected;
+        });
+    }
+
+    /// <summary>
+    /// Tells whether plugin files are on disk although Jellyfin does not list them yet, as after a run stopped
+    /// between writing the files and refreshing the item.
+    /// </summary>
+    /// <param name="existing">File names currently on disk.</param>
+    /// <param name="knownToJellyfin">Whether Jellyfin already lists themes of this type for the item.</param>
+    /// <returns>Whether the item must be refreshed.</returns>
+    public static bool NeedsRegistration(IEnumerable<string> existing, bool knownToJellyfin)
+        => !knownToJellyfin && existing.Any(IsPluginFile);
+
+    /// <summary>
+    /// Keeps only the file name part of a name sent by AnimeThemes, so it can never point outside the theme folder.
+    /// </summary>
+    /// <param name="name">Name sent by the API.</param>
+    /// <returns>The safe base name, or <c>null</c> when nothing usable is left.</returns>
+    public static string? SafeBaseName(string? name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            return null;
+        }
+
+        // Both separators: a name built on Linux must not escape the folder on Windows, and the other way round.
+        var baseName = name[(name.LastIndexOfAny(['/', '\\']) + 1)..].Trim();
+        return baseName.Length == 0 || baseName == "." || baseName == ".." || baseName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0
+            ? null
+            : baseName;
     }
 
     [GeneratedRegex(@"^(?<base>.+)__(?<volume>\d{1,3})\.(?<ext>mp3|webm)$", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant)]

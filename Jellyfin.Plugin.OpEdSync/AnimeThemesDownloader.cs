@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Data.Enums;
@@ -32,6 +33,9 @@ public class AnimeThemesDownloader : IDisposable
 {
     private const string ThemeMusicDirectory = "theme-music";
     private const string ThemeVideoDirectory = "backdrops";
+
+    // A theme is a few megabytes: past this, the connection is stuck and the next item should get its turn.
+    private static readonly TimeSpan DownloadTimeout = TimeSpan.FromMinutes(10);
 
     // Providers in order of preference: Jellyfin provider key -> AnimeThemes site name.
     private static readonly (string ProviderKey, string Site)[] SupportedProviders =
@@ -121,9 +125,9 @@ public class AnimeThemesDownloader : IDisposable
                 {
                     animeById = await _api.FindByExternalId(siteGroup.Key, itemsById.Keys, cancellationToken).ConfigureAwait(false);
                 }
-                catch (HttpRequestException e)
+                catch (Exception e) when (e is HttpRequestException or JsonException || ThemeFileRules.IsTimeout(e, cancellationToken))
                 {
-                    // Don't let a failing lookup abort the whole run; the next run will retry.
+                    // Don't let a failing lookup (or a maintenance page instead of JSON) abort the whole run; the next run will retry.
                     _logger.LogError(e, "Lookup on {Site} failed", siteGroup.Key);
                     foreach (var item in itemsById.Values.SelectMany(it => it))
                     {
@@ -230,7 +234,11 @@ public class AnimeThemesDownloader : IDisposable
         // Process audios
         bool audioChanged = await ProcessMediaType(MediaType.Audio, anime, item, configuration.ForceSync, collectionTypeConfig, report, cancellationToken).ConfigureAwait(false);
 
-        if (videoChanged || audioChanged)
+        // Files written by a run that stopped before the refresh are on disk but unknown to Jellyfin.
+        bool unregistered = ThemeFileRules.NeedsRegistration(ListThemeFiles(item, MediaType.Video), item.GetThemeVideos().Any())
+                            || ThemeFileRules.NeedsRegistration(ListThemeFiles(item, MediaType.Audio), item.GetThemeSongs().Any());
+
+        if (videoChanged || audioChanged || unregistered)
         {
             _logger.LogInformation("[{Id}] Saving metadata", item.Id);
             await item.RefreshMetadata(cancellationToken).ConfigureAwait(false);
@@ -277,13 +285,25 @@ public class AnimeThemesDownloader : IDisposable
             }
         }
 
-        if (forceSync)
+        // Movies sharing a folder share its theme folders: removing files there would delete the others' themes.
+        bool sharedFolder = item.IsInMixedFolder;
+        bool allOnDisk = links.Length > 0 && links.All(it => File.Exists(Path.Combine(item.ContainingFolderPath, it.Filepath)));
+
+        // Once the new selection is complete, files at an older volume are replaced, even when the best theme changed name.
+        if (allOnDisk && !sharedFolder)
+        {
+            changesMade |= RemoveFiles(item, type, existing => ThemeFileRules.OutdatedVolumeFiles(existing, settings.Volume), report);
+        }
+
+        if (forceSync && sharedFolder)
+        {
+            _logger.LogInformation("[{Id}] Keeping existing {Type} themes: the folder is shared with other items", item.Id, type);
+        }
+        else if (forceSync)
         {
             // Only clean up once the replacements are on disk, so a failed download or a show without
             // matching themes never loses the theme it already had. "None" is an explicit request to clear them.
-            bool replacementsReady = settings.FetchType == FetchType.None
-                ? links.Length == 0
-                : links.Length > 0 && links.All(it => File.Exists(Path.Combine(item.ContainingFolderPath, it.Filepath)));
+            bool replacementsReady = settings.FetchType == FetchType.None ? links.Length == 0 : allOnDisk;
 
             if (replacementsReady)
             {
@@ -322,9 +342,18 @@ public class AnimeThemesDownloader : IDisposable
         foreach (var theme in themes)
         {
             var link = isAudio ? theme.Audio.Link : theme.Video.Link;
+
+            // The name comes from the API: never let it point outside the theme folder.
+            var baseName = ThemeFileRules.SafeBaseName(isAudio ? theme.Audio.Filename : theme.Video.Filename);
+            if (baseName is null)
+            {
+                _logger.LogWarning("Ignoring {Link}: unusable file name", link);
+                continue;
+            }
+
             var path = isAudio
-                ? Path.Combine(ThemeMusicDirectory, ThemeFileRules.BuildFileName(theme.Audio.Filename, settings.Volume, "mp3"))
-                : Path.Combine(ThemeVideoDirectory, ThemeFileRules.BuildFileName(theme.Video.Filename, settings.Volume, "webm"));
+                ? Path.Combine(ThemeMusicDirectory, ThemeFileRules.BuildFileName(baseName, settings.Volume, "mp3"))
+                : Path.Combine(ThemeVideoDirectory, ThemeFileRules.BuildFileName(baseName, settings.Volume, "webm"));
 
             yield return (link, path);
         }
@@ -369,19 +398,24 @@ public class AnimeThemesDownloader : IDisposable
         // ffmpeg writes to a temporary name first, so an interrupted run never leaves a truncated theme behind
         // (which the next run would treat as "already downloaded").
         var partialPath = path + ".part";
+
+        // Bounds the whole download and conversion; HttpClient's own timeout stops once the headers arrive.
+        using var timeout = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        timeout.CancelAfter(DownloadTimeout);
+        var token = timeout.Token;
         try
         {
             // Make sure directory exists
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
 
             _logger.LogInformation("[{Id}] Downloading {Url} to {Path}", item.Id, url, path);
-            var downloadStream = await _client.GetStreamAsync(url, cancellationToken).ConfigureAwait(false);
+            var downloadStream = await _client.GetStreamAsync(url, token).ConfigureAwait(false);
             await using (downloadStream.ConfigureAwait(false))
             {
                 var fileStream = File.Create(tempFile);
                 await using (fileStream.ConfigureAwait(false))
                 {
-                    await downloadStream.CopyToAsync(fileStream, cancellationToken).ConfigureAwait(false);
+                    await downloadStream.CopyToAsync(fileStream, token).ConfigureAwait(false);
                 }
             }
 
@@ -433,9 +467,9 @@ public class AnimeThemesDownloader : IDisposable
 
             try
             {
-                var errorTask = process.StandardError.ReadToEndAsync(cancellationToken);
-                var outputTask = process.StandardOutput.ReadToEndAsync(cancellationToken);
-                await process.WaitForExitAsync(cancellationToken).ConfigureAwait(false);
+                var errorTask = process.StandardError.ReadToEndAsync(token);
+                var outputTask = process.StandardOutput.ReadToEndAsync(token);
+                await process.WaitForExitAsync(token).ConfigureAwait(false);
                 var error = await errorTask.ConfigureAwait(false);
                 await outputTask.ConfigureAwait(false);
 
@@ -450,6 +484,17 @@ public class AnimeThemesDownloader : IDisposable
                 if (!process.HasExited)
                 {
                     process.Kill(true);
+
+                    // Kill returns before ffmpeg lets go of its files; deleting them right away fails on Windows.
+                    using var exited = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                    try
+                    {
+                        await process.WaitForExitAsync(exited.Token).ConfigureAwait(false);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        _logger.LogWarning("[{Id}] ffmpeg did not exit after being stopped", item.Id);
+                    }
                 }
 
                 throw;
@@ -458,7 +503,7 @@ public class AnimeThemesDownloader : IDisposable
             File.Move(partialPath, path, true);
             _logger.LogInformation("[{Id}] Successfully downloaded theme song!", item.Id);
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e) when (!ThemeFileRules.IsTimeout(e, cancellationToken))
         {
             throw;
         }
@@ -469,24 +514,35 @@ public class AnimeThemesDownloader : IDisposable
         }
         finally
         {
-            File.Delete(tempFile);
-            File.Delete(partialPath);
+            TryDelete(tempFile);
+            TryDelete(partialPath);
         }
 
         return DownloadResult.Downloaded;
     }
 
+    // A leftover temporary file must not turn a cancellation (or a success) into a failure.
+    private void TryDelete(string path)
+    {
+        try
+        {
+            File.Delete(path);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            _logger.LogWarning(e, "Could not delete temporary file {Path}", path);
+        }
+    }
+
     /// <summary>
-    /// Gets the settings that apply to an item (movies follow the series settings unless configured otherwise).
+    /// Gets the settings that apply to an item; movies and series share them.
     /// </summary>
     /// <param name="item">Item.</param>
     /// <param name="configuration">Configuration.</param>
     /// <returns>The settings.</returns>
     internal static CollectionTypeConfiguration GetCollectionSettings(BaseItem item, PluginConfiguration configuration)
     {
-        return item.GetBaseItemKind() == BaseItemKind.Movie && configuration.SeparateMovieSettings
-            ? configuration.MovieSettings
-            : new CollectionTypeConfiguration { AudioSettings = configuration.AudioSettings, VideoSettings = configuration.VideoSettings };
+        return new CollectionTypeConfiguration { AudioSettings = configuration.AudioSettings, VideoSettings = configuration.VideoSettings };
     }
 
     private static bool IsSatisfied(BaseItem item, PluginConfiguration configuration)
@@ -613,6 +669,7 @@ public class AnimeThemesDownloader : IDisposable
                          || it.Video.Overlap == OverlapType.None
                          || (settings.AllowTransitions && it.Video.Overlap == OverlapType.Transition))
             .Where(it => !settings.IgnoreThemesWithCredits || it.Video.Creditless)
+            .Where(it => it.Theme.Type != ThemeType.Other)
             .Where(it => !settings.IgnoreEDs || it.Theme.Type != ThemeType.ED)
             .Where(it => !settings.IgnoreOPs || it.Theme.Type != ThemeType.OP);
     }

@@ -98,10 +98,12 @@ public sealed class StatusService : IDisposable
                 check.StatusCode = (int)response.StatusCode;
                 check.Reachable = response.IsSuccessStatusCode;
             }
-            catch (Exception e) when (e is HttpRequestException or TaskCanceledException)
+            catch (Exception e) when (e is HttpRequestException || ThemeFileRules.IsTimeout(e, cancellationToken))
             {
+                // A page closed during the check cancels the request: that says nothing about AnimeThemes, so it
+                // is neither reported nor kept.
                 check.Reachable = false;
-                check.Error = e is TaskCanceledException ? "timeout" : e.Message;
+                check.Error = e is HttpRequestException ? e.Message : "timeout";
             }
 
             check.LatencyMs = (int)watch.ElapsedMilliseconds;

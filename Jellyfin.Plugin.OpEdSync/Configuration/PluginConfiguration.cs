@@ -41,7 +41,6 @@ public class PluginConfiguration : BasePluginConfiguration
             Volume = 0.0,
         };
 
-        MovieSettings = new CollectionTypeConfiguration();
         LibraryIds = [];
     }
 
@@ -61,11 +60,6 @@ public class PluginConfiguration : BasePluginConfiguration
     /// </summary>
     [System.Diagnostics.CodeAnalysis.SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "Serialized to XML.")]
     public string[] LibraryIds { get; set; }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether movies use <see cref="MovieSettings"/> instead of the series settings.
-    /// </summary>
-    public bool SeparateMovieSettings { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether an anime is only accepted when its year is close to the item's.
@@ -101,9 +95,4 @@ public class PluginConfiguration : BasePluginConfiguration
     /// Gets or sets the video settings.
     /// </summary>
     public MediaTypeConfiguration VideoSettings { get; set; }
-
-    /// <summary>
-    /// Gets or sets the download settings for the movie type.
-    /// </summary>
-    public CollectionTypeConfiguration MovieSettings { get; set; }
 }

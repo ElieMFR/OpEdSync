@@ -5,7 +5,7 @@ namespace Jellyfin.Plugin.OpEdSync.Models;
 /// <summary>
 /// Enum describing the theme types.
 /// </summary>
-[JsonConverter(typeof(JsonStringEnumConverter))]
+[JsonConverter(typeof(ThemeTypeConverter))]
 public enum ThemeType
 {
     /// <summary>
@@ -16,5 +16,10 @@ public enum ThemeType
     /// <summary>
     /// Ending theme.
     /// </summary>
-    ED
+    ED,
+
+    /// <summary>
+    /// A type the plugin does not know (an insert song, for instance); never used as a theme.
+    /// </summary>
+    Other
 }

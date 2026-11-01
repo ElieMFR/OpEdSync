@@ -428,6 +428,8 @@
                     "selected": "{0} sur {1} cochées",
                     "selectAll": "Tout cocher",
                     "selectNone": "Tout décocher",
+                    "saveFailed": "Les réglages n’ont pas été enregistrés : le serveur n’a pas répondu.",
+                    "runFailed": "Le passage n’a pas pu être lancé : le serveur n’a pas répondu.",
                     "reasons": {
                         "NoId": "Aucun identifiant AniDB, MyAnimeList ou AniList",
                         "NotOnAnimeThemes": "Introuvable sur AnimeThemes",
@@ -555,6 +557,8 @@
                     "selected": "{0} of {1} ticked",
                     "selectAll": "Tick all",
                     "selectNone": "Untick all",
+                    "saveFailed": "The settings were not saved: the server did not answer.",
+                    "runFailed": "The run could not be started: the server did not answer.",
                     "reasons": {
                         "NoId": "No AniDB, MyAnimeList or AniList ID",
                         "NotOnAnimeThemes": "Not found on AnimeThemes",
@@ -1092,6 +1096,9 @@
                     task.CurrentProgressPercentage = 0;
                     renderTask();
                     watchTask();
+                }).catch(function (e) {
+                    console.error('OpEdSync: run failed to start', e);
+                    Dashboard.alert(t.runFailed);
                 });
             }
 
@@ -1126,7 +1133,13 @@
                 readForm();
                 ApiClient.updatePluginConfiguration(pluginId, config).then(function (result) {
                     Dashboard.processPluginConfigurationUpdateResult(result);
-                    return loadStats(true);
+                    return loadStats(true).catch(function (e) {
+                        console.error('OpEdSync: figures failed to load', e);
+                    });
+                }, function (e) {
+                    console.error('OpEdSync: settings failed to save', e);
+                    Dashboard.hideLoadingMsg();
+                    Dashboard.alert(t.saveFailed);
                 });
                 return false;
             });

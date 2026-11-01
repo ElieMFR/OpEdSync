@@ -27,6 +27,7 @@ public sealed class StatsService
     private readonly RunSummaryStore _summaryStore;
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly object _lock = new();
+    private readonly object _computeLock = new();
     private StatsResponse? _cached;
     private bool _subscribed;
 
@@ -65,21 +66,27 @@ public sealed class StatsService
     {
         SubscribeToConfigurationChanges();
 
-        lock (_lock)
+        var asked = DateTime.UtcNow;
+
+        // One computation at a time: a second page view waits for the first one and reuses its figures.
+        lock (_computeLock)
         {
-            if (!refresh && _cached is not null && DateTime.UtcNow - _cached.ComputedUtc < CacheDuration)
+            lock (_lock)
             {
-                return _cached;
+                if (_cached is not null && (refresh ? _cached.ComputedUtc >= asked : DateTime.UtcNow - _cached.ComputedUtc < CacheDuration))
+                {
+                    return _cached;
+                }
             }
-        }
 
-        var computed = Compute();
-        lock (_lock)
-        {
-            _cached = computed;
-        }
+            var computed = Compute();
+            lock (_lock)
+            {
+                _cached = computed;
+            }
 
-        return computed;
+            return computed;
+        }
     }
 
     private void SubscribeToConfigurationChanges()
@@ -97,6 +104,7 @@ public sealed class StatsService
 
     private StatsResponse Compute()
     {
+        var computedUtc = DateTime.UtcNow;
         var configuration = Plugin.Instance!.Configuration;
         var summary = _summaryStore.Load();
 
@@ -112,7 +120,7 @@ public sealed class StatsService
             .OrderBy(it => it.Name, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
 
-        var response = new StatsResponse { Libraries = libraries, ComputedUtc = DateTime.UtcNow };
+        var response = new StatsResponse { Libraries = libraries, ComputedUtc = computedUtc };
         var reasons = Enum.GetValues<MissingReason>().ToDictionary(it => it.ToString(), _ => 0);
         var missing = new List<MissingItem>();
 

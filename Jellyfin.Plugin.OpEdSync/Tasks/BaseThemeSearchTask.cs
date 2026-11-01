@@ -100,7 +100,7 @@ public abstract class BaseThemeSearchTask
                 {
                     await _downloader.HandleAsync(item.Item, item.Anime.First(), configuration, report, ct).ConfigureAwait(false);
                 }
-                catch (Exception e) when (e is not OperationCanceledException)
+                catch (Exception e) when (e is not OperationCanceledException || ThemeFileRules.IsTimeout(e, ct))
                 {
                     // One broken item must not stop the others.
                     _logger.LogError(e, "[{Id}] Failed to process {Name}", item.Item.Id, item.Item.Name);
