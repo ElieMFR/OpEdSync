@@ -10,6 +10,14 @@
         "imageUrl": "https://raw.githubusercontent.com/ElieMFR/OpEdSync/main/logo.png",
         "versions": [
             {
+                "checksum": "b217fb42158535d6245ee33756ea2749",
+                "changelog": "<a style='color:white;text-decoration:none' href=\"https://github.com/ElieMFR/OpEdSync/releases/tag/1.5.3.1\">📋 <span style='text-decoration:underline'>Release Notes 1.5.3.1</span></a>",
+                "targetAbi": "12.0.0.0",
+                "sourceUrl": "https://github.com/ElieMFR/OpEdSync/releases/download/1.5.3.1/opedsync_1.5.3.1.zip",
+                "timestamp": "2026-11-07T13:07:01Z",
+                "version": "1.5.3.1"
+            },
+            {
                 "checksum": "5de7049689068771954e32d156a7f934",
                 "changelog": "<a style='color:white;text-decoration:none' href=\"https://github.com/ElieMFR/OpEdSync/releases/tag/1.5.3.0\">📋 <span style='text-decoration:underline'>Release Notes 1.5.3.0</span></a>",
                 "targetAbi": "12.0.0.0",
