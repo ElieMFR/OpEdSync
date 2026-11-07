@@ -15,7 +15,7 @@ namespace Jellyfin.Plugin.OpEdSync;
 /// <summary>
 /// Represents the AnimeThemes API.
 /// </summary>
-public sealed class AnimeThemesApi : IDisposable
+public sealed class AnimeThemesApi
 {
     // Largest page accepted by the API.
     private const int MaxPageSize = 100;
@@ -23,7 +23,7 @@ public sealed class AnimeThemesApi : IDisposable
     // Safety net against a pagination loop.
     private const int MaxPages = 10;
 
-    private readonly HttpClient _client;
+    private readonly IHttpClientFactory _clientFactory;
     private readonly ILogger<AnimeThemesDownloader> _logger;
 
     /// <summary>
@@ -34,7 +34,7 @@ public sealed class AnimeThemesApi : IDisposable
     public AnimeThemesApi(IHttpClientFactory clientFactory, ILogger<AnimeThemesDownloader> logger)
     {
         _logger = logger;
-        _client = clientFactory.CreateClient("AnimeThemes");
+        _clientFactory = clientFactory;
     }
 
     /// <summary>
@@ -67,13 +67,17 @@ public sealed class AnimeThemesApi : IDisposable
         // @formatter:on
 
         string? uri = QueryHelpers.AddQueryString("/anime/", arguments);
+
+        // A client per lookup: the factory reads the configured address each time, so a changed setting applies
+        // without restarting the server.
+        using var client = _clientFactory.CreateClient("AnimeThemes");
         var found = new List<Anime>();
 
         // One ID can match several anime, so a page may not hold everything: follow the next links.
         for (int page = 0; uri is not null && page < MaxPages; page++)
         {
             _logger.LogInformation("Fetching from API: {Uri} (length={Length})", uri, uri.Length);
-            using var result = await _client.GetAsync(new Uri(uri, UriKind.RelativeOrAbsolute), cancellationToken).ConfigureAwait(false);
+            using var result = await client.GetAsync(new Uri(uri, UriKind.RelativeOrAbsolute), cancellationToken).ConfigureAwait(false);
             result.EnsureSuccessStatusCode();
 
             var content = await result.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
@@ -93,23 +97,5 @@ public sealed class AnimeThemesApi : IDisposable
         _logger.LogInformation("Of a total of {TotalCount} shows, we were able to find entries for {FinalCount} shows", idList.Length, animeByAniId.Count);
 
         return idList.ToDictionary(id => id, id => animeByAniId.GetValueOrDefault(id) ?? []);
-    }
-
-    /// <summary>
-    /// Disposes of the client.
-    /// </summary>
-    /// <param name="disposing">Whether the object is currently being disposed.</param>
-    private void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            _client.Dispose();
-        }
-    }
-
-    /// <inheritdoc />
-    public void Dispose()
-    {
-        Dispose(true);
     }
 }

@@ -142,11 +142,7 @@ public sealed class StatsService
                 continue;
             }
 
-            var reason = !AnimeThemesDownloader.HasOwnThemeFolder(item)
-                ? MissingReason.SharedFolder
-                : !downloader.HasAnyId(item, configuration)
-                ? MissingReason.NoId
-                : summary?.Reasons.GetValueOrDefault(item.Id, MissingReason.NotAnalysed) ?? MissingReason.NotAnalysed;
+            var reason = ClassifyMissing(item, () => downloader.HasAnyId(item, configuration), summary);
 
             reasons[reason.ToString()]++;
             if (missing.Count < MaxMissingListed)
@@ -170,6 +166,28 @@ public sealed class StatsService
         };
 
         return response;
+    }
+
+    /// <summary>
+    /// Tells why an item has no theme, for the configuration page.
+    /// </summary>
+    /// <param name="item">Item without theme.</param>
+    /// <param name="hasAnyId">Whether the item (or one of its seasons) has an ID; only asked when needed.</param>
+    /// <param name="lastRun">Summary of the last run, if any.</param>
+    /// <returns>The reason.</returns>
+    public static MissingReason ClassifyMissing(BaseItem item, Func<bool> hasAnyId, RunSummary? lastRun)
+    {
+        ArgumentNullException.ThrowIfNull(item);
+        ArgumentNullException.ThrowIfNull(hasAnyId);
+
+        if (!AnimeThemesDownloader.HasOwnThemeFolder(item))
+        {
+            return MissingReason.SharedFolder;
+        }
+
+        return !hasAnyId()
+            ? MissingReason.NoId
+            : lastRun?.Reasons.GetValueOrDefault(item.Id, MissingReason.NotAnalysed) ?? MissingReason.NotAnalysed;
     }
 
     // Only the number is asked for: loading every item of a large film library took seconds.

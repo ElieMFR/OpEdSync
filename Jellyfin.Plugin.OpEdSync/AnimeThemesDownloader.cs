@@ -29,7 +29,7 @@ namespace Jellyfin.Plugin.OpEdSync;
 /// <summary>
 /// Class that is responsible for downloading themes.
 /// </summary>
-public class AnimeThemesDownloader : IDisposable
+public class AnimeThemesDownloader
 {
     private const string ThemeMusicDirectory = "theme-music";
     private const string ThemeVideoDirectory = "backdrops";
@@ -45,7 +45,7 @@ public class AnimeThemesDownloader : IDisposable
         ("AniList", Sites.ANILIST),
     ];
 
-    private readonly HttpClient _client;
+    private readonly IHttpClientFactory _clientFactory;
     private readonly AnimeThemesApi _api;
     private readonly ILogger<AnimeThemesDownloader> _logger;
     private readonly IMediaEncoder _mediaEncoder;
@@ -63,7 +63,7 @@ public class AnimeThemesDownloader : IDisposable
         _mediaEncoder = mediaEncoder;
         _libraryManager = libraryManager;
         _logger = logger;
-        _client = clientFactory.CreateClient("AnimeThemes");
+        _clientFactory = clientFactory;
         _api = new AnimeThemesApi(clientFactory, logger);
     }
 
@@ -403,7 +403,9 @@ public class AnimeThemesDownloader : IDisposable
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
 
             _logger.LogInformation("[{Id}] Downloading {Url} to {Path}", item.Id, url, path);
-            var downloadStream = await _client.GetStreamAsync(url, token).ConfigureAwait(false);
+            // A client per download, like the lookups, so a changed address applies without a restart.
+            using var client = _clientFactory.CreateClient("AnimeThemes");
+            var downloadStream = await client.GetStreamAsync(url, token).ConfigureAwait(false);
             await using (downloadStream.ConfigureAwait(false))
             {
                 var fileStream = File.Create(tempFile);
@@ -731,27 +733,5 @@ public class AnimeThemesDownloader : IDisposable
         }
 
         return score;
-    }
-
-    /// <summary>
-    /// Dispose.
-    /// </summary>
-    /// <param name="disposing">Whether we're disposing.</param>
-    protected virtual void Dispose(bool disposing)
-    {
-        if (disposing)
-        {
-            _api.Dispose();
-            _client.Dispose();
-        }
-    }
-
-    /// <summary>
-    /// Dispose.
-    /// </summary>
-    public void Dispose()
-    {
-        Dispose(true);
-        GC.SuppressFinalize(this);
     }
 }

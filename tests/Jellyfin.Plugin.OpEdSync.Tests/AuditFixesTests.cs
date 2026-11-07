@@ -56,7 +56,7 @@ public class AuditFixesTests
         {
             Content = new StringContent("<html>Down for maintenance</html>", Encoding.UTF8, "text/html"),
         }));
-        using var api = new AnimeThemesApi(factory, NullLogger<AnimeThemesDownloader>.Instance);
+        var api = new AnimeThemesApi(factory, NullLogger<AnimeThemesDownloader>.Instance);
 
         await Assert.ThrowsAsync<JsonException>(() => api.FindByExternalId(Sites.ANIDB, [1], CancellationToken.None).AsTask());
     }

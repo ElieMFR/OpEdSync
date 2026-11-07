@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading;
 using System.Threading.Tasks;
 using Polly;
@@ -51,6 +52,25 @@ public sealed class PollyResilienceHandler : DelegatingHandler
         BackoffType = DelayBackoffType.Exponential,
         Delay = TimeSpan.FromSeconds(2),
         DelayGenerator = args => ValueTask.FromResult(
-            args.Outcome.Result?.Headers.RetryAfter?.Delta)
+            RetryAfterDelay(args.Outcome.Result?.Headers.RetryAfter, DateTimeOffset.UtcNow))
     };
+
+    /// <summary>
+    /// Reads how long the server asked to wait. <c>Retry-After</c> is either a number of seconds or an HTTP date;
+    /// without it, the exponential backoff applies.
+    /// </summary>
+    /// <param name="retryAfter">The header, if any.</param>
+    /// <param name="now">Current time.</param>
+    /// <returns>The wait, never negative, or <c>null</c> to use the backoff.</returns>
+    public static TimeSpan? RetryAfterDelay(RetryConditionHeaderValue? retryAfter, DateTimeOffset now)
+    {
+        if (retryAfter?.Delta is { } delta)
+        {
+            return delta;
+        }
+
+        return retryAfter?.Date is { } date
+            ? (date > now ? date - now : TimeSpan.Zero)
+            : null;
+    }
 }

@@ -29,7 +29,8 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
 
         serviceCollection.AddTransient<PollyResilienceHandler>();
 
-        // The address is read each time a client is created, so a changed setting applies to the next run.
+        // The address is read each time a client is created. The plugin asks for a client per lookup and per download,
+        // so a changed setting applies to the next run without restarting the server.
         serviceCollection
             .AddHttpClient("AnimeThemes", c =>
             {
