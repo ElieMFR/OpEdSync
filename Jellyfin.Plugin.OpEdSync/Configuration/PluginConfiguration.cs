@@ -9,9 +9,9 @@ namespace Jellyfin.Plugin.OpEdSync.Configuration;
 public class PluginConfiguration : BasePluginConfiguration
 {
     /// <summary>
-    /// Address of the public AnimeThemes API.
+    /// Address of the public AnimeThemes API (GraphQL).
     /// </summary>
-    public const string DefaultAnimeThemesBaseUrl = "https://api.animethemes.moe";
+    public const string DefaultAnimeThemesBaseUrl = "https://rs.animethemes.moe/graphql";
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PluginConfiguration"/> class.
@@ -111,12 +111,27 @@ public class PluginConfiguration : BasePluginConfiguration
     public string AnimeThemesBaseUrl { get; set; }
 
     /// <summary>
-    /// Gets the AnimeThemes address to use: the configured one when it is an absolute http(s) address, the public API otherwise.
+    /// Gets the AnimeThemes address to use: the configured one when it is an absolute http(s) address, the public API
+    /// otherwise. The addresses of the retired APIs, which versions 1.5.3.0 and 1.5.3.1 saved as the default, count as
+    /// "not configured": they would answer 503 or speak another language.
     /// </summary>
     /// <param name="configured">Configured address, possibly empty or missing from older settings.</param>
     /// <returns>The address.</returns>
     public static Uri ResolveAnimeThemesBaseUrl(string? configured)
-        => Uri.TryCreate(configured?.Trim(), UriKind.Absolute, out var uri) && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
-            ? uri
-            : new Uri(DefaultAnimeThemesBaseUrl);
+    {
+        var trimmed = configured?.Trim();
+        if (Uri.TryCreate(trimmed, UriKind.Absolute, out var uri)
+            && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
+            && !IsRetiredAddress(uri))
+        {
+            return uri;
+        }
+
+        return new Uri(DefaultAnimeThemesBaseUrl);
+    }
+
+    private static bool IsRetiredAddress(Uri uri)
+        => (string.Equals(uri.Host, "api.animethemes.moe", StringComparison.OrdinalIgnoreCase)
+            || string.Equals(uri.Host, "graphql.animethemes.moe", StringComparison.OrdinalIgnoreCase))
+           && uri.AbsolutePath.Trim('/').Length == 0;
 }

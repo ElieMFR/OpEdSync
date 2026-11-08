@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Text.Json.Serialization;
 
 namespace Jellyfin.Plugin.OpEdSync.Models;
 
@@ -15,13 +14,10 @@ namespace Jellyfin.Plugin.OpEdSync.Models;
 /// <param name="Spoiler">Whether content is included that may spoil the viewer.</param>
 /// <param name="Videos">Videos for the entry.</param>
 public record AnimeThemeEntry(
-    [property: JsonPropertyName("id")] int Id,
-    [property: JsonPropertyName("version")]
+    int Id,
     int? Version,
-    [property: JsonPropertyName("episodes")]
     string? Episodes,
-    [property: JsonPropertyName("nsfw")] bool Nsfw,
-    [property: JsonPropertyName("spoiler")]
+    bool Nsfw,
     bool Spoiler,
-    [property: JsonPropertyName("videos")] Collection<Video> Videos
+    Collection<Video> Videos
 );

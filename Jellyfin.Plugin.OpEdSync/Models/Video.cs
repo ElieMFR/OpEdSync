@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Text.Json.Serialization;
 
 namespace Jellyfin.Plugin.OpEdSync.Models;
 
@@ -17,15 +16,12 @@ namespace Jellyfin.Plugin.OpEdSync.Models;
 /// <param name="Creditless">Whether the video is creditless.</param>
 /// <param name="Audio">Audio for the video.</param>
 public record Video(
-    [property: JsonPropertyName("id")] int Id,
-    [property: JsonPropertyName("basename")]
+    int Id,
     string Basename,
-    [property: JsonPropertyName("filename")]
     string Filename,
-    [property: JsonPropertyName("source")] VideoSource? Source,
-    [property: JsonPropertyName("overlap")]
+    VideoSource? Source,
     OverlapType Overlap,
-    [property: JsonPropertyName("link")] string Link,
-    [property: JsonPropertyName("nc")] bool Creditless,
-    [property: JsonPropertyName("audio")] Audio Audio
+    string Link,
+    bool Creditless,
+    Audio Audio
 );

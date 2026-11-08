@@ -48,6 +48,20 @@ public class RetryTests
         Assert.Equal(status, response.StatusCode);
     }
 
+    // GraphQL lookups are POSTs: every new attempt must carry the same body.
+    [Fact]
+    public async Task APostWithABody_IsSentAgainWithTheSameBody()
+    {
+        var inner = new BodyRecordingHandler();
+        using var client = new HttpClient(new PollyResilienceHandler { InnerHandler = inner });
+        using var content = new StringContent("{\"query\":\"{ __typename }\"}", System.Text.Encoding.UTF8, "application/json");
+
+        using var response = await client.PostAsync(new Uri("http://animethemes.test/graphql"), content);
+
+        Assert.Equal(4, inner.Bodies.Count);
+        Assert.All(inner.Bodies, body => Assert.Equal("{\"query\":\"{ __typename }\"}", body));
+    }
+
     [Fact]
     public async Task NotFound_IsNotTriedAgain()
     {
@@ -57,6 +71,19 @@ public class RetryTests
         using var response = await client.GetAsync(new Uri("http://animethemes.test/anime"));
 
         Assert.Equal(1, inner.Calls);
+    }
+
+    private sealed class BodyRecordingHandler : HttpMessageHandler
+    {
+        public System.Collections.Generic.List<string> Bodies { get; } = [];
+
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            Bodies.Add(await request.Content!.ReadAsStringAsync(cancellationToken));
+            var response = new HttpResponseMessage(HttpStatusCode.ServiceUnavailable);
+            response.Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.Zero);
+            return response;
+        }
     }
 
     // Always answers with the same status; "Retry-After: 0" keeps the test fast.

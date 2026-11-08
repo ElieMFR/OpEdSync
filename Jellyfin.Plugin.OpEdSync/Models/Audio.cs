@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace Jellyfin.Plugin.OpEdSync.Models;
 
 /// <summary>
@@ -13,10 +11,9 @@ namespace Jellyfin.Plugin.OpEdSync.Models;
 /// <param name="MimeType">The media type of the file in storage.</param>
 /// <param name="Link">The URL to stream the file from storage.</param>
 public record Audio(
-    [property: JsonPropertyName("id")] int Id,
-    [property: JsonPropertyName("path")] string Path,
-    [property: JsonPropertyName("filename")] string Filename,
-    [property: JsonPropertyName("mimetype")]
+    int Id,
+    string Path,
+    string Filename,
     string MimeType,
-    [property: JsonPropertyName("link")] string Link
+    string Link
 );

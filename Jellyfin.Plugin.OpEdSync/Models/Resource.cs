@@ -1,5 +1,3 @@
-using System.Text.Json.Serialization;
-
 namespace Jellyfin.Plugin.OpEdSync.Models;
 
 /// <summary>
@@ -8,8 +6,7 @@ namespace Jellyfin.Plugin.OpEdSync.Models;
 /// For site types, see <see cref="Sites"/>.
 /// </summary>
 public record Resource(
-    [property: JsonPropertyName("id")] int Id,
-    [property: JsonPropertyName("external_id")]
+    int Id,
     int ExternalId,
-    [property: JsonPropertyName("site")] string Site
+    string Site
 );

@@ -43,7 +43,7 @@ public class AddressChangeTests
             hosts.Add(request.RequestUri!.Host);
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
             {
-                Content = new StringContent("{\"anime\":[],\"links\":{\"next\":null}}", Encoding.UTF8, "application/json"),
+                Content = new StringContent("{\"data\":{\"filterAnimeByExternalSite\":[]}}", Encoding.UTF8, "application/json"),
             });
         }
     }

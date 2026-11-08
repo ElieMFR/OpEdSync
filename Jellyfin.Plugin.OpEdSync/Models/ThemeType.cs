@@ -1,11 +1,8 @@
-using System.Text.Json.Serialization;
-
 namespace Jellyfin.Plugin.OpEdSync.Models;
 
 /// <summary>
 /// Enum describing the theme types.
 /// </summary>
-[JsonConverter(typeof(ThemeTypeConverter))]
 public enum ThemeType
 {
     /// <summary>

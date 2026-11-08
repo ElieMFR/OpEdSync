@@ -1,0 +1,557 @@
+{
+ "data": {
+  "filterAnimeByExternalSite": [
+   {
+    "id": 521,
+    "slug": "cowboy_bebop",
+    "year": 1998,
+    "title": {
+     "romaji": "Cowboy Bebop"
+    },
+    "resources": {
+     "pageInfo": {
+      "hasNextPage": false
+     },
+     "nodes": [
+      {
+       "id": 227,
+       "externalId": 1,
+       "site": "MAL"
+      },
+      {
+       "id": 3812,
+       "externalId": 1,
+       "site": "ANILIST"
+      },
+      {
+       "id": 4475,
+       "externalId": 1,
+       "site": "KITSU"
+      },
+      {
+       "id": 10398,
+       "externalId": 23,
+       "site": "ANIDB"
+      },
+      {
+       "id": 22170,
+       "externalId": 13,
+       "site": "ANN"
+      },
+      {
+       "id": 24299,
+       "externalId": 400,
+       "site": "ANIME_PLANET"
+      },
+      {
+       "id": 34355,
+       "externalId": null,
+       "site": "HULU"
+      },
+      {
+       "id": 34356,
+       "externalId": null,
+       "site": "CRUNCHYROLL"
+      },
+      {
+       "id": 34357,
+       "externalId": null,
+       "site": "AMAZON_PRIME_VIDEO"
+      },
+      {
+       "id": 34358,
+       "externalId": 80001305,
+       "site": "NETFLIX"
+      },
+      {
+       "id": 34359,
+       "externalId": null,
+       "site": "OFFICIAL_SITE"
+      }
+     ]
+    },
+    "themes": [
+     {
+      "id": 578,
+      "type": "OP",
+      "sequence": null,
+      "slug": "OP1",
+      "entries": [
+       {
+        "id": 644,
+        "version": 1,
+        "episodes": "1-25",
+        "nsfw": false,
+        "spoiler": false,
+        "videos": {
+         "nodes": [
+          {
+           "id": 12907,
+           "basename": "CowboyBebop-OP1.webm",
+           "filename": "CowboyBebop-OP1",
+           "link": "https://v.animethemes.moe/CowboyBebop-OP1.webm",
+           "nc": false,
+           "overlap": "NONE",
+           "source": "BD",
+           "audio": {
+            "id": 10807,
+            "filename": "CowboyBebop-OP1",
+            "link": "https://a.animethemes.moe/CowboyBebop-OP1.ogg",
+            "mimetype": "audio/ogg",
+            "path": "90s/CowboyBebop-OP1.ogg"
+           }
+          }
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "id": 579,
+      "type": "ED",
+      "sequence": 1,
+      "slug": "ED1",
+      "entries": [
+       {
+        "id": 645,
+        "version": 1,
+        "episodes": "1-12, 14-25",
+        "nsfw": false,
+        "spoiler": false,
+        "videos": {
+         "nodes": [
+          {
+           "id": 12904,
+           "basename": "CowboyBebop-ED1.webm",
+           "filename": "CowboyBebop-ED1",
+           "link": "https://v.animethemes.moe/CowboyBebop-ED1.webm",
+           "nc": true,
+           "overlap": "NONE",
+           "source": "BD",
+           "audio": {
+            "id": 10804,
+            "filename": "CowboyBebop-ED1",
+            "link": "https://a.animethemes.moe/CowboyBebop-ED1.ogg",
+            "mimetype": "audio/ogg",
+            "path": "90s/CowboyBebop-ED1.ogg"
+           }
+          }
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "id": 580,
+      "type": "ED",
+      "sequence": 2,
+      "slug": "ED2",
+      "entries": [
+       {
+        "id": 646,
+        "version": 1,
+        "episodes": "13",
+        "nsfw": false,
+        "spoiler": true,
+        "videos": {
+         "nodes": [
+          {
+           "id": 12905,
+           "basename": "CowboyBebop-ED2.webm",
+           "filename": "CowboyBebop-ED2",
+           "link": "https://v.animethemes.moe/CowboyBebop-ED2.webm",
+           "nc": false,
+           "overlap": "TRANS",
+           "source": "BD",
+           "audio": {
+            "id": 10805,
+            "filename": "CowboyBebop-ED2",
+            "link": "https://a.animethemes.moe/CowboyBebop-ED2.ogg",
+            "mimetype": "audio/ogg",
+            "path": "90s/CowboyBebop-ED2.ogg"
+           }
+          }
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "id": 581,
+      "type": "ED",
+      "sequence": 3,
+      "slug": "ED3",
+      "entries": [
+       {
+        "id": 647,
+        "version": 1,
+        "episodes": "26",
+        "nsfw": false,
+        "spoiler": true,
+        "videos": {
+         "nodes": [
+          {
+           "id": 12906,
+           "basename": "CowboyBebop-ED3.webm",
+           "filename": "CowboyBebop-ED3",
+           "link": "https://v.animethemes.moe/CowboyBebop-ED3.webm",
+           "nc": false,
+           "overlap": "TRANS",
+           "source": "BD",
+           "audio": {
+            "id": 10806,
+            "filename": "CowboyBebop-ED3",
+            "link": "https://a.animethemes.moe/CowboyBebop-ED3.ogg",
+            "mimetype": "audio/ogg",
+            "path": "90s/CowboyBebop-ED3.ogg"
+           }
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": 1510,
+    "slug": "kimi_no_na_wa",
+    "year": 2016,
+    "title": {
+     "romaji": "Kimi no Na wa."
+    },
+    "resources": {
+     "pageInfo": {
+      "hasNextPage": false
+     },
+     "nodes": [
+      {
+       "id": 2177,
+       "externalId": 32281,
+       "site": "MAL"
+      },
+      {
+       "id": 7470,
+       "externalId": 21519,
+       "site": "ANILIST"
+      },
+      {
+       "id": 8396,
+       "externalId": 11614,
+       "site": "KITSU"
+      },
+      {
+       "id": 12143,
+       "externalId": 11829,
+       "site": "ANIDB"
+      },
+      {
+       "id": 21650,
+       "externalId": 18171,
+       "site": "ANN"
+      },
+      {
+       "id": 25379,
+       "externalId": 7639,
+       "site": "ANIME_PLANET"
+      },
+      {
+       "id": 36115,
+       "externalId": null,
+       "site": "OFFICIAL_SITE"
+      },
+      {
+       "id": 36116,
+       "externalId": 80161371,
+       "site": "NETFLIX"
+      },
+      {
+       "id": 36117,
+       "externalId": null,
+       "site": "CRUNCHYROLL"
+      },
+      {
+       "id": 36118,
+       "externalId": null,
+       "site": "AMAZON_PRIME_VIDEO"
+      }
+     ]
+    },
+    "themes": [
+     {
+      "id": 6820,
+      "type": "OP",
+      "sequence": null,
+      "slug": "OP1",
+      "entries": [
+       {
+        "id": 7927,
+        "version": 1,
+        "episodes": null,
+        "nsfw": false,
+        "spoiler": false,
+        "videos": {
+         "nodes": [
+          {
+           "id": 7160,
+           "basename": "KimiNoNaWa-OP1.webm",
+           "filename": "KimiNoNaWa-OP1",
+           "link": "https://v.animethemes.moe/KimiNoNaWa-OP1.webm",
+           "nc": true,
+           "overlap": "TRANS",
+           "source": "BD",
+           "audio": {
+            "id": 6154,
+            "filename": "KimiNoNaWa-OP1",
+            "link": "https://a.animethemes.moe/KimiNoNaWa-OP1.ogg",
+            "mimetype": "audio/ogg",
+            "path": "2016/Summer/KimiNoNaWa-OP1.ogg"
+           }
+          }
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "id": 6821,
+      "type": "ED",
+      "sequence": null,
+      "slug": "ED1",
+      "entries": [
+       {
+        "id": 7928,
+        "version": 1,
+        "episodes": null,
+        "nsfw": false,
+        "spoiler": false,
+        "videos": {
+         "nodes": [
+          {
+           "id": 7159,
+           "basename": "KimiNoNaWa-ED1.webm",
+           "filename": "KimiNoNaWa-ED1",
+           "link": "https://v.animethemes.moe/KimiNoNaWa-ED1.webm",
+           "nc": false,
+           "overlap": "NONE",
+           "source": "BD",
+           "audio": {
+            "id": 6153,
+            "filename": "KimiNoNaWa-ED1",
+            "link": "https://a.animethemes.moe/KimiNoNaWa-ED1.ogg",
+            "mimetype": "audio/ogg",
+            "path": "2016/Summer/KimiNoNaWa-ED1.ogg"
+           }
+          }
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "id": 6822,
+      "type": "OP",
+      "sequence": null,
+      "slug": "OP1-EN",
+      "entries": [
+       {
+        "id": 7929,
+        "version": 1,
+        "episodes": null,
+        "nsfw": false,
+        "spoiler": false,
+        "videos": {
+         "nodes": [
+          {
+           "id": 7162,
+           "basename": "KimiNoNaWa-OP1-EN.webm",
+           "filename": "KimiNoNaWa-OP1-EN",
+           "link": "https://v.animethemes.moe/KimiNoNaWa-OP1-EN.webm",
+           "nc": false,
+           "overlap": "NONE",
+           "source": "BD",
+           "audio": {
+            "id": 6156,
+            "filename": "KimiNoNaWa-OP1-EN",
+            "link": "https://a.animethemes.moe/KimiNoNaWa-OP1-EN.ogg",
+            "mimetype": "audio/ogg",
+            "path": "2016/Summer/KimiNoNaWa-OP1-EN.ogg"
+           }
+          }
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "id": 6823,
+      "type": "ED",
+      "sequence": null,
+      "slug": "ED1-EN",
+      "entries": [
+       {
+        "id": 7930,
+        "version": 1,
+        "episodes": null,
+        "nsfw": false,
+        "spoiler": false,
+        "videos": {
+         "nodes": [
+          {
+           "id": 7161,
+           "basename": "KimiNoNaWa-ED1-EN.webm",
+           "filename": "KimiNoNaWa-ED1-EN",
+           "link": "https://v.animethemes.moe/KimiNoNaWa-ED1-EN.webm",
+           "nc": false,
+           "overlap": "NONE",
+           "source": "BD",
+           "audio": {
+            "id": 6155,
+            "filename": "KimiNoNaWa-ED1-EN",
+            "link": "https://a.animethemes.moe/KimiNoNaWa-ED1-EN.ogg",
+            "mimetype": "audio/ogg",
+            "path": "2016/Summer/KimiNoNaWa-ED1-EN.ogg"
+           }
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ]
+   },
+   {
+    "id": 1566,
+    "slug": "koe_no_katachi",
+    "year": 2016,
+    "title": {
+     "romaji": "Koe no Katachi"
+    },
+    "resources": {
+     "pageInfo": {
+      "hasNextPage": false
+     },
+     "nodes": [
+      {
+       "id": 2109,
+       "externalId": 28851,
+       "site": "MAL"
+      },
+      {
+       "id": 7337,
+       "externalId": 20954,
+       "site": "ANILIST"
+      },
+      {
+       "id": 8258,
+       "externalId": 10028,
+       "site": "KITSU"
+      },
+      {
+       "id": 12083,
+       "externalId": 10937,
+       "site": "ANIDB"
+      },
+      {
+       "id": 21597,
+       "externalId": 16661,
+       "site": "ANN"
+      },
+      {
+       "id": 25440,
+       "externalId": 6805,
+       "site": "ANIME_PLANET"
+      },
+      {
+       "id": 36195,
+       "externalId": null,
+       "site": "OFFICIAL_SITE"
+      },
+      {
+       "id": 36196,
+       "externalId": null,
+       "site": "X"
+      },
+      {
+       "id": 36197,
+       "externalId": 80223226,
+       "site": "NETFLIX"
+      }
+     ]
+    },
+    "themes": [
+     {
+      "id": 6663,
+      "type": "OP",
+      "sequence": null,
+      "slug": "OP1",
+      "entries": [
+       {
+        "id": 7753,
+        "version": 1,
+        "episodes": null,
+        "nsfw": false,
+        "spoiler": false,
+        "videos": {
+         "nodes": [
+          {
+           "id": 6719,
+           "basename": "KoeNoKatachi-OP1.webm",
+           "filename": "KoeNoKatachi-OP1",
+           "link": "https://v.animethemes.moe/KoeNoKatachi-OP1.webm",
+           "nc": false,
+           "overlap": "TRANS",
+           "source": "BD",
+           "audio": {
+            "id": 5825,
+            "filename": "KoeNoKatachi-OP1",
+            "link": "https://a.animethemes.moe/KoeNoKatachi-OP1.ogg",
+            "mimetype": "audio/ogg",
+            "path": "2016/Fall/KoeNoKatachi-OP1.ogg"
+           }
+          }
+         ]
+        }
+       }
+      ]
+     },
+     {
+      "id": 6664,
+      "type": "ED",
+      "sequence": null,
+      "slug": "ED1",
+      "entries": [
+       {
+        "id": 7754,
+        "version": 1,
+        "episodes": null,
+        "nsfw": false,
+        "spoiler": false,
+        "videos": {
+         "nodes": [
+          {
+           "id": 6718,
+           "basename": "KoeNoKatachi-ED1.webm",
+           "filename": "KoeNoKatachi-ED1",
+           "link": "https://v.animethemes.moe/KoeNoKatachi-ED1.webm",
+           "nc": false,
+           "overlap": "NONE",
+           "source": "BD",
+           "audio": {
+            "id": 5824,
+            "filename": "KoeNoKatachi-ED1",
+            "link": "https://a.animethemes.moe/KoeNoKatachi-ED1.ogg",
+            "mimetype": "audio/ogg",
+            "path": "2016/Fall/KoeNoKatachi-ED1.ogg"
+           }
+          }
+         ]
+        }
+       }
+      ]
+     }
+    ]
+   }
+  ]
+ }
+}

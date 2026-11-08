@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text.Json.Serialization;
 
 namespace Jellyfin.Plugin.OpEdSync.Models;
 
@@ -9,13 +8,11 @@ namespace Jellyfin.Plugin.OpEdSync.Models;
 /// Represents an anime. Subset of <a href="https://api-docs.animethemes.moe/anime">anime</a>.
 /// </summary>
 public record Anime(
-    [property: JsonPropertyName("id")] int Id,
-    [property: JsonPropertyName("name")] string Name,
-    [property: JsonPropertyName("slug")] string Slug,
-    [property: JsonPropertyName("year")] int? Year,
-    [property: JsonPropertyName("resources")]
+    int Id,
+    string Name,
+    string Slug,
+    int? Year,
     Collection<Resource> Resources,
-    [property: JsonPropertyName("animethemes")]
     Collection<AnimeTheme> Themes
 )
 {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Jellyfin.Plugin.OpEdSync.Web;
@@ -94,7 +95,8 @@ public sealed class StatusService : IDisposable
             try
             {
                 using var client = _clientFactory.CreateClient(CheckClientName);
-                using var response = await client.GetAsync(new Uri("/anime?page%5Bsize%5D=1&fields%5Banime%5D=id", UriKind.Relative), cancellationToken).ConfigureAwait(false);
+                using var content = new StringContent(AnimeThemesGraphQl.CheckRequest, Encoding.UTF8, "application/json");
+                using var response = await client.PostAsync(new Uri(string.Empty, UriKind.Relative), content, cancellationToken).ConfigureAwait(false);
                 check.StatusCode = (int)response.StatusCode;
                 check.Reachable = response.IsSuccessStatusCode;
             }

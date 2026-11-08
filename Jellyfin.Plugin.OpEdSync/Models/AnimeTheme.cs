@@ -1,5 +1,4 @@
 using System.Collections.ObjectModel;
-using System.Text.Json.Serialization;
 
 namespace Jellyfin.Plugin.OpEdSync.Models;
 
@@ -13,12 +12,10 @@ namespace Jellyfin.Plugin.OpEdSync.Models;
 /// <param name="Slug">The URL slug &amp; route key of the resource.</param>
 /// <param name="Entries">Entries of the theme.</param>
 public record AnimeTheme(
-    [property: JsonPropertyName("id")] int Id,
-    [property: JsonPropertyName("type")] ThemeType? Type,
-    [property: JsonPropertyName("sequence")]
+    int Id,
+    ThemeType? Type,
     int? Sequence,
-    [property: JsonPropertyName("group")] string? Group,
-    [property: JsonPropertyName("slug")] string? Slug,
-    [property: JsonPropertyName("animethemeentries")]
+    string? Group,
+    string? Slug,
     Collection<AnimeThemeEntry> Entries
 );
