@@ -641,7 +641,7 @@ public class AnimeThemesDownloader
     /// </summary>
     private List<(string Site, int Id, int? Year)> GetCandidates(BaseItem item, PluginConfiguration configuration)
     {
-        var candidates = new List<(string Site, int Id, int? Year)>();
+        var seasonIds = new List<(string Site, int Id, int? Year)>();
 
         if (item.GetBaseItemKind() == BaseItemKind.Series && configuration.ThemeSource == ThemeSource.LatestSeason)
         {
@@ -655,11 +655,37 @@ public class AnimeThemesDownloader
             // Newest season first. Specials (index 0) are not real seasons.
             foreach (var season in seasons.Where(it => it.IndexNumber > 0).OrderByDescending(it => it.IndexNumber))
             {
-                candidates.AddRange(GetSiteIds(season));
+                seasonIds.AddRange(GetSiteIds(season));
             }
         }
 
-        candidates.AddRange(GetSiteIds(item));
-        return candidates.Distinct().ToList();
+        return BuildCandidates(seasonIds, GetSiteIds(item).ToList());
+    }
+
+    /// <summary>
+    /// Orders the lookups of a series: its seasons from the newest, then the series itself.
+    /// A season whose id belongs to it alone (not shared with another season, not the id of the series) is an exact
+    /// match made by the metadata provider, so its year is not compared: the dates of the seasons come from TVDB and
+    /// are sometimes wrong. The other ids keep their year, which is what rejects a wrong id.
+    /// </summary>
+    /// <param name="seasonIds">The ids of the seasons, newest first.</param>
+    /// <param name="seriesIds">The ids of the series.</param>
+    /// <returns>The lookups to try, most preferred first.</returns>
+    internal static List<(string Site, int Id, int? Year)> BuildCandidates(
+        IReadOnlyList<(string Site, int Id, int? Year)> seasonIds,
+        IReadOnlyList<(string Site, int Id, int? Year)> seriesIds)
+    {
+        ArgumentNullException.ThrowIfNull(seasonIds);
+        ArgumentNullException.ThrowIfNull(seriesIds);
+
+        var ofSeries = seriesIds.Select(it => (it.Site, it.Id)).ToHashSet();
+        var perId = seasonIds.GroupBy(it => (it.Site, it.Id)).ToDictionary(it => it.Key, it => it.Count());
+
+        var candidates = seasonIds
+            .Select(it => perId[(it.Site, it.Id)] == 1 && !ofSeries.Contains((it.Site, it.Id)) ? (it.Site, it.Id, Year: (int?)null) : it)
+            .Concat(seriesIds)
+            .Distinct()
+            .ToList();
+        return candidates;
     }
 }
