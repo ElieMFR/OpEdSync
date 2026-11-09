@@ -158,6 +158,17 @@ public class ThemeSelectionTests
         Assert.Equal("OP1", Pick(anime, MediaType.Video, ThemeChoice.Latest));
     }
 
+    // The same holds for the order of earlier versions: only the picture is adult, so only the video is affected.
+    [Fact]
+    public void First_IgnoresTheAdultFlag_ForTheMusicOnly()
+    {
+        var anime = Make(Theme(1, "OP1", nsfw: true), Theme(2, "OP2"));
+
+        // Music: the flag is ignored, the order of AnimeThemes decides. Video: the flagged OP1 comes last.
+        Assert.Equal("OP1", Pick(anime, MediaType.Audio, ThemeChoice.First));
+        Assert.Equal("OP2", Pick(anime, MediaType.Video, ThemeChoice.First));
+    }
+
     // Credits on screen and the source of the video do not change the music; they do change a video.
     [Fact]
     public void Latest_IgnoresCreditsAndSource_ForTheMusicOnly()

@@ -13,6 +13,8 @@ namespace Jellyfin.Plugin.OpEdSync;
 /// </summary>
 internal static partial class ThemeSelection
 {
+    private const double AdultPenalty = 10;
+
     /// <summary>
     /// Lists the usable themes of an anime, best first.
     /// </summary>
@@ -41,7 +43,8 @@ internal static partial class ThemeSelection
         if (settings.Choice == ThemeChoice.First)
         {
             // The order the plugin has always used: quality, then the order of AnimeThemes (OP1, OP2... then ED1...).
-            return candidates.OrderBy(Rate).ToList();
+            // The adult flag describes the picture: it only counts for a video.
+            return candidates.OrderBy(it => Rate(it) - (type == MediaType.Audio && it.Entry.Nsfw ? AdultPenalty : 0)).ToList();
         }
 
         // Quality first for a video (credits and the source are on screen), only what is heard for a music theme.
@@ -88,7 +91,7 @@ internal static partial class ThemeSelection
 
         if (theme.Entry.Nsfw)
         {
-            score += 10;
+            score += AdultPenalty;
         }
 
         if (theme.Entry.Spoiler)
