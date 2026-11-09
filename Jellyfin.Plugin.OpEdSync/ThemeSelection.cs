@@ -131,8 +131,8 @@ internal static partial class ThemeSelection
     }
 
     /// <summary>
-    /// Scores a theme on what matters for the music: a spoiler, a part of the episode over the music, adult content.
-    /// The source of the video and the credits shown on screen change nothing to the music.
+    /// Scores a theme on what matters for the music: a spoiler, a part of the episode over the music.
+    /// The source of the video, the credits shown on screen and the adult flag (it describes the picture) change nothing to the music.
     /// </summary>
     /// <param name="theme">The theme.</param>
     /// <returns>The score; the lowest is the best.</returns>
@@ -152,11 +152,6 @@ internal static partial class ThemeSelection
             OverlapType.Transition => 15,
             _ => 0,
         };
-
-        if (theme.Entry.Nsfw)
-        {
-            score += 10;
-        }
 
         return score;
     }

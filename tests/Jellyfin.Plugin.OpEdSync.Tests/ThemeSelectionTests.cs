@@ -147,6 +147,17 @@ public class ThemeSelectionTests
         Assert.Equal("OP1", Pick(anime, MediaType.Audio, ThemeChoice.Latest));
     }
 
+    // The adult flag describes the picture, not the sound: it does not change the music, it does change a video.
+    // Slime season 4: OP1 is clean, the newer OP2 is flagged.
+    [Fact]
+    public void Latest_IgnoresTheAdultFlag_ForTheMusicOnly()
+    {
+        var anime = Make(Theme(1, "OP1"), Theme(2, "OP2", nsfw: true));
+
+        Assert.Equal("OP2", Pick(anime, MediaType.Audio, ThemeChoice.Latest));
+        Assert.Equal("OP1", Pick(anime, MediaType.Video, ThemeChoice.Latest));
+    }
+
     // Credits on screen and the source of the video do not change the music; they do change a video.
     [Fact]
     public void Latest_IgnoresCreditsAndSource_ForTheMusicOnly()
@@ -247,9 +258,10 @@ public class ThemeSelectionTests
         VideoSource source = VideoSource.BD,
         int? sequence = null,
         bool hasAudio = true,
-        Video[]? videos = null)
+        Video[]? videos = null,
+        bool nsfw = false)
     {
-        var entry = new AnimeThemeEntry(id * 10, 1, null, false, spoiler, new Collection<Video>(videos ?? [Video(id * 100, source, creditless, overlap, hasAudio)]));
+        var entry = new AnimeThemeEntry(id * 10, 1, null, nsfw, spoiler, new Collection<Video>(videos ?? [Video(id * 100, source, creditless, overlap, hasAudio)]));
         return new AnimeTheme(id, type, sequence, group, slug, [entry]);
     }
 }
