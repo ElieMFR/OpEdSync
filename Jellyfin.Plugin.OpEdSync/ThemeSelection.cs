@@ -131,7 +131,7 @@ internal static partial class ThemeSelection
     }
 
     /// <summary>
-    /// Scores a theme on what can be heard: a spoiler, a part of the episode over the music, adult content.
+    /// Scores a theme on what matters for the music: a spoiler, a part of the episode over the music, adult content.
     /// The source of the video and the credits shown on screen change nothing to the music.
     /// </summary>
     /// <param name="theme">The theme.</param>
