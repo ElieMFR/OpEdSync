@@ -590,7 +590,7 @@ public class AnimeThemesDownloader
     private IEnumerable<FlattenedTheme> GetUsableThemes(MediaType type, Anime anime, MediaTypeConfiguration settings)
     {
         // Some videos have no extracted audio track on AnimeThemes; they can't provide a theme song.
-        return GetBestThemes(anime, settings).Where(it => type == MediaType.Video || it.Audio is not null);
+        return ThemeSelection.Order(anime, type, settings);
     }
 
     /// <summary>
@@ -661,77 +661,5 @@ public class AnimeThemesDownloader
 
         candidates.AddRange(GetSiteIds(item));
         return candidates.Distinct().ToList();
-    }
-
-    /// <summary>
-    /// Gets themes roughly sorted by relevance and filtered as needed.
-    /// </summary>
-    /// <param name="anime">The anime in question.</param>
-    /// <param name="settings">The configuration that sets the rules.</param>
-    /// <returns>A filtered and sorted and flattened enumerable of themes.</returns>
-    private IEnumerable<FlattenedTheme> GetBestThemes(Anime anime, MediaTypeConfiguration settings)
-    {
-        return anime.Themes.SelectMany(theme => theme.Entries.SelectMany(entry => entry.Videos.Select(video => Wrap(theme, entry, video))))
-            .OrderBy(Rate)
-            .Where(it => !settings.IgnoreOverlapping
-                         || it.Video.Overlap == OverlapType.None
-                         || (settings.AllowTransitions && it.Video.Overlap == OverlapType.Transition))
-            .Where(it => !settings.IgnoreThemesWithCredits || it.Video.Creditless)
-            .Where(it => it.Theme.Type != ThemeType.Other)
-            .Where(it => !settings.IgnoreEDs || it.Theme.Type != ThemeType.ED)
-            .Where(it => !settings.IgnoreOPs || it.Theme.Type != ThemeType.OP);
-    }
-
-    private FlattenedTheme Wrap(AnimeTheme theme, AnimeThemeEntry entry, Video video)
-    {
-        return new FlattenedTheme(theme, entry, video, video.Audio);
-    }
-
-    private double Rate(FlattenedTheme theme)
-    {
-        double score = 0;
-
-        if (theme.Entry.Nsfw)
-        {
-            score += 10;
-        }
-
-        if (theme.Entry.Spoiler)
-        {
-            // Huge penalty for spoilers
-            score += 50;
-        }
-
-        // Big penalties for overlap
-        switch (theme.Video.Overlap)
-        {
-            case OverlapType.Over:
-                score += 20;
-                break;
-            case OverlapType.Transition:
-                score += 15;
-                break;
-        }
-
-        // Small penalties for source
-        switch (theme.Video.Source)
-        {
-            case VideoSource.LD:
-            case VideoSource.VHS:
-                score += 10;
-                break;
-            case VideoSource.WEB:
-            case VideoSource.RAW:
-                score += 5;
-                break;
-        }
-
-        // Medium penalty for credits
-        if (!theme.Video.Creditless)
-        {
-            score += 10;
-        }
-
-        return score;
     }
 }

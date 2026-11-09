@@ -93,6 +93,7 @@ If the former **AnimeThemes** plugin is installed, uninstall it: both would down
 | **Themes to download** | One (the best) | One, all, or none. |
 | **For series, use** | The latest season | Or the series itself, usually season 1. |
 | **Openings and endings** | Both | Or openings only, or endings only. |
+| **When there are several, take** | The most recent | The highest number: OP12 before OP3. Dubbed versions and themes with a spoiler come last. Or the first, as in earlier versions. |
 | **Themes that overlap with the episode** | Accept simple transitions | Or clean themes only, or accept everything. |
 | **Volume** | 50 % | Baked into the file. A change applies on the next run. |
 | **Theme video** | Off | Animated background on the series page. Takes a lot of disk space. |
@@ -194,6 +195,7 @@ Si l'ancien plugin **AnimeThemes** est installé, désinstallez-le : les deux t�
 | **Thèmes à télécharger** | Un seul (le meilleur) | Un, tous, ou aucun. |
 | **Pour les séries, utiliser** | La dernière saison | Ou la série elle-même, en général la saison 1. |
 | **Openings et endings** | Les deux | Ou openings seulement, ou endings seulement. |
+| **Quand il y en a plusieurs, prendre** | Le plus récent | Le plus haut numéro : OP12 avant OP3. Les versions doublées et les thèmes avec spoiler passent après. Ou le premier, comme dans les versions précédentes. |
 | **Génériques qui débordent sur l'épisode** | Accepter les simples transitions | Ou génériques propres seulement, ou tout accepter. |
 | **Volume** | 50 % | Appliqué dans le fichier. Un changement est pris en compte au passage suivant. |
 | **Vidéo de thème** | Désactivée | Fond animé sur la page de la série. Prend beaucoup de place sur le disque. |

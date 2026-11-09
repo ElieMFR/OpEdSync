@@ -20,7 +20,7 @@ public static class AnimeThemesGraphQl
     public const string LookupQuery =
         "query($site: ResourceSite!, $id: [Int!]) { filterAnimeByExternalSite(site: $site, id: $id) { "
         + "id slug year title { romaji } resources { pageInfo { hasNextPage } nodes { id externalId site } } "
-        + "themes { id type sequence slug entries { id version episodes nsfw spoiler "
+        + "themes { id type sequence slug group { name } entries { id version episodes nsfw spoiler "
         + "videos { nodes { id basename filename link nc overlap source audio { id filename link mimetype path } } } } } } }";
 
     /// <summary>
@@ -165,7 +165,8 @@ public static class AnimeThemesGraphQl
             entries.Add(new AnimeThemeEntry(Int(entry, "id"), IntOrNull(entry, "version"), Text(entry, "episodes"), Flag(entry, "nsfw"), Flag(entry, "spoiler"), videos));
         }
 
-        return new AnimeTheme(Int(theme, "id"), ToThemeType(Text(theme, "type")), IntOrNull(theme, "sequence"), null, Text(theme, "slug"), entries);
+        var group = theme.TryGetProperty("group", out var groupElement) ? Text(groupElement, "name") : null;
+        return new AnimeTheme(Int(theme, "id"), ToThemeType(Text(theme, "type")), IntOrNull(theme, "sequence"), group, Text(theme, "slug"), entries);
     }
 
     private static Video ReadVideo(JsonElement video)

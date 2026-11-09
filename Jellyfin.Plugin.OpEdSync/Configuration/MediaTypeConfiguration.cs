@@ -37,6 +37,11 @@ public class MediaTypeConfiguration
     public bool IgnoreThemesWithCredits { get; set; }
 
     /// <summary>
+    /// Gets or sets which theme is taken first when an anime has several. The most recent by default.
+    /// </summary>
+    public ThemeChoice Choice { get; set; } = ThemeChoice.Latest;
+
+    /// <summary>
     /// Gets or sets the volume setting.
     /// </summary>
     public double Volume { get; set; }

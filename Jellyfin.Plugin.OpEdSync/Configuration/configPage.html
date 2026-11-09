@@ -203,6 +203,14 @@
                             </select>
                         </div>
                         <div class="selectContainer">
+                            <label class="selectLabel" for="opsThemeChoice" data-ops-t="themeChoice"></label>
+                            <select is="emby-select" id="opsThemeChoice">
+                                <option value="Latest" data-ops-t="choiceLatest"></option>
+                                <option value="First" data-ops-t="choiceFirst"></option>
+                            </select>
+                            <div class="fieldDescription" data-ops-t="themeChoiceHelp"></div>
+                        </div>
+                        <div class="selectContainer">
                             <label class="selectLabel" for="opsAudioOverlap" data-ops-t="overlap"></label>
                             <select is="emby-select" id="opsAudioOverlap">
                                 <option value="transitions" data-ops-t="overlapTransitions"></option>
@@ -346,6 +354,10 @@
                     "typesBoth": "Les deux",
                     "typesOp": "Openings uniquement",
                     "typesEd": "Endings uniquement",
+                    "themeChoice": "Quand il y en a plusieurs, prendre",
+                    "choiceLatest": "Le plus récent",
+                    "choiceFirst": "Le premier",
+                    "themeChoiceHelp": "Le plus récent suit la numérotation d'AnimeThemes : OP12 passe avant OP3. Un thème avec spoiler passe après les autres, et les versions doublées sont écartées.",
                     "overlap": "Génériques qui débordent sur l'épisode",
                     "overlapTransitions": "Propres, ou avec une courte transition",
                     "overlapStrict": "Propres uniquement",
@@ -476,6 +488,10 @@
                     "typesBoth": "Both",
                     "typesOp": "Openings only",
                     "typesEd": "Endings only",
+                    "themeChoice": "When there are several, take",
+                    "choiceLatest": "The most recent",
+                    "choiceFirst": "The first",
+                    "themeChoiceHelp": "The most recent follows the numbering of AnimeThemes: OP12 comes before OP3. A theme with a spoiler comes after the others, and dubbed versions are left out.",
                     "overlap": "Themes that overlap with the episode",
                     "overlapTransitions": "Clean, or with a short transition",
                     "overlapStrict": "Clean only",
@@ -681,6 +697,7 @@
                 $('#opsAudioFetch').value = audio.FetchType;
                 $('#opsThemeSource').value = config.ThemeSource || 'LatestSeason';
                 $('#opsThemeTypes').value = audio.IgnoreEDs ? 'op' : (audio.IgnoreOPs ? 'ed' : 'both');
+                $('#opsThemeChoice').value = audio.Choice || 'Latest';
                 $('#opsAudioOverlap').value = overlapValue(audio);
                 $('#opsAudioVolume').value = Math.round((audio.Volume || 0) * 100);
                 showVolume($('#opsAudioVolume'), $('#opsAudioVolumeOut'));
@@ -711,6 +728,7 @@
                 audio.FetchType = $('#opsAudioFetch').value;
                 audio.IgnoreOPs = video.IgnoreOPs = types === 'ed';
                 audio.IgnoreEDs = video.IgnoreEDs = types === 'op';
+                audio.Choice = video.Choice = $('#opsThemeChoice').value;
                 applyOverlap(audio, $('#opsAudioOverlap').value);
                 audio.Volume = parseInt($('#opsAudioVolume').value, 10) / 100;
 
