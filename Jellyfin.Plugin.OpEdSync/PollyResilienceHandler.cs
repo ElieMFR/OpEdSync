@@ -48,6 +48,12 @@ public sealed class PollyResilienceHandler : DelegatingHandler
     private static RetryStrategyOptions<HttpResponseMessage> GetRetryOptions() => new()
     {
         ShouldHandle = args => HandleTransientHttpError(args.Outcome),
+        OnRetry = args =>
+        {
+            // The answer that is given up on is never read: release its connection before the next attempt.
+            args.Outcome.Result?.Dispose();
+            return default;
+        },
         MaxRetryAttempts = 3,
         BackoffType = DelayBackoffType.Exponential,
         Delay = TimeSpan.FromSeconds(2),
@@ -64,13 +70,13 @@ public sealed class PollyResilienceHandler : DelegatingHandler
     /// <returns>The wait, never negative, or <c>null</c> to use the backoff.</returns>
     public static TimeSpan? RetryAfterDelay(RetryConditionHeaderValue? retryAfter, DateTimeOffset now)
     {
-        if (retryAfter?.Delta is { } delta)
-        {
-            return delta;
-        }
+        TimeSpan? wait = retryAfter?.Delta is { } delta
+            ? delta
+            : retryAfter?.Date is { } date
+                ? (date > now ? date - now : TimeSpan.Zero)
+                : null;
 
-        return retryAfter?.Date is { } date
-            ? (date > now ? date - now : TimeSpan.Zero)
-            : null;
+        // A server (or a proxy) asking for hours would freeze the run: same ceiling as the rate limit gate.
+        return wait > RateLimitGate.MaxWait ? RateLimitGate.MaxWait : wait;
     }
 }

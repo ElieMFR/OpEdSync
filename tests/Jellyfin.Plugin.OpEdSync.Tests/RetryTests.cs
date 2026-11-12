@@ -1,4 +1,5 @@
 using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Headers;
@@ -24,6 +25,60 @@ public class RetryTests
     public void RetryAfterInSeconds_IsRead()
     {
         Assert.Equal(TimeSpan.FromSeconds(7), PollyResilienceHandler.RetryAfterDelay(new RetryConditionHeaderValue(TimeSpan.FromSeconds(7)), Now));
+    }
+
+    // Audit 2026-11-12: a huge Retry-After froze the run for as long as the server asked.
+    [Fact]
+    public void RetryAfter_IsCappedLikeTheRateLimitGate()
+    {
+        Assert.Equal(RateLimitGate.MaxWait, PollyResilienceHandler.RetryAfterDelay(new RetryConditionHeaderValue(TimeSpan.FromHours(1)), Now));
+        Assert.Equal(RateLimitGate.MaxWait, PollyResilienceHandler.RetryAfterDelay(new RetryConditionHeaderValue(Now.AddDays(1)), Now));
+    }
+
+    // Audit 2026-11-12: the answers given up on were never released.
+    [Fact]
+    public async Task AnswersGivenUpOn_AreDisposedBeforeTheNextAttempt()
+    {
+        var inner = new DisposalTrackingHandler();
+        using var client = new HttpClient(new PollyResilienceHandler { InnerHandler = inner });
+
+        using var response = await client.GetAsync(new Uri("http://animethemes.test/anime"));
+
+        Assert.Equal(4, inner.Responses.Count);
+        Assert.All(inner.Responses.Take(3), r => Assert.True(r.Disposed));
+    }
+
+    private sealed class TrackedContent : HttpContent
+    {
+        public bool Disposed { get; private set; }
+
+        protected override Task SerializeToStreamAsync(System.IO.Stream stream, System.Net.TransportContext? context) => Task.CompletedTask;
+
+        protected override bool TryComputeLength(out long length)
+        {
+            length = 0;
+            return true;
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            Disposed = true;
+            base.Dispose(disposing);
+        }
+    }
+
+    private sealed class DisposalTrackingHandler : HttpMessageHandler
+    {
+        public System.Collections.Generic.List<TrackedContent> Responses { get; } = [];
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            var content = new TrackedContent();
+            Responses.Add(content);
+            var response = new HttpResponseMessage(HttpStatusCode.ServiceUnavailable) { Content = content };
+            response.Headers.RetryAfter = new RetryConditionHeaderValue(TimeSpan.Zero);
+            return Task.FromResult(response);
+        }
     }
 
     [Fact]
