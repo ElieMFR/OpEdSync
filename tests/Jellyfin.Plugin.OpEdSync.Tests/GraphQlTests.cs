@@ -203,6 +203,50 @@ public class GraphQlTests
         Assert.Equal(4, found.Count);
     }
 
+    // Audit 2026-11-12: one ID the API chokes on (HTTP 200 with an error) rejected the 50 of its batch.
+    [Fact]
+    public async Task OneIdTheApiRefuses_DoesNotCostTheOthers()
+    {
+        var handler = new ScriptedHandler(request =>
+        {
+            using var body = JsonDocument.Parse(request.Body);
+            var ids = body.RootElement.GetProperty("variables").GetProperty("id").EnumerateArray().Select(it => it.GetInt32()).ToArray();
+            return ids.Contains(3)
+                ? Json("{\"errors\":[{\"message\":\"Something broke.\"}]}")
+                : Json("{\"data\":{\"filterAnimeByExternalSite\":[]}}");
+        });
+        var api = NewApi(handler);
+
+        var found = await api.FindByExternalId(Sites.ANIDB, [1, 2, 3, 4], CancellationToken.None);
+
+        Assert.Equal(4, found.Count);
+        Assert.Empty(found[3]);
+    }
+
+    // A 5xx is the server's, not the IDs': the batch is not split (it would multiply the failing requests).
+    [Fact]
+    public async Task AServerError_DoesNotSplitTheBatch()
+    {
+        var handler = new ScriptedHandler(_ => new HttpResponseMessage(HttpStatusCode.ServiceUnavailable));
+        var api = NewApi(handler);
+
+        await Assert.ThrowsAsync<HttpRequestException>(() => api.FindByExternalId(Sites.ANIDB, [1, 2, 3, 4], CancellationToken.None).AsTask());
+
+        Assert.Single(handler.Requests);
+    }
+
+    // An error that every ID gets is not theirs: the lookup fails, after a few requests only.
+    [Fact]
+    public async Task AnErrorEveryIdGets_FailsTheLookupWithoutSplittingToTheEnd()
+    {
+        var handler = new ScriptedHandler(_ => Json("{\"errors\":[{\"message\":\"Something broke.\"}]}"));
+        var api = NewApi(handler);
+
+        await Assert.ThrowsAsync<HttpRequestException>(() => api.FindByExternalId(Sites.ANIDB, Enumerable.Range(1, 64), CancellationToken.None).AsTask());
+
+        Assert.True(handler.Requests.Count < 15, handler.Requests.Count.ToString(System.Globalization.CultureInfo.InvariantCulture));
+    }
+
     [Fact]
     public async Task AnyOtherError_FailsTheLookup()
     {

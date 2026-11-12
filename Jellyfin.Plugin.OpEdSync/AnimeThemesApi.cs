@@ -68,7 +68,19 @@ public sealed class AnimeThemesApi
         // A client per lookup: the factory reads the configured address each time, so a changed setting applies
         // without restarting the server.
         using var client = _clientFactory.CreateClient("AnimeThemes");
-        var found = await FindBatch(client, site, idList, cancellationToken).ConfigureAwait(false);
+        var outcome = new LookupOutcome();
+        var found = await FindBatch(client, site, idList, outcome, cancellationToken).ConfigureAwait(false);
+
+        // The IDs that failed alone stay unanswered while the others are kept; none answered means the error is not theirs.
+        if (outcome.Failed.Count > 0 && !outcome.Succeeded)
+        {
+            throw new HttpRequestException("AnimeThemes answered with an error: " + outcome.LastError);
+        }
+
+        if (outcome.Failed.Count > 0)
+        {
+            _logger.LogWarning("AnimeThemes refused {Count} IDs ({Ids}) one by one: {Error}", outcome.Failed.Count, string.Join(", ", outcome.Failed), outcome.LastError);
+        }
 
         // One ID can match several anime: the links of each one tell which ID it answers.
         var animeByAniId = found
@@ -90,7 +102,7 @@ public sealed class AnimeThemesApi
             ? number
             : null;
 
-    private async Task<List<Anime>> FindBatch(HttpClient client, string site, int[] ids, CancellationToken cancellationToken)
+    private async Task<List<Anime>> FindBatch(HttpClient client, string site, int[] ids, LookupOutcome outcome, CancellationToken cancellationToken)
     {
         await _gate.WaitAsync(cancellationToken).ConfigureAwait(false);
 
@@ -109,19 +121,32 @@ public sealed class AnimeThemesApi
 
         if (result.Errors.Count > 0)
         {
-            // Over the complexity or depth limit the API answers HTTP 200 with errors: half the IDs cost half as much.
-            if (ids.Length > 1 && result.Errors.Any(IsTooComplex))
+            var error = string.Join(" | ", result.Errors);
+
+            // An error in HTTP 200 is either the complexity limit or one ID the API chokes on: half the IDs cost half
+            // as much, and halving again ends on the faulty one alone, so the others are not lost with it. A 5xx
+            // (thrown above) is the server's, not the IDs': splitting would only multiply the failing requests.
+            if (ids.Length > 1 && outcome.CanSplit)
             {
-                _logger.LogWarning("AnimeThemes found {Count} IDs too complex in one request, splitting it", ids.Length);
+                _logger.LogWarning("AnimeThemes answered an error for {Count} IDs, splitting the request: {Error}", ids.Length, error);
                 var half = ids.Length / 2;
-                var first = await FindBatch(client, site, ids[..half], cancellationToken).ConfigureAwait(false);
-                var second = await FindBatch(client, site, ids[half..], cancellationToken).ConfigureAwait(false);
+                var first = await FindBatch(client, site, ids[..half], outcome, cancellationToken).ConfigureAwait(false);
+                var second = await FindBatch(client, site, ids[half..], outcome, cancellationToken).ConfigureAwait(false);
                 first.AddRange(second);
                 return first;
             }
 
-            throw new HttpRequestException("AnimeThemes answered with an error: " + string.Join(" | ", result.Errors));
+            if (ids.Length == 1 && !IsTooComplex(error))
+            {
+                outcome.Failed.AddRange(ids);
+                outcome.LastError = error;
+                return [];
+            }
+
+            throw new HttpRequestException("AnimeThemes answered with an error: " + error);
         }
+
+        outcome.Succeeded = true;
 
         if (result.TruncatedResources > 0)
         {
@@ -129,5 +154,20 @@ public sealed class AnimeThemesApi
         }
 
         return [.. result.Anime];
+    }
+
+    // What the splitting of one lookup has seen. Without any success after a few lone failures, the error is the
+    // API's and not the IDs': splitting further would burn the rate limit for nothing.
+    private sealed class LookupOutcome
+    {
+        private const int GiveUpAfter = 3;
+
+        public List<int> Failed { get; } = [];
+
+        public string LastError { get; set; } = string.Empty;
+
+        public bool Succeeded { get; set; }
+
+        public bool CanSplit => Succeeded || Failed.Count < GiveUpAfter;
     }
 }
