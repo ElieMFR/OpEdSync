@@ -129,9 +129,12 @@ public class AnimeThemesDownloader
                 {
                     // Don't let a failing lookup (or a maintenance page instead of JSON) abort the whole run; the next run will retry.
                     _logger.LogError(e, "Lookup on {Site} failed", siteGroup.Key);
+                    // Not tried again with the next ID this run: an older season (or another site) would give the item
+                    // the theme of something else. It stays as it is until the next run.
                     foreach (var item in itemsById.Values.SelectMany(it => it))
                     {
                         report.SetReason(item.Id, MissingReason.LookupFailed);
+                        pending.Remove(item);
                     }
 
                     continue;
