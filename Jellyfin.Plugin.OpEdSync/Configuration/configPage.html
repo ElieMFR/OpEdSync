@@ -386,6 +386,7 @@
                     "failed1": "avec 1 échec",
                     "failedN": "avec {0} échecs",
                     "cancelled": "Le passage a été interrompu.",
+                    "crashed": "Le passage s'est arrêté sur une erreur (voir le journal du serveur).",
                     "never": "Aucun passage pour l'instant.",
                     "ago": "il y a {0}",
                     "at": "à {0}",
@@ -520,6 +521,7 @@
                     "failed1": "with 1 failure",
                     "failedN": "with {0} failures",
                     "cancelled": "The run was cancelled.",
+                    "crashed": "The run stopped on an error (see the server log).",
                     "never": "No run yet.",
                     "ago": "{0} ago",
                     "at": "at {0}",
@@ -907,7 +909,7 @@
                 if (run) {
                     $('#opsLastAdded').textContent = plural(run.Added, t.added0, t.added1, t.addedN);
                     $('#opsLastRunSub').textContent = capitalize(since(new Date(run.EndedUtc)))
-                        + ', ' + plural(run.Failed, t.failed0, t.failed1, t.failedN) + '.' + (run.Cancelled ? ' ' + t.cancelled : '');
+                        + ', ' + plural(run.Failed, t.failed0, t.failed1, t.failedN) + '.' + (run.Cancelled ? ' ' + t.cancelled : '') + (run.Crashed ? ' ' + t.crashed : '');
                 } else {
                     $('#opsLastAdded').textContent = '—';
                     $('#opsLastRunSub').textContent = t.never;

@@ -158,6 +158,7 @@ public sealed class StatsService
             StartedUtc = summary.StartedUtc,
             EndedUtc = summary.EndedUtc,
             Cancelled = summary.Cancelled,
+            Crashed = summary.Crashed,
             Candidates = summary.Candidates,
             Matched = summary.Matched,
             Added = summary.Added,

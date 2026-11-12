@@ -54,7 +54,7 @@ public abstract class BaseThemeSearchTask
         _logger.LogInformation("Starting theme search");
         var configuration = Plugin.Instance!.Configuration;
         var report = new RunReport();
-        bool cancelled = true;
+        Exception? ended = null;
 
         try
         {
@@ -62,7 +62,6 @@ public abstract class BaseThemeSearchTask
             if (items.Count == 0)
             {
                 _logger.LogInformation("No applicable items found -- aborting");
-                cancelled = false;
                 return;
             }
 
@@ -111,7 +110,6 @@ public abstract class BaseThemeSearchTask
                 progress.Report(LookupShare + (done / (double)count * (100 - LookupShare)));
             }).ConfigureAwait(false);
 
-            cancelled = false;
             _logger.LogInformation(
                 "Ending theme search: {Matched} matched, {Added} added, {Removed} removed, {Failed} failed",
                 report.Matched,
@@ -119,10 +117,24 @@ public abstract class BaseThemeSearchTask
                 report.Removed,
                 report.Failed);
         }
+        catch (Exception e)
+        {
+            ended = e;
+            throw;
+        }
         finally
         {
-            _summaryStore.Save(report.ToSummary(cancelled));
+            var (cancelled, crashed) = EndOf(ended);
+            _summaryStore.Save(report.ToSummary(cancelled, crashed));
             _statsService.Invalidate();
         }
     }
+
+    /// <summary>
+    /// Tells how a run ended. A run that stopped on an error is not a cancelled one: the page says which.
+    /// </summary>
+    /// <param name="error">The exception that stopped the run, if any.</param>
+    /// <returns>Whether it was cancelled, and whether it crashed.</returns>
+    internal static (bool Cancelled, bool Crashed) EndOf(Exception? error)
+        => error is null ? (false, false) : error is OperationCanceledException ? (true, false) : (false, true);
 }

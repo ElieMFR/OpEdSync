@@ -47,4 +47,28 @@ public class LocalizationAndReportTests
         Assert.False(summary.Reasons.ContainsKey(id));
         Assert.Equal(1, summary.Added);
     }
+
+    // Audit 2026-11-12: a run that crashed was saved as "cancelled", so the page blamed the user.
+    [Fact]
+    public void ARunThatCrashed_IsNotSavedAsCancelled()
+    {
+        Assert.Equal((false, false), Tasks.BaseThemeSearchTask.EndOf(null));
+        Assert.Equal((true, false), Tasks.BaseThemeSearchTask.EndOf(new OperationCanceledException()));
+        Assert.Equal((true, false), Tasks.BaseThemeSearchTask.EndOf(new System.Threading.Tasks.TaskCanceledException()));
+        Assert.Equal((false, true), Tasks.BaseThemeSearchTask.EndOf(new InvalidOperationException()));
+
+        var summary = new RunReport().ToSummary(false, true);
+        Assert.True(summary.Crashed);
+        Assert.False(summary.Cancelled);
+    }
+
+    [Fact]
+    public void ConfigurationPage_SaysWhenARunCrashed_InBothLanguages()
+    {
+        using var stream = typeof(Plugin).Assembly.GetManifestResourceStream("Jellyfin.Plugin.OpEdSync.Configuration.configPage.html")!;
+        var html = new System.IO.StreamReader(stream).ReadToEnd();
+
+        Assert.Equal(2, html.Split("\"crashed\":").Length - 1);
+        Assert.Contains("run.Crashed", html, StringComparison.Ordinal);
+    }
 }

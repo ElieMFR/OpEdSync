@@ -24,6 +24,11 @@ public sealed class RunSummary
     public bool Cancelled { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the run stopped on an error of its own (not cancelled by the user).
+    /// </summary>
+    public bool Crashed { get; set; }
+
+    /// <summary>
     /// Gets or sets how many items were candidates.
     /// </summary>
     public int Candidates { get; set; }

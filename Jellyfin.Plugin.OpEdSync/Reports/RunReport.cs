@@ -80,12 +80,14 @@ public sealed class RunReport
     /// Builds the summary saved at the end of the run.
     /// </summary>
     /// <param name="cancelled">Whether the run was cancelled.</param>
+    /// <param name="crashed">Whether the run stopped on an error.</param>
     /// <returns>The summary.</returns>
-    public RunSummary ToSummary(bool cancelled) => new()
+    public RunSummary ToSummary(bool cancelled, bool crashed = false) => new()
     {
         StartedUtc = StartedUtc,
         EndedUtc = DateTime.UtcNow,
         Cancelled = cancelled,
+        Crashed = crashed,
         Candidates = Candidates,
         Matched = Matched,
         Added = Added,

@@ -23,6 +23,11 @@ public sealed class LastRunInfo
     public bool Cancelled { get; set; }
 
     /// <summary>
+    /// Gets or sets a value indicating whether the run stopped on an error.
+    /// </summary>
+    public bool Crashed { get; set; }
+
+    /// <summary>
     /// Gets or sets how many items were candidates.
     /// </summary>
     public int Candidates { get; set; }
