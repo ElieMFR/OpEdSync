@@ -37,6 +37,9 @@ public class AnimeThemesDownloader
     // A theme is a few megabytes: past this, the connection is stuck and the next item should get its turn.
     private static readonly TimeSpan DownloadTimeout = TimeSpan.FromMinutes(10);
 
+    // The heaviest themes (1080p) weigh tens of megabytes: past this, the link is not a theme.
+    internal const long MaxDownloadBytes = 300L * 1024 * 1024;
+
     // Providers in order of preference: Jellyfin provider key -> AnimeThemes site name.
     private static readonly (string ProviderKey, string Site)[] SupportedProviders =
     [
@@ -408,13 +411,27 @@ public class AnimeThemesDownloader
             _logger.LogInformation("[{Id}] Downloading {Url} to {Path}", item.Id, url, path);
             // A client per download, like the lookups, so a changed address applies without a restart.
             using var client = _clientFactory.CreateClient("AnimeThemes");
-            var downloadStream = await client.GetStreamAsync(url, token).ConfigureAwait(false);
+
+            // The link comes from the API: it must stay on AnimeThemes (or the configured address), and so must its redirections.
+            if (!IsTrustedLink(url, client.BaseAddress))
+            {
+                throw new InvalidDataException("Link refused, it does not point at AnimeThemes: " + url);
+            }
+
+            using var response = await client.GetAsync(new Uri(url, UriKind.Absolute), HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
+            response.EnsureSuccessStatusCode();
+            if (response.RequestMessage?.RequestUri is { } finalUri && !IsTrustedLink(finalUri.AbsoluteUri, client.BaseAddress))
+            {
+                throw new InvalidDataException("Redirection refused, it leaves AnimeThemes: " + finalUri);
+            }
+
+            var downloadStream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
             await using (downloadStream.ConfigureAwait(false))
             {
                 var fileStream = File.Create(tempFile);
                 await using (fileStream.ConfigureAwait(false))
                 {
-                    await downloadStream.CopyToAsync(fileStream, token).ConfigureAwait(false);
+                    await CopyLimitedAsync(downloadStream, fileStream, MaxDownloadBytes, token).ConfigureAwait(false);
                 }
             }
 
@@ -432,7 +449,7 @@ public class AnimeThemesDownloader
                     FileName = _mediaEncoder.EncoderPath,
                     WindowStyle = ProcessWindowStyle.Hidden,
                     ErrorDialog = false,
-                    ArgumentList = { "-y", "-nostdin", "-loglevel", "error", "-i", tempFile }
+                    ArgumentList = { "-y", "-nostdin", "-loglevel", "error", "-protocol_whitelist", "file", "-i", tempFile }
                 },
                 EnableRaisingEvents = true
             };
@@ -518,6 +535,56 @@ public class AnimeThemesDownloader
         }
 
         return DownloadResult.Downloaded;
+    }
+
+    /// <summary>
+    /// Tells whether a download link may be followed: https on animethemes.moe or one of its subdomains, or, for a
+    /// test bench, the address the plugin is configured with.
+    /// </summary>
+    /// <param name="link">The link given by the API.</param>
+    /// <param name="baseAddress">The configured address of AnimeThemes.</param>
+    /// <returns>Whether the link is trusted.</returns>
+    internal static bool IsTrustedLink(string? link, Uri? baseAddress)
+    {
+        if (!Uri.TryCreate(link, UriKind.Absolute, out var uri))
+        {
+            return false;
+        }
+
+        if (uri.Scheme == Uri.UriSchemeHttps && (uri.Host == "animethemes.moe" || uri.Host.EndsWith(".animethemes.moe", StringComparison.OrdinalIgnoreCase)))
+        {
+            return true;
+        }
+
+        return baseAddress is not null
+               && uri.Scheme == baseAddress.Scheme
+               && string.Equals(uri.Host, baseAddress.Host, StringComparison.OrdinalIgnoreCase)
+               && uri.Port == baseAddress.Port;
+    }
+
+    /// <summary>
+    /// Copies a stream, refusing to go past a size.
+    /// </summary>
+    /// <param name="source">Source.</param>
+    /// <param name="target">Target.</param>
+    /// <param name="maxBytes">Largest size accepted.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A task that ends with the copy.</returns>
+    internal static async Task CopyLimitedAsync(Stream source, Stream target, long maxBytes, CancellationToken cancellationToken)
+    {
+        var buffer = new byte[81920];
+        long total = 0;
+        int read;
+        while ((read = await source.ReadAsync(buffer, cancellationToken).ConfigureAwait(false)) > 0)
+        {
+            total += read;
+            if (total > maxBytes)
+            {
+                throw new InvalidDataException("The download is larger than " + maxBytes + " bytes, refused");
+            }
+
+            await target.WriteAsync(buffer.AsMemory(0, read), cancellationToken).ConfigureAwait(false);
+        }
     }
 
     // A leftover temporary file must not turn a cancellation (or a success) into a failure.
