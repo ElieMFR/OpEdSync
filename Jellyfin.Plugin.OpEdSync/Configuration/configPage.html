@@ -138,6 +138,7 @@
                     <p class="ops-card-sub" id="opsNextRunSub"></p>
                 </div>
             </div>
+            <p class="ops-danger" id="opsStatsError" role="alert" style="display: none;"></p>
             <p class="ops-hint" data-ops-t="profileHint"></p>
 
             <div class="ops-section" id="opsReasonsSection">
@@ -371,7 +372,7 @@
                     "videoVolumeHelp": "À 0 %, la piste audio est retirée.",
                     "advanced": "Avancé",
                     "checkYear": "Vérifier l'année de sortie",
-                    "checkYearHelp": "Le plugin écarte un animé sorti plus d’un an avant ou après le média. Ça évite la plupart des identifiants erronés.",
+                    "checkYearHelp": "Écarte les résultats dont l’année de sortie est éloignée de celle du média de plus d’un an. Avec « Sa dernière saison », une saison qui a son propre numéro d’animé n’est pas vérifiée.",
                     "parallelism": "Téléchargements simultanés",
                     "parallelismHelp": "Un seul à la fois suffit et ménage le serveur d’AnimeThemes.",
                     "forceSync": "Mettre à jour les thèmes déjà téléchargés",
@@ -442,6 +443,7 @@
                     "selectAll": "Tout cocher",
                     "selectNone": "Tout décocher",
                     "saveFailed": "Les réglages n’ont pas été enregistrés : le serveur n’a pas répondu.",
+                    "statsFailed": "Les chiffres n'ont pas pu être chargés. Recharge la page.",
                     "runFailed": "Le passage n’a pas pu être lancé : le serveur n’a pas répondu.",
                     "reasons": {
                         "NoId": "Aucun identifiant AniDB, MyAnimeList ou AniList",
@@ -506,7 +508,7 @@
                     "videoVolumeHelp": "At 0 %, the audio track is removed.",
                     "advanced": "Advanced",
                     "checkYear": "Check the release year",
-                    "checkYearHelp": "The plugin rules out an anime released more than one year before or after the media. This avoids most wrong IDs.",
+                    "checkYearHelp": "Skips results whose release year differs from the media’s by more than a year. With “Its latest season”, a season that has an anime number of its own is not checked.",
                     "parallelism": "Simultaneous downloads",
                     "parallelismHelp": "One at a time is enough and spares the AnimeThemes server.",
                     "forceSync": "Update themes already downloaded",
@@ -577,6 +579,7 @@
                     "selectAll": "Tick all",
                     "selectNone": "Untick all",
                     "saveFailed": "The settings were not saved: the server did not answer.",
+                    "statsFailed": "The figures could not be loaded. Reload the page.",
                     "runFailed": "The run could not be started: the server did not answer.",
                     "reasons": {
                         "NoId": "No AniDB, MyAnimeList or AniList ID",
@@ -888,6 +891,7 @@
             }
 
             function renderStats(stats) {
+                $('#opsStatsError').style.display = 'none';
                 var anyLibrary = false;
                 for (var k = 0; k < (stats.Libraries || []).length; k++) {
                     anyLibrary = anyLibrary || stats.Libraries[k].Included;
@@ -1033,10 +1037,26 @@
                 });
             }
 
+            // The figures could not be read: show dashes instead of the placeholder, and say so.
+            function showStatsFailed() {
+                $('#opsCoverage').textContent = '—';
+                $('#opsCoverageSub').textContent = '';
+                $('#opsMissing').textContent = '—';
+                $('#opsMissingSub').textContent = '';
+                $('#opsLastAdded').textContent = '—';
+                $('#opsLastRunSub').textContent = '';
+                $('#opsReasons').innerHTML = '';
+                $('#opsStatsError').textContent = t.statsFailed;
+                $('#opsStatsError').style.display = '';
+            }
+
             function loadStats(refresh) {
                 return ApiClient.getJSON(ApiClient.getUrl('OpEdSync/Stats', refresh ? { refresh: true } : {})).then(function (stats) {
                     renderLibraries(stats.Libraries || []);
                     renderStats(stats);
+                }, function (e) {
+                    console.error('OpEdSync: figures failed to load', e);
+                    showStatsFailed();
                 });
             }
 

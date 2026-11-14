@@ -52,6 +52,8 @@
 
 Open an anime: its opening plays in the background. The dashboard at the top of the settings tells you how many series have a theme, and why the others don't.
 
+To find the themes, the plugin sends your anime IDs to AnimeThemes. The site also sees your server's address.
+
 ## ✨ Key Features
 
 *   **Openings and endings from [AnimeThemes](https://animethemes.moe)**: the community database of anime themes, as theme music and, if you want it, as theme video.
@@ -97,7 +99,7 @@ If the former **AnimeThemes** plugin is installed, uninstall it: both would down
 | **Themes that overlap with the episode** | Accept simple transitions | Or clean themes only, or accept everything. |
 | **Volume** | 50 % | Baked into the file. A change applies on the next run. |
 | **Theme video** | Off | Animated background on the series page. Takes a lot of disk space. |
-| **Check the release year** | On | Rules out most wrong IDs. |
+| **Check the release year** | On | Skips results whose release year differs from the media’s by more than a year. With “Its latest season”, a season that has an anime number of its own is not checked. |
 | **Simultaneous downloads** | 1 | Up to 4. 1 spares the AnimeThemes server. |
 | **Replace existing themes on every run** | Off | Downloads again and removes the plugin's themes that no longer match the settings. |
 
@@ -154,6 +156,8 @@ Released under the [GPL-3.0 License](./LICENSE).
 
 Ouvrez un animé : son générique se joue en fond. Le tableau de bord en haut des réglages indique combien de séries ont un thème, et pourquoi les autres n'en ont pas.
 
+Pour trouver les génériques, le plugin envoie à AnimeThemes les numéros de vos animés. Le site voit aussi l'adresse de votre serveur.
+
 ## ✨ Fonctionnalités
 
 *   **Openings et endings depuis [AnimeThemes](https://animethemes.moe)** : la base communautaire des génériques d'animés, en musique de thème et, si vous le voulez, en vidéo de thème.
@@ -199,7 +203,7 @@ Si l'ancien plugin **AnimeThemes** est installé, désinstallez-le : les deux t�
 | **Génériques qui débordent sur l'épisode** | Accepter les simples transitions | Ou génériques propres seulement, ou tout accepter. |
 | **Volume** | 50 % | Appliqué dans le fichier. Un changement est pris en compte au passage suivant. |
 | **Vidéo de thème** | Désactivée | Fond animé sur la page de la série. Prend beaucoup de place sur le disque. |
-| **Vérifier l'année de sortie** | Activé | Écarte la plupart des identifiants erronés. |
+| **Vérifier l'année de sortie** | Activé | Écarte les résultats dont l'année de sortie est éloignée de celle du média de plus d'un an. Avec « Sa dernière saison », une saison qui a son propre numéro d'animé n'est pas vérifiée. |
 | **Téléchargements simultanés** | 1 | Jusqu'à 4. 1 ménage le serveur d'AnimeThemes. |
 | **Remplacer les thèmes existants à chaque passage** | Désactivé | Retélécharge et supprime les thèmes du plugin qui ne correspondent plus aux réglages. |
 

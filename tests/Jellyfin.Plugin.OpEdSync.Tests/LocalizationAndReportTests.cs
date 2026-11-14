@@ -71,4 +71,29 @@ public class LocalizationAndReportTests
         Assert.Equal(2, html.Split("\"crashed\":").Length - 1);
         Assert.Contains("run.Crashed", html, StringComparison.Ordinal);
     }
+
+    [Fact]
+    public void ConfigurationPage_SaysWhenTheFiguresCouldNotBeLoaded_InBothLanguages()
+    {
+        using var stream = typeof(Plugin).Assembly.GetManifestResourceStream("Jellyfin.Plugin.OpEdSync.Configuration.configPage.html")!;
+        var html = new System.IO.StreamReader(stream).ReadToEnd();
+
+        Assert.Contains("\"statsFailed\": \"Les chiffres n'ont pas pu être chargés. Recharge la page.\"", html, StringComparison.Ordinal);
+        Assert.Contains("\"statsFailed\": \"The figures could not be loaded. Reload the page.\"", html, StringComparison.Ordinal);
+        Assert.Contains("id=\"opsStatsError\"", html, StringComparison.Ordinal);
+
+        // The figures show a dash, not the placeholder or zeros, and the message is shown by the failing load itself.
+        Assert.Contains("showStatsFailed()", html, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void ConfigurationPage_SaysTheYearCheckSkipsASeasonWithItsOwnId_InBothLanguages()
+    {
+        using var stream = typeof(Plugin).Assembly.GetManifestResourceStream("Jellyfin.Plugin.OpEdSync.Configuration.configPage.html")!;
+        var html = new System.IO.StreamReader(stream).ReadToEnd();
+
+        Assert.Contains("une saison qui a son propre numéro d’animé n’est pas vérifiée.", html, StringComparison.Ordinal);
+        Assert.Contains("a season that has an anime number of its own is not checked.", html, StringComparison.Ordinal);
+        Assert.DoesNotContain("Ça évite la plupart des identifiants erronés", html, StringComparison.Ordinal);
+    }
 }
