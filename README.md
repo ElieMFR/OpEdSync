@@ -156,7 +156,7 @@ Released under the [GPL-3.0 License](./LICENSE).
 
 Ouvrez un animé : son générique se joue en fond. Le tableau de bord en haut des réglages indique combien de séries ont un thème, et pourquoi les autres n'en ont pas.
 
-Pour trouver les génériques, le plugin envoie à AnimeThemes les numéros de vos animés. Le site voit aussi l'adresse de votre serveur.
+Pour trouver les génériques, le plugin envoie à AnimeThemes les numéros de tes animés. Le site voit aussi l'adresse de ton serveur.
 
 ## ✨ Fonctionnalités
 
