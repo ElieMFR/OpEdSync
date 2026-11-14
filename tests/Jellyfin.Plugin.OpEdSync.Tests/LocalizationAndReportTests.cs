@@ -78,7 +78,7 @@ public class LocalizationAndReportTests
         using var stream = typeof(Plugin).Assembly.GetManifestResourceStream("Jellyfin.Plugin.OpEdSync.Configuration.configPage.html")!;
         var html = new System.IO.StreamReader(stream).ReadToEnd();
 
-        Assert.Contains("\"statsFailed\": \"Les chiffres n'ont pas pu être chargés. Recharge la page.\"", html, StringComparison.Ordinal);
+        Assert.Contains("\"statsFailed\": \"Les chiffres n'ont pas pu être chargés. Rechargez la page.\"", html, StringComparison.Ordinal);
         Assert.Contains("\"statsFailed\": \"The figures could not be loaded. Reload the page.\"", html, StringComparison.Ordinal);
         Assert.Contains("id=\"opsStatsError\"", html, StringComparison.Ordinal);
 
