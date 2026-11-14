@@ -23,9 +23,7 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
         serviceCollection.AddSingleton<StatusService>();
         serviceCollection.AddHostedService<ExoPlayerFixRegistration>();
 
-        var productHeader = new ProductInfoHeaderValue(
-            "jf-plugin-opedsync",
-            applicationHost.ApplicationVersionString);
+        var productHeader = CreateUserAgent();
 
         serviceCollection.AddTransient<PollyResilienceHandler>();
 
@@ -47,4 +45,12 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
             c.Timeout = TimeSpan.FromSeconds(8);
         });
     }
+
+    /// <summary>
+    /// The User-Agent sent to AnimeThemes, which refuses a request without one: the name and version of the plugin,
+    /// not the version of the Jellyfin server.
+    /// </summary>
+    /// <returns>The header value.</returns>
+    internal static ProductInfoHeaderValue CreateUserAgent()
+        => new("jf-plugin-opedsync", typeof(Plugin).Assembly.GetName().Version?.ToString() ?? "unknown");
 }

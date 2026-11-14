@@ -36,6 +36,42 @@ public class AddressChangeTests
         Assert.Equal(["first.test", "second.test"], hosts);
     }
 
+    // AnimeThemes needs a User-Agent (a request without one gets a 403) but not the version of the Jellyfin server.
+    [Fact]
+    public void UserAgent_NamesThePlugin_WithItsOwnVersion()
+    {
+        var agent = PluginServiceRegistrator.CreateUserAgent();
+
+        Assert.Equal("jf-plugin-opedsync", agent.Product!.Name);
+        Assert.Equal(typeof(Plugin).Assembly.GetName().Version!.ToString(), agent.Product.Version);
+    }
+
+    // The real registration, then what goes on the wire: the header of the client the plugin really uses.
+    [Fact]
+    public async Task TheClientOfThePlugin_SendsThePluginUserAgent()
+    {
+        var agents = new List<string>();
+        var services = new ServiceCollection();
+        new PluginServiceRegistrator().RegisterServices(services, null!);
+        services.AddHttpClient("AnimeThemes").ConfigurePrimaryHttpMessageHandler(() => new AgentHandler(agents));
+        using var provider = services.BuildServiceProvider();
+
+        using var client = provider.GetRequiredService<IHttpClientFactory>().CreateClient("AnimeThemes");
+        await client.GetAsync(new Uri("http://127.0.0.1:1/"));
+
+        Assert.Equal([PluginServiceRegistrator.CreateUserAgent().ToString()], agents);
+        Assert.DoesNotContain("12.", agents[0], StringComparison.Ordinal);
+    }
+
+    private sealed class AgentHandler(List<string> agents) : HttpMessageHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            agents.Add(request.Headers.UserAgent.ToString());
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK));
+        }
+    }
+
     private sealed class RecordingHandler(List<string> hosts) : HttpMessageHandler
     {
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
