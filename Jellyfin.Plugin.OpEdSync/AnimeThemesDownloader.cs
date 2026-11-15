@@ -241,8 +241,8 @@ public class AnimeThemesDownloader
         bool audioChanged = await ProcessMediaType(MediaType.Audio, anime, item, configuration.ForceSync, collectionTypeConfig, report, cancellationToken).ConfigureAwait(false);
 
         // Files written by a run that stopped before the refresh are on disk but unknown to Jellyfin.
-        bool unregistered = ThemeFileRules.NeedsRegistration(ListThemeFiles(item, MediaType.Video), item.GetThemeVideos().Any())
-                            || ThemeFileRules.NeedsRegistration(ListThemeFiles(item, MediaType.Audio), item.GetThemeSongs().Any());
+        bool unregistered = ThemeFileRules.NeedsRegistration(ListThemeFiles(item, MediaType.Video), item.GetThemeVideos().Count > 0)
+                            || ThemeFileRules.NeedsRegistration(ListThemeFiles(item, MediaType.Audio), item.GetThemeSongs().Count > 0);
 
         if (videoChanged || audioChanged || unregistered)
         {
@@ -615,8 +615,8 @@ public class AnimeThemesDownloader
     {
         var settings = GetCollectionSettings(item, configuration);
 
-        var audioSatisfied = item.GetThemeSongs().Any() || settings.AudioSettings.FetchType == FetchType.None;
-        var videoSatisfied = item.GetThemeVideos().Any() || settings.VideoSettings.FetchType == FetchType.None;
+        var audioSatisfied = item.GetThemeSongs().Count > 0 || settings.AudioSettings.FetchType == FetchType.None;
+        var videoSatisfied = item.GetThemeVideos().Count > 0 || settings.VideoSettings.FetchType == FetchType.None;
 
         return audioSatisfied && videoSatisfied;
     }
