@@ -188,7 +188,7 @@ public class AnimeThemesDownloader
 
                         // A season whose themes are all filtered out (overlap, credits, OP/ED) would leave the
                         // item without a theme; try the previous season (or the series) instead.
-                        var usable = matches.Where(it => HasUsableThemes(it, item, configuration)).ToArray();
+                        var usable = matches.Where(it => HasUsableThemes(it, configuration)).ToArray();
                         if (usable.Length == 0)
                         {
                             _logger.LogInformation(
@@ -232,13 +232,11 @@ public class AnimeThemesDownloader
 
         _logger.LogInformation("[{Id}] Attempting to filter theme songs for: {Name} (AnimeThemes={AnimeId}, {AnimeName})", item.Id, item.Name, anime.Id, anime.Name);
 
-        var collectionTypeConfig = GetCollectionSettings(item, configuration);
-
         // Process videos
-        bool videoChanged = await ProcessMediaType(MediaType.Video, anime, item, configuration.ForceSync, collectionTypeConfig, report, cancellationToken).ConfigureAwait(false);
+        bool videoChanged = await ProcessMediaType(MediaType.Video, anime, item, configuration.ForceSync, configuration, report, cancellationToken).ConfigureAwait(false);
 
         // Process audios
-        bool audioChanged = await ProcessMediaType(MediaType.Audio, anime, item, configuration.ForceSync, collectionTypeConfig, report, cancellationToken).ConfigureAwait(false);
+        bool audioChanged = await ProcessMediaType(MediaType.Audio, anime, item, configuration.ForceSync, configuration, report, cancellationToken).ConfigureAwait(false);
 
         // Files written by a run that stopped before the refresh are on disk but unknown to Jellyfin.
         bool unregistered = ThemeFileRules.NeedsRegistration(ListThemeFiles(item, MediaType.Video), item.GetThemeVideos().Count > 0)
@@ -255,7 +253,7 @@ public class AnimeThemesDownloader
         }
     }
 
-    private async ValueTask<bool> ProcessMediaType(MediaType type, Anime anime, BaseItem item, bool forceSync, CollectionTypeConfiguration configuration, RunReport report, CancellationToken cancellationToken = default)
+    private async ValueTask<bool> ProcessMediaType(MediaType type, Anime anime, BaseItem item, bool forceSync, PluginConfiguration configuration, RunReport report, CancellationToken cancellationToken = default)
     {
         var settings = type == MediaType.Audio ? configuration.AudioSettings : configuration.VideoSettings;
 
@@ -615,23 +613,10 @@ public class AnimeThemesDownloader
         }
     }
 
-    /// <summary>
-    /// Gets the settings that apply to an item; movies and series share them.
-    /// </summary>
-    /// <param name="item">Item.</param>
-    /// <param name="configuration">Configuration.</param>
-    /// <returns>The settings.</returns>
-    internal static CollectionTypeConfiguration GetCollectionSettings(BaseItem item, PluginConfiguration configuration)
-    {
-        return new CollectionTypeConfiguration { AudioSettings = configuration.AudioSettings, VideoSettings = configuration.VideoSettings };
-    }
-
     private static bool IsSatisfied(BaseItem item, PluginConfiguration configuration)
     {
-        var settings = GetCollectionSettings(item, configuration);
-
-        var audioSatisfied = item.GetThemeSongs().Count > 0 || settings.AudioSettings.FetchType == FetchType.None;
-        var videoSatisfied = item.GetThemeVideos().Count > 0 || settings.VideoSettings.FetchType == FetchType.None;
+        var audioSatisfied = item.GetThemeSongs().Count > 0 || configuration.AudioSettings.FetchType == FetchType.None;
+        var videoSatisfied = item.GetThemeVideos().Count > 0 || configuration.VideoSettings.FetchType == FetchType.None;
 
         return audioSatisfied && videoSatisfied;
     }
@@ -646,9 +631,8 @@ public class AnimeThemesDownloader
 
     private static bool HasOutdatedVolume(BaseItem item, PluginConfiguration configuration)
     {
-        var settings = GetCollectionSettings(item, configuration);
-        return (settings.AudioSettings.FetchType != FetchType.None && ThemeFileRules.HasOutdatedVolume(ListThemeFiles(item, MediaType.Audio), settings.AudioSettings.Volume))
-               || (settings.VideoSettings.FetchType != FetchType.None && ThemeFileRules.HasOutdatedVolume(ListThemeFiles(item, MediaType.Video), settings.VideoSettings.Volume));
+        return (configuration.AudioSettings.FetchType != FetchType.None && ThemeFileRules.HasOutdatedVolume(ListThemeFiles(item, MediaType.Audio), configuration.AudioSettings.Volume))
+               || (configuration.VideoSettings.FetchType != FetchType.None && ThemeFileRules.HasOutdatedVolume(ListThemeFiles(item, MediaType.Video), configuration.VideoSettings.Volume));
     }
 
     private static bool HasVideos(Anime anime)
@@ -656,10 +640,9 @@ public class AnimeThemesDownloader
         return anime.Themes.Any(theme => theme.Entries.Any(entry => entry.Videos.Count > 0));
     }
 
-    private bool HasUsableThemes(Anime anime, BaseItem item, PluginConfiguration configuration)
+    private bool HasUsableThemes(Anime anime, PluginConfiguration configuration)
     {
-        var settings = GetCollectionSettings(item, configuration);
-        var active = new[] { (Type: MediaType.Audio, Settings: settings.AudioSettings), (Type: MediaType.Video, Settings: settings.VideoSettings) }
+        var active = new[] { (Type: MediaType.Audio, Settings: configuration.AudioSettings), (Type: MediaType.Video, Settings: configuration.VideoSettings) }
             .Where(it => it.Settings.FetchType != FetchType.None)
             .ToList();
 
