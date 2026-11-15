@@ -96,4 +96,23 @@ public class LocalizationAndReportTests
         Assert.Contains("a season that has an anime number of its own is not checked.", html, StringComparison.Ordinal);
         Assert.DoesNotContain("Ça évite la plupart des identifiants erronés", html, StringComparison.Ordinal);
     }
+
+    // Two rules styled classes no element of the page carries (the library list is .ops-lib-list since the filter was added).
+    [Fact]
+    public void ConfigurationPage_HasNoStyleRuleForClassesItNeverUses()
+    {
+        using var stream = typeof(Plugin).Assembly.GetManifestResourceStream("Jellyfin.Plugin.OpEdSync.Configuration.configPage.html")!;
+        var html = new System.IO.StreamReader(stream).ReadToEnd();
+
+        Assert.DoesNotContain(".ops-title", html, StringComparison.Ordinal);
+        Assert.DoesNotContain(".ops-libraries", html, StringComparison.Ordinal);
+        Assert.DoesNotContain("class=\"ops-title", html, StringComparison.Ordinal);
+        Assert.DoesNotContain("class=\"ops-libraries", html, StringComparison.Ordinal);
+
+        // Its other rules stay.
+        Assert.Contains("#OpEdSyncConfigPage .ops-lib-list {", html, StringComparison.Ordinal);
+        Assert.Contains("#OpEdSyncConfigPage .ops-grid { grid-template-columns: minmax(0, 1fr); }", html, StringComparison.Ordinal);
+        Assert.Contains("#OpEdSyncConfigPage .ops-cards, #OpEdSyncConfigPage .ops-actions { grid-template-columns: minmax(0, 1fr); }", html, StringComparison.Ordinal);
+        Assert.Contains(".ops-section-title", html, StringComparison.Ordinal);
+    }
 }

@@ -269,7 +269,7 @@ public class ThemeSelectionTests
     private static Anime Make(params AnimeTheme[] themes) => new(1, "A", "a", 2020, [], new Collection<AnimeTheme>(themes));
 
     private static Video Video(int id, VideoSource source, bool creditless, OverlapType overlap = OverlapType.None, bool hasAudio = true)
-        => new(id, "b", "f", source, overlap, "https://v/" + id, creditless, hasAudio ? new Audio(id, "p", "f", "audio/ogg", "https://a/" + id) : null!);
+        => new(id, "f", source, overlap, "https://v/" + id, creditless, hasAudio ? new Audio("f", "https://a/" + id) : null!);
 
     private static AnimeTheme Theme(
         int id,
@@ -285,7 +285,7 @@ public class ThemeSelectionTests
         Video[]? videos = null,
         bool nsfw = false)
     {
-        var entry = new AnimeThemeEntry(id * 10, 1, null, nsfw, spoiler, new Collection<Video>(videos ?? [Video(id * 100, source, creditless, overlap, hasAudio)]));
+        var entry = new AnimeThemeEntry(id * 10, 1, nsfw, spoiler, new Collection<Video>(videos ?? [Video(id * 100, source, creditless, overlap, hasAudio)]));
         return new AnimeTheme(id, type, sequence, group, slug, [entry]);
     }
 }

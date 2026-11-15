@@ -20,8 +20,8 @@ public static class AnimeThemesGraphQl
     public const string LookupQuery =
         "query($site: ResourceSite!, $id: [Int!]) { filterAnimeByExternalSite(site: $site, id: $id) { "
         + "id slug year title { romaji } resources { pageInfo { hasNextPage } nodes { id externalId site } } "
-        + "themes { id type sequence slug group { name } entries { id version episodes nsfw spoiler "
-        + "videos { nodes { id basename filename link nc overlap source audio { id filename link mimetype path } } } } } } }";
+        + "themes { id type sequence slug group { name } entries { id version nsfw spoiler "
+        + "videos { nodes { id filename link nc overlap source audio { filename link } } } } } } }";
 
     /// <summary>
     /// The smallest valid request, used to check that the API answers.
@@ -162,7 +162,7 @@ public static class AnimeThemesGraphQl
                 }
             }
 
-            entries.Add(new AnimeThemeEntry(Int(entry, "id"), IntOrNull(entry, "version"), Text(entry, "episodes"), Flag(entry, "nsfw"), Flag(entry, "spoiler"), videos));
+            entries.Add(new AnimeThemeEntry(Int(entry, "id"), IntOrNull(entry, "version"), Flag(entry, "nsfw"), Flag(entry, "spoiler"), videos));
         }
 
         var group = theme.TryGetProperty("group", out var groupElement) ? Text(groupElement, "name") : null;
@@ -175,16 +175,12 @@ public static class AnimeThemesGraphQl
         if (video.TryGetProperty("audio", out var audioElement) && audioElement.ValueKind == JsonValueKind.Object)
         {
             audio = new Audio(
-                IntOrNull(audioElement, "id") ?? 0,
-                Text(audioElement, "path") ?? string.Empty,
                 Text(audioElement, "filename") ?? string.Empty,
-                Text(audioElement, "mimetype") ?? string.Empty,
                 Text(audioElement, "link") ?? string.Empty);
         }
 
         return new Video(
             Int(video, "id"),
-            Text(video, "basename") ?? string.Empty,
             Text(video, "filename") ?? string.Empty,
             ToSource(Text(video, "source")),
             ToOverlap(Text(video, "overlap")),

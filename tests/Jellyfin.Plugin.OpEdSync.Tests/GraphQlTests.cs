@@ -163,6 +163,42 @@ public class GraphQlTests
         Assert.Throws<ArgumentOutOfRangeException>(() => AnimeThemesGraphQl.ToGraphQlSite("Netflix"));
     }
 
+    // The plugin reads none of these: asking for them only makes every answer heavier.
+    [Theory]
+    [InlineData("basename")]
+    [InlineData("episodes")]
+    [InlineData("mimetype")]
+    [InlineData("path")]
+    public void LookupQuery_DoesNotAskForFieldsThePluginNeverReads(string field)
+    {
+        using var document = JsonDocument.Parse(AnimeThemesGraphQl.BuildLookupRequest(Sites.ANIDB, [1]));
+        var query = document.RootElement.GetProperty("query").GetString()!;
+
+        Assert.DoesNotContain(query.Split([' ', '{', '}', '(', ')', ',', ':']), word => word == field);
+    }
+
+    [Fact]
+    public void LookupQuery_StillAsksForWhatTheSelectionAndTheDownloadNeed()
+    {
+        var words = AnimeThemesGraphQl.LookupQuery.Split([' ', '{', '}', '(', ')', ',', ':']);
+
+        foreach (var field in new[] { "filename", "link", "nc", "overlap", "source", "audio", "nsfw", "spoiler", "version", "sequence", "slug", "group", "year", "externalId", "hasNextPage" })
+        {
+            Assert.Contains(field, words);
+        }
+    }
+
+    [Fact]
+    public void FieldsTheQueryNoLongerAsksFor_AreIgnoredWhenTheAnswerStillHasThem()
+    {
+        using var document = JsonDocument.Parse(One());
+
+        var audio = AnimeThemesGraphQl.Parse(document).Anime.Single().Themes.Single().Entries.Single().Videos.Single().Audio;
+
+        Assert.Equal("A-OP1", audio.Filename);
+        Assert.Equal("https://a/A-OP1.ogg", audio.Link);
+    }
+
     [Fact]
     public async Task Lookup_PostsTheQuery_AndMatchesEachAnimeToItsId()
     {
