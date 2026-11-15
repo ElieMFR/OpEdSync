@@ -253,6 +253,19 @@ public class ThemeSelectionTests
         }
     }
 
+    // The choice is one setting for the music and the video (audio.Choice = video.Choice): the page has to say so.
+    [Fact]
+    public void ConfigurationPage_SaysTheChoiceAppliesToMusicAndVideo_InBothLanguages()
+    {
+        using var stream = typeof(Plugin).Assembly.GetManifestResourceStream("Jellyfin.Plugin.OpEdSync.Configuration.configPage.html")!;
+        var html = new StreamReader(stream).ReadToEnd();
+
+        Assert.Contains("\"themeChoice\": \"Quand un animé a plusieurs thèmes, choisir\"", html, StringComparison.Ordinal);
+        Assert.Contains("\"themeChoice\": \"When an anime has several themes, choose\"", html, StringComparison.Ordinal);
+        Assert.Contains("Ce choix vaut pour la musique et pour la vidéo.", html, StringComparison.Ordinal);
+        Assert.Contains("This choice applies to both music and video.", html, StringComparison.Ordinal);
+    }
+
     private static Anime Make(params AnimeTheme[] themes) => new(1, "A", "a", 2020, [], new Collection<AnimeTheme>(themes));
 
     private static Video Video(int id, VideoSource source, bool creditless, OverlapType overlap = OverlapType.None, bool hasAudio = true)
