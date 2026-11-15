@@ -444,36 +444,16 @@ public class AnimeThemesDownloader
                     RedirectStandardError = true,
                     FileName = _mediaEncoder.EncoderPath,
                     WindowStyle = ProcessWindowStyle.Hidden,
-                    ErrorDialog = false,
-                    ArgumentList = { "-y", "-nostdin", "-loglevel", "error", "-protocol_whitelist", "file", "-i", tempFile }
+                    ErrorDialog = false
                 },
                 EnableRaisingEvents = true
             };
 
-            // Update arguments
             var arguments = process.StartInfo.ArgumentList;
-            if (type == MediaType.Video)
+            foreach (var argument in BuildFfmpegArguments(type, tempFile, volume, partialPath))
             {
-                // Copy video stream
-                arguments.Add("-c:v");
-                arguments.Add("copy");
+                arguments.Add(argument);
             }
-
-            if (volume < 0.01 && type == MediaType.Video)
-            {
-                // Mute videos when volume is low enough
-                arguments.Add("-an");
-            }
-            else
-            {
-                arguments.Add("-filter:a");
-                arguments.Add(string.Create(CultureInfo.InvariantCulture, $"volume={volume:0.00}"));
-            }
-
-            // The container can't be guessed from the ".part" extension.
-            arguments.Add("-f");
-            arguments.Add(type == MediaType.Audio ? "mp3" : "webm");
-            arguments.Add(partialPath);
 
             process.Start();
 
@@ -531,6 +511,45 @@ public class AnimeThemesDownloader
         }
 
         return DownloadResult.Downloaded;
+    }
+
+    /// <summary>
+    /// Builds the ffmpeg arguments that convert a downloaded file into a theme. Only the local input file may be
+    /// read (<c>-protocol_whitelist file</c> comes before <c>-i</c>): ffmpeg then refuses any network address a
+    /// crafted file could point at.
+    /// </summary>
+    /// <param name="type">Kind of theme.</param>
+    /// <param name="inputFile">Downloaded file, a local path.</param>
+    /// <param name="volume">Volume between 0 and 1.</param>
+    /// <param name="outputFile">File to write.</param>
+    /// <returns>The arguments, in order.</returns>
+    internal static List<string> BuildFfmpegArguments(MediaType type, string inputFile, double volume, string outputFile)
+    {
+        var arguments = new List<string> { "-y", "-nostdin", "-loglevel", "error", "-protocol_whitelist", "file", "-i", inputFile };
+
+        if (type == MediaType.Video)
+        {
+            // Copy video stream
+            arguments.Add("-c:v");
+            arguments.Add("copy");
+        }
+
+        if (volume < 0.01 && type == MediaType.Video)
+        {
+            // Mute videos when volume is low enough
+            arguments.Add("-an");
+        }
+        else
+        {
+            arguments.Add("-filter:a");
+            arguments.Add(string.Create(CultureInfo.InvariantCulture, $"volume={volume:0.00}"));
+        }
+
+        // The container can't be guessed from the ".part" extension.
+        arguments.Add("-f");
+        arguments.Add(type == MediaType.Audio ? "mp3" : "webm");
+        arguments.Add(outputFile);
+        return arguments;
     }
 
     /// <summary>
