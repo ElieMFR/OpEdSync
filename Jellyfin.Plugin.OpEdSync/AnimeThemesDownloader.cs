@@ -293,28 +293,24 @@ public class AnimeThemesDownloader
 
         bool allOnDisk = links.Length > 0 && links.All(it => File.Exists(Path.Combine(item.ContainingFolderPath, it.Filepath)));
 
-        // Once the new selection is complete, files at an older volume are replaced, even when the best theme changed name.
-        if (allOnDisk)
+        // Once the whole selection is on disk, the files it replaces go: another volume, then (forced sync) anything
+        // the plugin wrote outside the selection. Never a file the plugin did not write.
+        var obsolete = ThemeFileRules.ObsoleteFiles(
+            ListThemeFiles(item, type),
+            links.Select(it => Path.GetFileName(it.Filepath)).ToList(),
+            allOnDisk,
+            forceSync,
+            settings.FetchType,
+            settings.Volume);
+
+        if (obsolete.Count > 0)
         {
-            changesMade |= RemoveFiles(item, type, existing => ThemeFileRules.OutdatedVolumeFiles(existing, settings.Volume), report);
+            changesMade |= RemoveFiles(item, type, _ => obsolete, report);
         }
 
-        if (forceSync)
+        if (forceSync && !ThemeFileRules.ReplacementsReady(settings.FetchType, links.Length, allOnDisk))
         {
-            // Only clean up once the replacements are on disk, so a failed download or a show without
-            // matching themes never loses the theme it already had. "None" is an explicit request to clear them.
-            bool replacementsReady = settings.FetchType == FetchType.None ? links.Length == 0 : allOnDisk;
-
-            if (replacementsReady)
-            {
-                // Only files written by the plugin are touched: a user supplied theme.mp3 always stays.
-                var keep = links.Select(it => Path.GetFileName(it.Filepath)).ToList();
-                changesMade |= RemoveFiles(item, type, existing => ThemeFileRules.FilesToRemove(existing, keep), report);
-            }
-            else
-            {
-                _logger.LogInformation("[{Id}] Keeping existing {Type} themes: no complete replacement available", item.Id, type);
-            }
+            _logger.LogInformation("[{Id}] Keeping existing {Type} themes: no complete replacement available", item.Id, type);
         }
 
         return changesMade;

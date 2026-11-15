@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Jellyfin.Plugin.OpEdSync.Configuration;
 
 namespace Jellyfin.Plugin.OpEdSync;
 
@@ -120,6 +121,53 @@ public static partial class ThemeFileRules
             var match = PluginFilePattern().Match(Path.GetFileName(it));
             return match.Success && match.Groups["volume"].Value != expected;
         });
+    }
+
+    /// <summary>
+    /// Tells whether what replaces the existing themes is in place: the whole selection on disk, or, for "None"
+    /// (an explicit request to clear the themes), nothing selected at all.
+    /// </summary>
+    /// <param name="fetchType">Configured selection.</param>
+    /// <param name="selectedCount">Number of themes in the selection.</param>
+    /// <param name="selectionOnDisk">Whether the selection is not empty and every file of it is on disk.</param>
+    /// <returns>Whether older files may be removed.</returns>
+    internal static bool ReplacementsReady(FetchType fetchType, int selectedCount, bool selectionOnDisk)
+        => fetchType == FetchType.None ? selectedCount == 0 : selectionOnDisk;
+
+    /// <summary>
+    /// Decides which plugin files to delete once the downloads of an item are over. Nothing goes before the whole
+    /// selection is on disk, so a failed download never costs a theme already there. First the files written at
+    /// another volume, then, with forced sync, any plugin file outside the selection. A file the plugin did not
+    /// write (such as <c>theme.mp3</c>) is never selected.
+    /// </summary>
+    /// <param name="existing">Theme files currently on disk.</param>
+    /// <param name="selectedNames">File names of the selection.</param>
+    /// <param name="selectionOnDisk">Whether the selection is not empty and every file of it is on disk.</param>
+    /// <param name="forceSync">Whether the plugin replaces the themes it wrote earlier.</param>
+    /// <param name="fetchType">Configured selection.</param>
+    /// <param name="volume">Configured volume between 0 and 1.</param>
+    /// <returns>The files to delete.</returns>
+    internal static List<string> ObsoleteFiles(
+        IReadOnlyCollection<string> existing,
+        IReadOnlyCollection<string> selectedNames,
+        bool selectionOnDisk,
+        bool forceSync,
+        FetchType fetchType,
+        double volume)
+    {
+        var obsolete = new List<string>();
+
+        if (selectionOnDisk)
+        {
+            obsolete.AddRange(OutdatedVolumeFiles(existing, volume));
+        }
+
+        if (forceSync && ReplacementsReady(fetchType, selectedNames.Count, selectionOnDisk))
+        {
+            obsolete.AddRange(FilesToRemove(existing, selectedNames));
+        }
+
+        return obsolete.Distinct().ToList();
     }
 
     /// <summary>
