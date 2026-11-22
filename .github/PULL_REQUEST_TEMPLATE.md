@@ -12,4 +12,4 @@
 
 - [ ] I tested it on Jellyfin 12.x. / Je l'ai testé sur Jellyfin 12.x.
 - [ ] It builds and the tests pass (`dotnet build`, `dotnet test`). / Il compile et les tests passent (`dotnet build`, `dotnet test`).
-- [ ] I did not add personal data, keys or tokens. / Je n'ai ajouté aucune donnée personnelle, clé ou jeton.
+- [ ] I did not add anything private (server address, keys, tokens, passwords, personal paths). / Je n'ai rien ajouté de privé (adresse de serveur, clés, jetons, mots de passe, chemins personnels).
