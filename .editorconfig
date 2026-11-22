@@ -199,7 +199,11 @@ csharp_preserve_single_line_blocks = true
 ### ERROR #
 ###########
 # error on SA1000: The keyword 'new' should be followed by a space
-dotnet_diagnostic.SA1000.severity = error
+# StyleCop.Analyzers 1.1.118 (stable) does not know C# 12 collection expressions and positional records: SA1000, SA1010,
+# SA1313 and SA1513 give false positives on them (fixed in the 1.2.0 betas, which the line 12 rule CNV-10 forbids).
+dotnet_diagnostic.SA1000.severity = none
+dotnet_diagnostic.SA1010.severity = none
+dotnet_diagnostic.SA1313.severity = none
 
 # error on SA1001: Commas should not be preceded by whitespace
 dotnet_diagnostic.SA1001.severity = error
@@ -232,7 +236,7 @@ dotnet_diagnostic.SA1316.severity = error
 dotnet_diagnostic.SA1414.severity = error
 
 # disable warning SA1513: Closing brace should be followed by blank line
-dotnet_diagnostic.SA1513.severity = error
+dotnet_diagnostic.SA1513.severity = none
 
 # error on SA1518: File is required to end with a single newline character
 dotnet_diagnostic.SA1518.severity = error
