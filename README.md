@@ -56,15 +56,15 @@ To find the themes, the plugin sends your anime IDs to AnimeThemes. The site als
 
 ## ✨ Key Features
 
-*   **Openings and endings from [AnimeThemes](https://animethemes.moe)**: the community database of anime themes, as theme music and, if you want it, as theme video.
-*   **The right season**: a series gets the theme of its latest season known to AnimeThemes, and falls back to the previous one when a season has nothing yet.
-*   **Clean versions first**: themes without on-screen credits or episode overlap are preferred. Simple transitions are accepted only when there is nothing cleaner.
-*   **Three ID sources**: AniDB, MyAnimeList or AniList, whichever your metadata plugins provide.
-*   **Wrong matches ruled out**: an anime whose release year is far from the media's is ignored, so a western film with a wrong ID does not get an anime theme.
-*   **A dashboard that explains itself**: coverage, items without theme with the reason for each (no ID, not on AnimeThemes, no video yet, ruled out), last and next run.
-*   **Your files are safe**: the plugin only ever touches the files it wrote, your own `theme.mp3` stays.
-*   **Android app fix**: in the Jellyfin Android app (built-in player), a video started over the theme music no longer blocks the next one (needs File Transformation).
-*   **Bilingual**: French when Jellyfin is in French, English for every other language.
+*   **Openings and endings from [AnimeThemes](https://animethemes.moe)**, the community database, as theme music and, if you want it, as theme video.
+*   **The right season**: the latest season known to AnimeThemes, or the previous one if it has nothing yet.
+*   **Clean versions first**: no on-screen credits or episode overlap when possible, simple transitions only as a fallback.
+*   **AniDB, MyAnimeList or AniList IDs**, whichever your metadata plugins provide.
+*   **Wrong matches ruled out**: an anime released more than a year apart from the media is ignored.
+*   **A dashboard that explains itself**: coverage, and why each item has no theme (no ID, not on AnimeThemes, no video yet, ruled out).
+*   **Your files are safe**: only files the plugin wrote are touched, your own `theme.mp3` stays.
+*   **Android app fix**: in the built-in player of the Jellyfin Android app, a video started over the theme music no longer blocks the next one (needs File Transformation).
+*   **Bilingual**: French when Jellyfin is in French, English otherwise.
 
 ## 📦 Installation
 
@@ -160,15 +160,15 @@ Pour trouver les génériques, le plugin envoie à AnimeThemes les numéros de v
 
 ## ✨ Fonctionnalités
 
-*   **Openings et endings depuis [AnimeThemes](https://animethemes.moe)** : la base communautaire des génériques d'animés, en musique de thème et, si vous le voulez, en vidéo de thème.
-*   **La bonne saison** : une série reçoit le thème de sa dernière saison connue d'AnimeThemes, et revient à la précédente quand une saison n'a encore rien.
-*   **Versions propres d'abord** : les génériques sans crédits à l'écran ni débordement sur l'épisode sont préférés. Les simples transitions ne sont acceptées que s'il n'y a rien de plus propre.
-*   **Trois sources d'identifiants** : AniDB, MyAnimeList ou AniList, selon ce que fournissent vos plugins de métadonnées.
-*   **Mauvaises correspondances écartées** : un animé dont l'année est éloignée de celle du média est ignoré, un film occidental au mauvais identifiant ne reçoit donc pas de générique d'animé.
-*   **Un tableau de bord qui s'explique** : couverture, médias sans thème avec la raison de chacun (pas d'identifiant, absent d'AnimeThemes, pas encore de vidéo, écarté), dernier et prochain passage.
-*   **Vos fichiers sont protégés** : le plugin ne touche qu'aux fichiers qu'il a écrits, votre propre `theme.mp3` reste en place.
-*   **Correctif pour l'appli Android** : dans l'appli Jellyfin Android (lecteur intégré), une vidéo lancée pendant la musique de thème ne bloque plus la suivante (nécessite File Transformation).
-*   **Bilingue** : en français si Jellyfin est en français, en anglais pour toutes les autres langues.
+*   **Openings et endings depuis [AnimeThemes](https://animethemes.moe)**, la base communautaire, en musique de thème et, si vous le voulez, en vidéo de thème.
+*   **La bonne saison** : la dernière connue d'AnimeThemes, ou la précédente si elle n'a encore rien.
+*   **Versions propres d'abord** : sans crédits à l'écran ni débordement sur l'épisode quand c'est possible, simples transitions en dernier recours.
+*   **Identifiants AniDB, MyAnimeList ou AniList**, selon ce que fournissent vos plugins de métadonnées.
+*   **Mauvaises correspondances écartées** : un animé sorti plus d'un an avant ou après le média est ignoré.
+*   **Un tableau de bord qui s'explique** : couverture, et pourquoi chaque média n'a pas de thème (pas d'identifiant, absent d'AnimeThemes, pas encore de vidéo, écarté).
+*   **Vos fichiers sont protégés** : seuls les fichiers écrits par le plugin sont touchés, votre propre `theme.mp3` reste en place.
+*   **Correctif pour l'appli Android** : dans le lecteur intégré de l'appli Jellyfin Android, une vidéo lancée pendant la musique de thème ne bloque plus la suivante (nécessite File Transformation).
+*   **Bilingue** : en français si Jellyfin est en français, en anglais sinon.
 
 ## 📦 Installation
 
