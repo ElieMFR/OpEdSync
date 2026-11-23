@@ -10,12 +10,15 @@
 
     // Retour de la vidéo : jellyfin-web ne relance le thème d'une fiche que si le propriétaire du thème a changé,
     // et ExoPlayer (natif) ne renvoie aucun événement à la page. Avant de passer au lecteur natif, un « viewshow »
-    // sans paramètres fait oublier à jellyfin-web le propriétaire du thème. Au retour de l'appli, la page rejoue
+    // sans paramètres fait oublier à jellyfin-web le propriétaire du thème. Quand le lecteur se ferme, la page rejoue
     // le « viewshow » de la fiche, ce qui relance le thème.
-    // Signal de retour : le lecteur natif est un fragment de la même activité, donc la page ne reçoit ni blur, ni focus,
-    // ni visibilitychange (relevé sur émulateur Android 14, appli 2.7.3). Seul événement observé : « resize », la
-    // fenêtre passant en plein écran (barres masquées) à l'ouverture du lecteur puis retrouvant sa taille à sa fermeture.
+    // Le lecteur natif est un fragment de la même activité : la page ne reçoit ni blur, ni focus, ni visibilitychange
+    // (relevé sur émulateur Android 14 et sur Pixel 10 Pro, appli 2.7.3). Deux signaux :
+    // - le serveur : l'appli signale sa lecture sous le même appareil ; elle cesse à la fermeture du lecteur ;
+    // - « resize » : les barres système se masquent à l'ouverture du lecteur et reviennent à sa fermeture, mais pas
+    //   toujours (selon la vidéo). Quand le serveur a vu la lecture, il confirme ou infirme ce signal.
     // Blur/focus et visibilitychange sont gardés au cas où un autre appareil les enverrait.
+    const POLL_MS = 3000;
     let lastParams = null;
     let returnArmed = false;
 
@@ -34,6 +37,40 @@
         document.dispatchEvent(event);
     }
 
+    // Le nom d'appareil de la page est encodé (« Pixel%2B10%2BPro »), celui de l'appli native ne l'est pas.
+    function deviceKey(name) {
+        let text = String(name || '');
+        try {
+            text = decodeURIComponent(text);
+        } catch (e) {
+            // Déjà lisible.
+        }
+
+        return text.replace(/\+/g, ' ').trim().toLowerCase();
+    }
+
+    // Une vidéo est-elle en lecture sur cet appareil d'après le serveur ? null si on ne peut pas le savoir.
+    async function videoPlaying() {
+        const client = window.ApiClient;
+        if (!client || typeof client.getJSON !== 'function') {
+            return null;
+        }
+
+        try {
+            const sessions = await client.getJSON(client.getUrl('Sessions'));
+            const device = deviceKey(client.deviceName());
+            const user = String(client.getCurrentUserId() || '').replace(/-/g, '').toLowerCase();
+            return sessions.some(function (session) {
+                return String(session.UserId || '').replace(/-/g, '').toLowerCase() === user
+                    && session.NowPlayingItem
+                    && session.NowPlayingItem.MediaType === 'Video'
+                    && deviceKey(session.DeviceName) === device;
+            });
+        } catch (e) {
+            return null;
+        }
+    }
+
     function armReturn() {
         if (returnArmed || !lastParams) {
             return;
@@ -42,14 +79,47 @@
         returnArmed = true;
         const params = lastParams;
         let left = false;
+        let seen = false;
+        let timer = 0;
         const width = window.innerWidth;
         const height = window.innerHeight;
+
+        const finish = function () {
+            if (!returnArmed) {
+                return;
+            }
+
+            returnArmed = false;
+            clearInterval(timer);
+            window.removeEventListener('resize', resized);
+            window.removeEventListener('blur', leave);
+            window.removeEventListener('focus', back);
+            document.removeEventListener('visibilitychange', leave);
+            document.removeEventListener('visibilitychange', back);
+            // La page est déjà revenue au premier plan ; laisse jellyfin-web finir de la réafficher.
+            setTimeout(function () {
+                console.info('OpEdSync: back from ExoPlayer, theme restarted');
+                dispatchViewShow(lastParams || params);
+            }, 300);
+        };
+
+        // Un signal de la page : si le serveur a vu la lecture, il dit si elle continue (rotation, barres système).
+        const candidate = async function () {
+            if (!seen) {
+                finish();
+                return;
+            }
+
+            if ((await videoPlaying()) === false) {
+                finish();
+            }
+        };
 
         const resized = function () {
             if (window.innerWidth !== width || window.innerHeight !== height) {
                 left = true;
-            } else {
-                back();
+            } else if (left) {
+                candidate();
             }
         };
 
@@ -60,21 +130,9 @@
         };
 
         const back = function () {
-            if (!left || document.visibilityState === 'hidden') {
-                return;
+            if (left && document.visibilityState !== 'hidden') {
+                candidate();
             }
-
-            window.removeEventListener('resize', resized);
-            window.removeEventListener('blur', leave);
-            window.removeEventListener('focus', back);
-            document.removeEventListener('visibilitychange', leave);
-            document.removeEventListener('visibilitychange', back);
-            returnArmed = false;
-            // La page est déjà revenue au premier plan ; laisse jellyfin-web finir de la réafficher.
-            setTimeout(function () {
-                console.info('OpEdSync: back from ExoPlayer, theme restarted');
-                dispatchViewShow(lastParams || params);
-            }, 300);
         };
 
         window.addEventListener('resize', resized);
@@ -82,6 +140,15 @@
         window.addEventListener('focus', back);
         document.addEventListener('visibilitychange', leave);
         document.addEventListener('visibilitychange', back);
+
+        timer = setInterval(async function () {
+            const playing = await videoPlaying();
+            if (playing) {
+                seen = true;
+            } else if (playing === false && seen) {
+                finish();
+            }
+        }, POLL_MS);
     }
 
     function patch(exoPlayer) {
