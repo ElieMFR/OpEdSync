@@ -12,7 +12,10 @@
     // et ExoPlayer (natif) ne renvoie aucun événement à la page. Avant de passer au lecteur natif, un « viewshow »
     // sans paramètres fait oublier à jellyfin-web le propriétaire du thème. Au retour de l'appli, la page rejoue
     // le « viewshow » de la fiche, ce qui relance le thème.
-    // Le signal de retour (blur/focus, visibilitychange) est une hypothèse : pas encore vérifié sur appareil.
+    // Signal de retour : le lecteur natif est un fragment de la même activité, donc la page ne reçoit ni blur, ni focus,
+    // ni visibilitychange (relevé sur émulateur Android 14, appli 2.7.3). Seul événement observé : « resize », la
+    // fenêtre passant en plein écran (barres masquées) à l'ouverture du lecteur puis retrouvant sa taille à sa fermeture.
+    // Blur/focus et visibilitychange sont gardés au cas où un autre appareil les enverrait.
     let lastParams = null;
     let returnArmed = false;
 
@@ -39,6 +42,16 @@
         returnArmed = true;
         const params = lastParams;
         let left = false;
+        const width = window.innerWidth;
+        const height = window.innerHeight;
+
+        const resized = function () {
+            if (window.innerWidth !== width || window.innerHeight !== height) {
+                left = true;
+            } else {
+                back();
+            }
+        };
 
         const leave = function () {
             if (document.visibilityState === 'hidden' || !document.hasFocus()) {
@@ -51,6 +64,7 @@
                 return;
             }
 
+            window.removeEventListener('resize', resized);
             window.removeEventListener('blur', leave);
             window.removeEventListener('focus', back);
             document.removeEventListener('visibilitychange', leave);
@@ -63,6 +77,7 @@
             }, 300);
         };
 
+        window.addEventListener('resize', resized);
         window.addEventListener('blur', leave);
         window.addEventListener('focus', back);
         document.addEventListener('visibilitychange', leave);
