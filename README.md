@@ -63,7 +63,7 @@ To find the themes, the plugin sends your anime IDs to AnimeThemes. The site als
 *   **Wrong matches ruled out**: an anime released more than a year apart from the media is ignored.
 *   **A dashboard that explains itself**: coverage, and why each item has no theme (no ID, not on AnimeThemes, no video yet, ruled out).
 *   **Your files are safe**: only files the plugin wrote are touched, your own `theme.mp3` stays.
-*   **Android app fix**: in the built-in player of the Jellyfin Android app, a video started over the theme music no longer blocks the next one (needs File Transformation).
+*   **Android app fix**: in the built-in player of the Jellyfin Android app, a video started over the theme music no longer blocks the next one, and the theme starts again when you come back to the page (needs File Transformation).
 *   **Bilingual**: French when Jellyfin is in French, English otherwise.
 
 ## 📦 Installation
@@ -167,7 +167,7 @@ Pour trouver les génériques, le plugin envoie à AnimeThemes les numéros de v
 *   **Mauvaises correspondances écartées** : un animé sorti plus d'un an avant ou après le média est ignoré.
 *   **Un tableau de bord qui s'explique** : couverture, et pourquoi chaque média n'a pas de thème (pas d'identifiant, absent d'AnimeThemes, pas encore de vidéo, écarté).
 *   **Vos fichiers sont protégés** : seuls les fichiers écrits par le plugin sont touchés, votre propre `theme.mp3` reste en place.
-*   **Correctif pour l'appli Android** : dans le lecteur intégré de l'appli Jellyfin Android, une vidéo lancée pendant la musique de thème ne bloque plus la suivante (nécessite File Transformation).
+*   **Correctif pour l'appli Android** : dans le lecteur intégré de l'appli Jellyfin Android, une vidéo lancée pendant la musique de thème ne bloque plus la suivante, et le thème repart quand vous revenez sur la page (nécessite File Transformation).
 *   **Bilingue** : en français si Jellyfin est en français, en anglais sinon.
 
 ## 📦 Installation
