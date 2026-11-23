@@ -57,7 +57,16 @@ public sealed class LibrarySelector
         // Older settings: regular expressions on library names.
         var include = TryCreateRegex(configuration.IncludeLibraries) ?? new Regex("^.*$", RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
         var exclude = TryCreateRegex(configuration.ExcludeLibraries);
-        return include.IsMatch(library.Name) && (exclude is null || !exclude.IsMatch(library.Name));
+        try
+        {
+            return include.IsMatch(library.Name) && (exclude is null || !exclude.IsMatch(library.Name));
+        }
+        catch (RegexMatchTimeoutException e)
+        {
+            // A pattern that takes too long on a name: the library is left out rather than aborting the run.
+            _logger.LogWarning(e, "OpEdSync: a library name pattern timed out on {Library}; the library is skipped", library.Name);
+            return false;
+        }
     }
 
     /// <summary>

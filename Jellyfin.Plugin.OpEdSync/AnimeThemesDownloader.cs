@@ -124,9 +124,10 @@ public class AnimeThemesDownloader
                     .ToDictionary(it => it.Key, it => it.ToList());
 
                 Dictionary<int, Anime[]> animeById;
+                var refused = new HashSet<int>();
                 try
                 {
-                    animeById = await _api.FindByExternalId(siteGroup.Key, itemsById.Keys, cancellationToken).ConfigureAwait(false);
+                    animeById = await _api.FindByExternalId(siteGroup.Key, itemsById.Keys, refused, cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception e) when (e is HttpRequestException or JsonException || ThemeFileRules.IsTimeout(e, cancellationToken))
                 {
@@ -143,7 +144,15 @@ public class AnimeThemesDownloader
                     continue;
                 }
 
-                foreach (var entry in animeById)
+                // An ID the API refused alone is not an unknown one: the next candidate (an older season, another site)
+                // would give the item the theme of something else. Like a failed lookup, it stays as it is until the next run.
+                foreach (var item in refused.SelectMany(id => itemsById.GetValueOrDefault(id) ?? []))
+                {
+                    report.SetReason(item.Id, MissingReason.LookupFailed);
+                    pending.Remove(item);
+                }
+
+                foreach (var entry in animeById.Where(it => !refused.Contains(it.Key)))
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
@@ -412,12 +421,8 @@ public class AnimeThemesDownloader
                 throw new InvalidDataException("Link refused, it does not point at AnimeThemes: " + url);
             }
 
-            using var response = await client.GetAsync(new Uri(url, UriKind.Absolute), HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
+            using var response = await GetFollowingTrustedRedirects(client, url, token).ConfigureAwait(false);
             response.EnsureSuccessStatusCode();
-            if (response.RequestMessage?.RequestUri is { } finalUri && !IsTrustedLink(finalUri.AbsoluteUri, client.BaseAddress))
-            {
-                throw new InvalidDataException("Redirection refused, it leaves AnimeThemes: " + finalUri);
-            }
 
             var downloadStream = await response.Content.ReadAsStreamAsync(token).ConfigureAwait(false);
             await using (downloadStream.ConfigureAwait(false))
@@ -573,6 +578,44 @@ public class AnimeThemesDownloader
                && uri.Scheme == baseAddress.Scheme
                && string.Equals(uri.Host, baseAddress.Host, StringComparison.OrdinalIgnoreCase)
                && uri.Port == baseAddress.Port;
+    }
+
+    /// <summary>
+    /// Gets a link, following its redirections by hand so that each hop is checked before it is requested. The client
+    /// must not follow them itself (see <see cref="PluginServiceRegistrator"/>).
+    /// </summary>
+    /// <param name="client">Client.</param>
+    /// <param name="url">First link, already trusted.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The final response, headers read; the caller disposes it.</returns>
+    /// <exception cref="InvalidDataException">A redirection leaves AnimeThemes or there are too many.</exception>
+    internal static async Task<HttpResponseMessage> GetFollowingTrustedRedirects(HttpClient client, string url, CancellationToken cancellationToken)
+    {
+        const int MaxRedirects = 5;
+        var current = new Uri(url, UriKind.Absolute);
+        for (int hop = 0; ; hop++)
+        {
+            var response = await client.GetAsync(current, HttpCompletionOption.ResponseHeadersRead, cancellationToken).ConfigureAwait(false);
+            var status = (int)response.StatusCode;
+            if ((status != 301 && status != 302 && status != 303 && status != 307 && status != 308) || response.Headers.Location is not { } location)
+            {
+                return response;
+            }
+
+            response.Dispose();
+            var next = location.IsAbsoluteUri ? location : new Uri(current, location);
+            if (!IsTrustedLink(next.AbsoluteUri, client.BaseAddress))
+            {
+                throw new InvalidDataException("Redirection refused, it leaves AnimeThemes: " + next);
+            }
+
+            if (hop >= MaxRedirects)
+            {
+                throw new InvalidDataException("Too many redirections: " + url);
+            }
+
+            current = next;
+        }
     }
 
     /// <summary>

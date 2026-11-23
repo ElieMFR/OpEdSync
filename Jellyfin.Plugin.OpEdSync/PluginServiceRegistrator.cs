@@ -35,6 +35,8 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
                 c.BaseAddress = PluginConfiguration.ResolveAnimeThemesBaseUrl(Plugin.Instance?.Configuration.AnimeThemesBaseUrl);
                 c.DefaultRequestHeaders.UserAgent.Add(productHeader);
             })
+            // Downloads follow their redirections by hand, to check every hop (AnimeThemesDownloader.GetFollowingTrustedRedirects).
+            .ConfigurePrimaryHttpMessageHandler(() => new System.Net.Http.SocketsHttpHandler { AllowAutoRedirect = false })
             .AddHttpMessageHandler<PollyResilienceHandler>();
 
         // Same address, no retries: a status check must answer within seconds.

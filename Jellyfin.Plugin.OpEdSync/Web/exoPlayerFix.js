@@ -8,6 +8,67 @@
 (function () {
     'use strict';
 
+    // Retour de la vidéo : jellyfin-web ne relance le thème d'une fiche que si le propriétaire du thème a changé,
+    // et ExoPlayer (natif) ne renvoie aucun événement à la page. Avant de passer au lecteur natif, un « viewshow »
+    // sans paramètres fait oublier à jellyfin-web le propriétaire du thème. Au retour de l'appli, la page rejoue
+    // le « viewshow » de la fiche, ce qui relance le thème.
+    // Le signal de retour (blur/focus, visibilitychange) est une hypothèse : pas encore vérifié sur appareil.
+    let lastParams = null;
+    let returnArmed = false;
+
+    document.addEventListener('viewshow', function (e) {
+        const params = e.detail && e.detail.params;
+        if (e.opEdSyncSynthetic) {
+            return;
+        }
+
+        lastParams = params && params.serverId && params.id ? { serverId: params.serverId, id: params.id } : null;
+    }, true);
+
+    function dispatchViewShow(params) {
+        const event = new CustomEvent('viewshow', { bubbles: true, detail: { params: params, options: {} } });
+        event.opEdSyncSynthetic = true;
+        document.dispatchEvent(event);
+    }
+
+    function armReturn() {
+        if (returnArmed || !lastParams) {
+            return;
+        }
+
+        returnArmed = true;
+        const params = lastParams;
+        let left = false;
+
+        const leave = function () {
+            if (document.visibilityState === 'hidden' || !document.hasFocus()) {
+                left = true;
+            }
+        };
+
+        const back = function () {
+            if (!left || document.visibilityState === 'hidden') {
+                return;
+            }
+
+            window.removeEventListener('blur', leave);
+            window.removeEventListener('focus', back);
+            document.removeEventListener('visibilitychange', leave);
+            document.removeEventListener('visibilitychange', back);
+            returnArmed = false;
+            // La page est déjà revenue au premier plan ; laisse jellyfin-web finir de la réafficher.
+            setTimeout(function () {
+                console.info('OpEdSync: back from ExoPlayer, theme restarted');
+                dispatchViewShow(lastParams || params);
+            }, 300);
+        };
+
+        window.addEventListener('blur', leave);
+        window.addEventListener('focus', back);
+        document.addEventListener('visibilitychange', leave);
+        document.addEventListener('visibilitychange', back);
+    }
+
     function patch(exoPlayer) {
         if (!exoPlayer || exoPlayer.opEdSyncPatched || typeof exoPlayer.play !== 'function') {
             return;
@@ -27,6 +88,13 @@
                 }
             } catch (e) {
                 console.warn('OpEdSync: ExoPlayer fix skipped', e);
+            }
+
+            try {
+                armReturn();
+                dispatchViewShow({});
+            } catch (e) {
+                console.warn('OpEdSync: theme restart after ExoPlayer skipped', e);
             }
 
             return play.call(this, options);

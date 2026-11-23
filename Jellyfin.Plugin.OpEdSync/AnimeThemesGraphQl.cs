@@ -106,6 +106,12 @@ public static class AnimeThemesGraphQl
         {
             foreach (var anime in list.EnumerateArray())
             {
+                // GraphQL puts a null in the list for an entry it could not resolve (the reason is in "errors").
+                if (anime.ValueKind != JsonValueKind.Object)
+                {
+                    continue;
+                }
+
                 found.Add(ReadAnime(anime, ref truncated));
             }
         }

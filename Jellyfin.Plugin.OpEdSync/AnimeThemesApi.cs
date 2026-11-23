@@ -54,7 +54,18 @@ public sealed class AnimeThemesApi
     /// <param name="ids">IDs on that site.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>A dictionary with an entry for each passed <paramref name="ids"/>.</returns>
-    public async ValueTask<Dictionary<int, Anime[]>> FindByExternalId(string site, IEnumerable<int> ids, CancellationToken cancellationToken = default)
+    public ValueTask<Dictionary<int, Anime[]>> FindByExternalId(string site, IEnumerable<int> ids, CancellationToken cancellationToken = default)
+        => FindByExternalId(site, ids, null, cancellationToken);
+
+    /// <summary>
+    /// Finds anime with all their themes by their IDs on an external site.
+    /// </summary>
+    /// <param name="site">The external site, see <see cref="Sites"/>.</param>
+    /// <param name="ids">IDs on that site.</param>
+    /// <param name="refused">Receives the IDs the API refused one by one: their empty entry means "not answered", not "unknown".</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>A dictionary with an entry for each passed <paramref name="ids"/>.</returns>
+    public async ValueTask<Dictionary<int, Anime[]>> FindByExternalId(string site, IEnumerable<int> ids, ISet<int>? refused, CancellationToken cancellationToken = default)
     {
         var idList = ids.Distinct().ToArray();
 
@@ -79,6 +90,7 @@ public sealed class AnimeThemesApi
 
         if (outcome.Failed.Count > 0)
         {
+            refused?.UnionWith(outcome.Failed);
             _logger.LogWarning("AnimeThemes refused {Count} IDs ({Ids}) one by one: {Error}", outcome.Failed.Count, string.Join(", ", outcome.Failed), outcome.LastError);
         }
 
