@@ -18,7 +18,12 @@
     // - « resize » : les barres système se masquent à l'ouverture du lecteur et reviennent à sa fermeture, mais pas
     //   toujours (selon la vidéo). Quand le serveur a vu la lecture, il confirme ou infirme ce signal.
     // Blur/focus et visibilitychange sont gardés au cas où un autre appareil les enverrait.
+    // Entre deux épisodes, l'appli signale l'arrêt du premier avant d'avoir chargé le suivant : un arrêt vu par le
+    // serveur ne prouve pas que le lecteur est fermé. Il est cru tout de suite si la fenêtre, redimensionnée par le
+    // lecteur, a repris sa taille. Sinon il doit durer, plus longtemps tant que la fenêtre garde la taille du lecteur.
     const POLL_MS = 3000;
+    const QUIET_SAME_SIZE_MS = 20000;
+    const QUIET_RESIZED_MS = 60000;
     let lastParams = null;
     let returnArmed = false;
 
@@ -83,6 +88,11 @@
         let timer = 0;
         const width = window.innerWidth;
         const height = window.innerHeight;
+        let moved = false;
+        let quietSince = 0;
+        const sizeChanged = function () {
+            return window.innerWidth !== width || window.innerHeight !== height;
+        };
 
         const finish = function () {
             if (!returnArmed) {
@@ -103,21 +113,40 @@
             }, 300);
         };
 
+        const check = async function () {
+            const playing = await videoPlaying();
+            if (playing) {
+                seen = true;
+                quietSince = 0;
+            } else if (playing === false && seen) {
+                quietSince = quietSince || Date.now();
+                let needed = QUIET_SAME_SIZE_MS;
+                if (sizeChanged()) {
+                    needed = QUIET_RESIZED_MS;
+                } else if (moved) {
+                    needed = 0;
+                }
+
+                if (Date.now() - quietSince >= needed) {
+                    finish();
+                }
+            }
+        };
+
         // Un signal de la page : si le serveur a vu la lecture, il dit si elle continue (rotation, barres système).
-        const candidate = async function () {
+        const candidate = function () {
             if (!seen) {
                 finish();
                 return;
             }
 
-            if ((await videoPlaying()) === false) {
-                finish();
-            }
+            check();
         };
 
         const resized = function () {
-            if (window.innerWidth !== width || window.innerHeight !== height) {
+            if (sizeChanged()) {
                 left = true;
+                moved = true;
             } else if (left) {
                 candidate();
             }
@@ -141,14 +170,7 @@
         document.addEventListener('visibilitychange', leave);
         document.addEventListener('visibilitychange', back);
 
-        timer = setInterval(async function () {
-            const playing = await videoPlaying();
-            if (playing) {
-                seen = true;
-            } else if (playing === false && seen) {
-                finish();
-            }
-        }, POLL_MS);
+        timer = setInterval(check, POLL_MS);
     }
 
     function patch(exoPlayer) {
